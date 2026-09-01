@@ -90,9 +90,19 @@ function memeLieu(nomSocle: string, nomGoogle: string, distance: number): boolea
 }
 
 export async function GET(request: Request) {
-  // Vercel signe ses appels de cron ; sans ce contrôle, l'URL serait une dépense publique.
+  // Vercel signe ses appels de cron ; sans ce contrôle, l'URL serait une dépense publique :
+  // chaque appel consomme le quota Google Places et écrit en base avec un jeton
+  // d'administration. Le secret absent ferme donc la route, au lieu de la laisser
+  // ouverte — c'est l'inverse qui se produisait tant que la condition portait sur
+  // l'existence du secret plutôt que sur sa validité.
   const secret = process.env.CRON_SECRET;
-  if (secret && request.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (!secret) {
+    return NextResponse.json(
+      { error: "cron non configuré : CRON_SECRET absent" },
+      { status: 503 },
+    );
+  }
+  if (request.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "non autorisé" }, { status: 401 });
   }
 
