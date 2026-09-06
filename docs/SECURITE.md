@@ -15,7 +15,34 @@ seule clé publiable, celle-là même que l'application livre au navigateur. C'e
 d'ailleurs par là qu'on entrerait. La mesure est faite ci-dessous, et elle
 change le tableau.
 
-## 🔴 La clé publique détient les droits d'écriture sur toutes les tables
+## ✅ Corrigé le 6 septembre 2026 — la clé publique détenait les droits d'écriture
+
+> **Refermé.** Le SQL ci-dessous a été exécuté dans l'éditeur Supabase le
+> 6 septembre 2026. Vérifié depuis l'extérieur dans la foulée, avec la seule clé
+> publiable :
+>
+> | Requête | Avant | Après |
+> |---|---|---|
+> | `DELETE` / `PATCH` / `POST` sur `places` et `communes` | 200, droit accordé | **401 `42501`** |
+> | `GET` sur `places` et `communes` | 200 | 200, inchangé |
+> | Nombre de lieux | 575 206 | **575 206** |
+>
+> Le compte de lignes est identique à celui du 1er septembre : rien n'a été
+> effacé pendant la fenêtre d'exposition. `relrowsecurity` vaut `true` sur les
+> quatre tables et `relforcerowsecurity` `false`, ce qui est la cible — les
+> fonctions `security definer` continuent d'écrire dans `quotas` et
+> `sante_journal`.
+>
+> **L'inconnue de l'audit n'a pas été levée, elle est devenue inaccessible.** La
+> requête `pg_class` a été exécutée *après* les `alter table`, dans le même bloc
+> collé : le `true` observé est l'effet du correctif, pas l'état antérieur.
+> Postgres ne conserve pas l'historique de ce drapeau, et la mesure externe ne
+> distinguait pas les deux cas — une RLS active sans politique d'écriture rendait
+> la même réponse qu'un droit accordé. On ne saura donc jamais si la porte était
+> réellement ouverte ou seulement déverrouillée. Sans conséquence désormais, mais
+> à ne pas relire comme une réponse.
+
+Ce qui suit est le constat d'origine, conservé pour la trace.
 
 **Constat établi.** Le rôle `anon`, dont la clé est livrée dans le bundle client
 et donc lisible par n'importe qui, détient les **privilèges de table**
@@ -162,9 +189,10 @@ nulle part, la condition n'était jamais vraie et la route répondait à n'impor
 qui. Elle consomme le quota Google Places, facturé, et écrit en base avec un
 jeton d'administration. L'absence de secret ferme désormais la route par un 503.
 
-**À faire côté Vercel :** définir `CRON_SECRET` et configurer le cron pour qu'il
-envoie l'en-tête `Authorization: Bearer <secret>`. Tant que la variable manque,
-la route renvoie 503 et la vérification des lieux ne tourne pas.
+**Fait côté Vercel, vérifié le 6 septembre 2026.** `CRON_SECRET` est définie en
+production : `GET https://vibetrip-schuft.vercel.app/api/cron/verify-places` sans
+en-tête répond **401 « non autorisé »**, et non le 503 qu'aurait rendu une
+variable absente. La garde fonctionne donc de bout en bout.
 
 ## Correction d'une décision précédente
 
@@ -262,15 +290,13 @@ peut ni lire ni écrire n'avance à rien.
 
 ## Ce que l'audit n'a pas pu vérifier
 
-**L'état de la RLS sur les quatre tables** — la seule inconnue qui décide de la
-gravité du point ci-dessus. Deux moyens de la lever : la requête sur `pg_class`
-donnée plus haut, ou une écriture témoin réassignant à une ligne sa propre
-valeur, qui distingue une écriture réussie d'une écriture arrêtée par la RLS.
-Cette seconde voie n'a pas été empruntée : c'est une écriture sur une base de
-production, et elle demande un accord explicite.
+**L'état de la RLS sur les quatre tables *avant* le correctif** — définitivement
+hors d'atteinte, pour la raison exposée en tête de document. Elle est active
+depuis le 6 septembre 2026, ce qui suffit pour la suite.
 
-**Les variables d'environnement côté Vercel** — dont `CRON_SECRET`, toujours
-absente au moment de l'audit.
+**Les variables d'environnement côté Vercel** — `CRON_SECRET` était absente au
+moment de l'audit ; elle est posée depuis, constaté le 6 septembre 2026 par le
+401 de la route cron. Les autres restent invérifiables depuis l'extérieur.
 
 **Le corps des fonctions `security definer`** (points 2.8 et 2.3). Leur
 comportement est déduit de l'extérieur : `consommer_quota` fonctionne alors que
