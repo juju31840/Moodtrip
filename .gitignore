@@ -8,10 +8,12 @@
 # production
 /build
 
-# env
-.env
-.env.local
-.env*.local
+# env — tout fichier .env, l'exemple excepte.
+# Les trois motifs precedents (.env, .env.local, .env*.local) laissaient passer
+# .env.production et .env.development : un fichier au nom plausible, portant les
+# vrais secrets de production, serait parti dans un commit sans un mot.
+.env*
+!.env.local.example
 
 # misc
 .DS_Store
