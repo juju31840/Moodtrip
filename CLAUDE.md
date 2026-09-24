@@ -473,6 +473,19 @@ change rien à ce plafond — c'est la limite d'exécution de 60 s qui commande.
 ignorés (musée en étape « Soir »), types parfois incohérents. Le prompt n'a pas encore été révisé
 à la lumière du banc d'essai.
 
+**Horaires et budget — prochaine étape après la pertinence (décidé le 24/09/2026).** À faire une
+fois le vivier curé stabilisé, puisqu'il change ce que le modèle reçoit :
+- *Horaires* : les rendre **impossibles** dans le schéma plutôt que les demander au prompt — même
+  logique que le contrat des périodes (`claudeItinerarySchemaFor`), qui n'a été tenu qu'une fois
+  contraint. Concrètement : n'offrir en `evening` que des refs dont le type est compatible avec le
+  soir (pas de musée, boutique, marché, parc), et symétriquement le matin pour les clubs. Le socle
+  Foursquare ne porte **aucun horaire** : la règle sera par type, pas par lieu.
+- *Budget* : Foursquare ne porte **aucun prix** non plus. La source la plus prometteuse est la
+  curation éditoriale (`scripts/curate-sources.mjs`), dont les articles donnent souvent une gamme
+  (« verres à 7 € », « menu à 25 € ») : ajouter un champ `gamme` (€ / €€ / €€€) à l'extraction,
+  puis écarter `€€€` des viviers à budget serré. À mesurer sur le cas « Le Petit Nice Passédat
+  proposé à budget 70 ».
+
 **Onglet Profil : fait** (29/08/2026). Voir la section dédiée plus bas.
 
 **Coaching à partir de la carte** : « tu n'as jamais rien fait rive droite », « tu prends toujours
@@ -1247,6 +1260,61 @@ la case peut appliquer et ce qui est une préférence ne sont pas la même liste
 **Reste ouvert** : le coaching (« tu n'as jamais rien fait rive droite ») demande quelques dizaines
 de points, donc plus tard. Et les goûts n'entrent dans le prompt que par le levier des envies
 existant — aucune pondération propre n'a été ajoutée, précisément pour que l'effet reste lisible.
+
+## Retour du test et passage à l'App Store (24/09/2026)
+
+Retour groupé des testeurs : utile, facile — trois reproches, tous fondés et tous mesurés.
+
+**1. « Des cafés au hasard. »** Cause vérifiée en base : `candidats_autour` triait par
+`md5(fsq_id || graine)` faute de tout signal (8 lieux visités, 6 notés sur 575 206) — le modèle
+composait parmi un tirage au sort, et décrivait des lieux qu'il ne connaissait pas à partir de
+leur nom. Remède : un **signal de notoriété** en base (`places.notoriete`, `places.raison`,
+table `mentions`, fonction `recalculer_notoriete()`), de deux sources :
+- `scripts/curate-wikidata.mjs` — gratuit, CC0. Rapprochement par nom **et** < 250 m, avec liste
+  blanche des sortes de lieux. Trois familles de faux rapprochements trouvées à blanc et bouchées
+  avant toute écriture : communes et quartiers (« Lyon Discothèque » héritait de *Lyon*), commerces
+  portant le nom d'un monument (« Buvette de la Tête d'Or »), noms proches (« Saint-Pierre des
+  Chartreux » / « des Cuisines »). Passé sur Lyon, Toulouse, Bordeaux, Lille, Paris, Marseille.
+- `scripts/curate-sources.mjs` — agent Claude + recherche web : ce que la presse et les guides
+  recommandent, rapproché du socle (jamais ajouté). On stocke la source, le lien et une raison
+  reformulée, jamais le texte des articles. Abstention en cas d'homonymes que l'adresse ne
+  départage pas. Mesuré sur Lyon : **zéro faux rapprochement**, ~40 % des citations retenues (le
+  reste : ouvertures postérieures au socle de février 2025). Coût mesuré avec Opus : ~1 $ par
+  envie et par ville ; passé sur Sonnet et trois envies, avec un **plafond de dépense** intégré.
+- Les candidats reconnus passent en tête de chaque envie, arrivent au modèle marqués ★ avec leur
+  raison, et le vivier se resserre (32 au lieu de 50 en soirée) quand la ville est curée.
+
+**Panne de production causée par la curation** : le crédit, partagé avec l'application, s'est
+épuisé en plein passage — l'app a répondu `CLAUDE_ERROR` à tout le monde. D'où le plafond, la clé
+distincte `VIBETRIP_CURATION_API_KEY`, et l'écriture envie par envie (la recherche déjà payée pour
+« Manger » a été perdue avec le processus).
+
+**2. « On sort de la ville alors qu'on a mis pas trop loin. »** Pire qu'il n'y paraissait : le mot
+sous le curseur était le même dans les trois modes, pas le rayon — « Toute la ville » valait
+17,5 km en soirée, 32,5 km en week-end et **110 km en voyage**, où l'on allait chercher les sept
+plus grosses villes du rayon. `lib/distance.ts` est désormais la source unique (rayon de recherche,
+filtre de plausibilité, consigne au modèle), identique pour tous les modes : à pied 1,5 km,
+quartier 3 km, **toute la ville = la commune de départ seulement** (`p_meme_commune`, arrondissements
+compris), environs 15 km (~30 min de transport), loin 50 km (~1 h). Le voyage ne passe par
+plusieurs villes qu'aux deux derniers paliers.
+
+**3. « L'attente est trop longue. »** Mesuré en production : première idée à 5,1 s (soirée),
+7,6 s (week-end), 8,7 s (voyage). Levier retenu avec l'utilisateur : un écran d'attente qui montre
+le **vrai repérage** (carte du quartier, adresses examinées), le serveur connaissant les candidats
+en ~0,3 s — événement `scouting` à ajouter au flux. Afficher les étapes au fil de l'eau a été
+écarté par l'utilisateur (« un peu chiant »).
+
+**`ProposalDetailScreen` allégé** : « Changer » n'apparaît que sur l'étape sélectionnée, les six
+envies du panneau derrière un lien « Autre envie ».
+
+**Application iOS** : Expo SDK 57 dans `mobile/`, compte développeur de Nathan (accès à demander).
+Squelette navigable : onglets natifs, création, attente, propositions, détail avec carte et
+« Y aller » vers Plans, sorties enregistrées (`expo-sqlite/kv-store`, synchrone comme
+`localStorage`, même interface `ItineraryStore`). Il appelle la route de production, rien du
+pipeline n'est dupliqué. Types et libellés partagés avec le site via `@shared/*` et `watchFolders`
+— seuls des modules **purs** y sont importés. Carte sur `react-native-maps` pour tourner dans Expo
+Go sans compte ; Mapbox demandera un build de développement. Maquettes des écrans natifs :
+https://claude.ai/artifact/ApcL9949yxZfsbDMFoJFrL
 
 ## Contrôle avant test utilisateur (29/08/2026)
 

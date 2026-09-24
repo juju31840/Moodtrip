@@ -1,4 +1,5 @@
 import { THEMES } from "./themes";
+import { distanceBand } from "./distance";
 import type { PlaceCandidate } from "./places-db";
 import type { GenerateItineraryRequest } from "@/types/itinerary";
 
@@ -20,28 +21,17 @@ export function totalDaysForMode(mode: GenerateItineraryRequest["mode"], distanc
   return Math.round(3 + t * 3);
 }
 
-const DISTANCE_HINTS: Record<GenerateItineraryRequest["mode"], string> = {
-  tonight:
-    "Le curseur Distance représente un rayon de marche/court trajet autour du point de départ (0 = à pied, 100 = quelques kilomètres en transport).",
-  weekend:
-    "Le curseur Distance représente le rayon d'exploration autour du point de départ (0 = quartier proche, 100 = excursions à plusieurs dizaines de kilomètres).",
-  trip:
-    "Le curseur Distance représente l'étendue du séjour à l'intérieur d'une même région (0 = une seule ville, 100 = plusieurs villes voisines, à moins de deux heures de route du point de départ).",
-};
-
 /**
- * Cinq paliers et non trois. Avec trois, le palier central couvrait un tiers de la course du
- * curseur : on pouvait le déplacer longuement sans que le mot affiché ne bouge, ce qui donnait
- * l'impression d'un réglage sans effet. Cinq paliers de 25 points font changer le mot à chaque
- * cran, et le curseur avance désormais par pas de 25 (components/ui/Slider.tsx) : chaque
- * position possible correspond exactement à un palier.
+ * La distance ne dépend plus du mode (24/09/2026) : les trois modes partageaient le même mot sous
+ * le curseur mais pas le même rayon, et « Toute la ville » menait à 110 km en voyage. La
+ * consigne vient de `lib/distance.ts`, la même table que le rayon de recherche.
  */
-export const LEVEL_COUNT = 5;
-
-export function levelIndex(value: number): number {
-  const clamped = Math.min(100, Math.max(0, value));
-  return Math.min(LEVEL_COUNT - 1, Math.round((clamped / 100) * (LEVEL_COUNT - 1)));
+function describeDistance(distance: number): string {
+  return `Distance : ${distanceBand(distance).consigne}`;
 }
+
+export { LEVEL_COUNT, levelIndex } from "./levels";
+import { levelIndex } from "./levels";
 
 function describeLevel(value: number, labels: readonly string[]): string {
   return labels[levelIndex(value)] ?? labels[labels.length - 1]!;
@@ -116,7 +106,7 @@ export function buildSystemPrompt(angle: string): string {
     "N'utilise JAMAIS les mots convivial, chaleureux, accueillant, sympathique, décontracté, détendu, ambiance, atmosphère, cadre, idéal, parfait, incontournable, ni aucun adjectif du même genre : ils conviendraient à n'importe quel lieu, donc ils ne disent rien. Si tu ne connais aucun fait sur un lieu, écris simplement ce qu'il est (« Bar à vin, rue Pleney. ») plutôt que d'inventer une ambiance.",
     "N'écris pas non plus le moment de la journée dans la description (« pour débuter la soirée », « après le repas ») : la place de l'étape dans le parcours le dit déjà.",
     "Les coordonnées GPS (lat/lng) doivent rester réalistes et cohérentes avec le point de départ.",
-    "Reste dans la même région que le point de départ, même en mode voyage et même avec une distance maximale : un séjour au départ de Lyon peut aller à Annecy ou Grenoble, jamais à Paris ni à Bordeaux. Traverser la France n'est pas un itinéraire, c'est un déménagement.",
+    "La consigne de distance est une limite stricte, pas une indication : un lieu hors de cette limite rend l'itinéraire inutilisable, même s'il est remarquable.",
   ].join(" ");
 }
 
@@ -135,13 +125,18 @@ function describeCandidates(candidates: PlaceCandidate[]): string | null {
     // La commune est portée explicitement : sur un voyage, le vivier couvre des dizaines de
     // villes, et sans elle le modèle ne peut pas construire un séjour qui se déplace.
     const commune = c.city ? ` (${c.city})` : "";
-    return `${c.ref} | ${c.name}${adresse}${commune} | ${c.type} | ${c.location.lat.toFixed(5)},${c.location.lng.toFixed(5)}`;
+    // La raison n'accompagne que les lieux reconnus : c'est le fait que la description doit
+    // porter, au lieu d'un adjectif déduit du nom (« Oriental Saphir » devenait un « bar à
+    // alcools du Moyen-Orient » que personne n'avait jamais décrit ainsi).
+    const reconnu = c.notoriety > 0 ? ` | ★ ${c.reason ?? "recommandé"}` : "";
+    return `${c.ref} | ${c.name}${adresse}${commune} | ${c.type} | ${c.location.lat.toFixed(5)},${c.location.lng.toFixed(5)}${reconnu}`;
   });
 
   return [
     `Lieux vérifiés disponibles autour du point de départ (${candidates.length}) — format : ref | nom, adresse (commune) | type | lat,lng`,
     ...lignes,
     "Compose l'itinéraire avec ces lieux. Pour chaque étape : ref = la référence, placeName = le nom exact, location = les coordonnées telles quelles.",
+    "Les lieux marqués ★ sont recommandés par des guides ou la presse, et la phrase qui suit dit pourquoi : choisis-les en priorité, et appuie leur description sur ce fait, reformulé. Pour un lieu sans ★, n'invente aucune spécialité : dis seulement ce qu'il est et où.",
   ].join("\n");
 }
 
@@ -165,7 +160,7 @@ export function buildUserPrompt(
       ? "Le budget est une contrainte, pas une indication : n'y place aucune table gastronomique ni aucun établissement réputé cher. Un restaurant étoilé proposé à quelqu'un qui a coché « serré » rend tout l'itinéraire inutilisable."
       : null,
     `Ambiance souhaitée (0-100=${ambiance}) : ${ambianceLabel}.`,
-    `Distance souhaitée (0-100=${distance}). ${DISTANCE_HINTS[mode]}`,
+    describeDistance(distance),
     "Structure les étapes par jour (day, à partir de 1) et par période (morning/midday/evening), avec au moins une étape par période pertinente.",
     "Tiens compte des heures d'ouverture habituelles : un musée, une boutique ou un marché n'ont pas leur place en soirée, un club ni un bar de nuit n'ont pas leur place le matin. Une étape fermée à l'heure où l'on s'y présente est une étape perdue.",
     "Choisis un type (`type`) cohérent pour chaque étape parmi la liste imposée par le schéma.",

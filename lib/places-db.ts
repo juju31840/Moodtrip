@@ -1,5 +1,6 @@
 import "server-only";
 import { haversineDistanceKm } from "./geo";
+import { distanceBand } from "./distance";
 import type { GeoPoint, PlaceType, ThemeId, TripMode } from "@/types/itinerary";
 
 /**
@@ -45,6 +46,22 @@ const CANDIDATS_MAX: Record<TripMode, number> = {
 };
 
 /**
+ * Moins de lieux, mais les meilleurs — demande des testeurs (24/09/2026), et levier de latence :
+ * le prompt est ce qui coûte. Quand la ville est curée, le vivier se resserre sur les lieux
+ * reconnus et ne complète avec des inconnus que jusqu'à ce plancher.
+ *
+ * Le resserrage n'a lieu **que si** assez de lieux sont reconnus : sans curation, un vivier
+ * maigre fait décrocher le modèle vers sa propre connaissance (Lille, 4 étapes confirmées sur 18
+ * à 50 candidats) — c'est-à-dire vers le défaut que le socle corrige.
+ */
+const VIVIER_CURE: Record<TripMode, number> = {
+  tonight: 32,
+  weekend: 45,
+  trip: 90,
+};
+const RECONNUS_MINIMUM = 12;
+
+/**
  * Enseignes écartées du vivier. Elles existent, sont correctement référencées, et ne sont jamais
  * une sortie : les proposer ferait douter de tout le reste. Liste volontairement courte — le tri
  * fin reste au modèle, ceci n'écarte que l'indéfendable.
@@ -68,6 +85,13 @@ export interface PlaceCandidate {
   distanceM: number;
   /** Commune du lieu — indispensable en mode voyage, où le vivier couvre des dizaines de villes. */
   city: string | null;
+  /**
+   * Points de notoriété : une source éditoriale qui le recommande, une fiche Wikipédia fournie.
+   * Zéro pour l'immense majorité des lieux, qui existent sans que personne n'en dise rien.
+   */
+  notoriety: number;
+  /** Ce qui le distingue, en une phrase factuelle — de la source éditoriale ou de Wikidata. */
+  reason: string | null;
 }
 
 interface LigneRpc {
@@ -81,22 +105,16 @@ interface LigneRpc {
   type_lieu: string;
   themes: string[];
   distance_m: number;
+  notoriete: number | null;
+  raison: string | null;
 }
 
 /**
- * Rayon de recherche, aligné sur celui du filtre de plausibilité (`lib/geo.ts`) : proposer des
- * candidats qu'un contrôle ultérieur rejetterait n'aurait pas de sens.
+ * Rayon de recherche : le palier de distance (`lib/distance.ts`), identique dans les trois modes
+ * et aligné sur le filtre de plausibilité.
  */
-const RAYONS: Record<TripMode, { min: number; max: number }> = {
-  tonight: { min: 5, max: 30 },
-  weekend: { min: 15, max: 50 },
-  trip: { min: 40, max: 180 },
-};
-
-export function rayonKm(mode: TripMode, distance: number): number {
-  const { min, max } = RAYONS[mode];
-  const t = Math.min(100, Math.max(0, distance)) / 100;
-  return min + (max - min) * t;
+export function rayonKm(_mode: TripMode, distance: number): number {
+  return distanceBand(distance).rayonKm;
 }
 
 export async function fetchCandidates(options: {
@@ -118,7 +136,10 @@ export async function fetchCandidates(options: {
   // balayage par proximité dépassait le délai d'exécution *par intermittence*, et cet échec est
   // silencieux — le modèle composait alors sans socle. C'est ce qui rendait le taux de
   // confirmation bimodal en mode voyage : 87 % quand la requête passait, 20 % sinon.
-  const fonction = mode === "trip" ? "candidats_voyage" : "candidats_autour";
+  // Et seulement au-delà de la ville : un voyage réglé sur « Toute la ville » restait jusqu'ici
+  // un balayage de 110 km, qui menait à une ou deux heures de train (retour des testeurs).
+  const palier = distanceBand(distance);
+  const fonction = mode === "trip" && palier.plusieursVilles ? "candidats_voyage" : "candidats_autour";
   const corps = JSON.stringify({
     p_lat: origin.lat,
     p_lng: origin.lng,
@@ -126,14 +147,14 @@ export async function fetchCandidates(options: {
     p_themes: themes && themes.length > 0 ? themes : null,
     p_par_theme: parTheme,
     p_graine: seed,
+    ...(fonction === "candidats_autour" ? { p_meme_commune: palier.memeCommune } : {}),
   });
 
   try {
     const lignes = await interroger(fonction, corps);
     if (!lignes) return [];
-    return lignes
-      .filter((l) => !estUneChaine(l.nom))
-      .slice(0, plafond)
+    const utiles = lignes.filter((l) => !estUneChaine(l.nom));
+    return resserrer(utiles, mode, plafond)
       .map((l) => ({
         ref: l.ref,
         id: l.fsq_id,
@@ -144,11 +165,23 @@ export async function fetchCandidates(options: {
         themes: l.themes as ThemeId[],
         distanceM: l.distance_m,
         city: l.commune,
+        notoriety: l.notoriete ?? 0,
+        reason: l.raison,
       }));
   } catch {
     // Socle indisponible : on ne casse pas la génération, elle repart comme avant.
     return [];
   }
+}
+
+/** Voir `VIVIER_CURE`. L'ordre des lignes est préservé : il porte la répartition par envie. */
+function resserrer(lignes: LigneRpc[], mode: TripMode, plafond: number): LigneRpc[] {
+  const reconnus = lignes.filter((l) => (l.notoriete ?? 0) > 0).length;
+  if (reconnus < RECONNUS_MINIMUM) return lignes.slice(0, plafond);
+  let inconnusPermis = Math.max(0, VIVIER_CURE[mode] - reconnus);
+  return lignes
+    .filter((l) => (l.notoriete ?? 0) > 0 || inconnusPermis-- > 0)
+    .slice(0, plafond);
 }
 
 /**

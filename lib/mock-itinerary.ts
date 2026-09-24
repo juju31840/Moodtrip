@@ -1,6 +1,7 @@
 import "server-only";
 import { geocodeCity } from "./geocode";
 import { totalDaysForMode } from "./prompt";
+import { distanceBand } from "./distance";
 import { proposalCountForMode } from "./itinerary-schema";
 import type { GenerateItineraryRequest, Itinerary, ItineraryStep, Period, PlaceType } from "@/types/itinerary";
 
@@ -18,12 +19,10 @@ import type { GenerateItineraryRequest, Itinerary, ItineraryStep, Period, PlaceT
 
 const PARIS = { lat: 48.8566, lng: 2.3522 };
 
-/** Rayon (km) dans lequel disperser les étapes — la moitié du rayon de plausibilité du mode. */
-const SPREAD_KM: Record<GenerateItineraryRequest["mode"], number> = {
-  tonight: 3,
-  weekend: 8,
-  trip: 50,
-};
+/** Rayon (km) dans lequel disperser les étapes — la moitié du rayon du palier de distance. */
+function spreadKm(distance: number): number {
+  return distanceBand(distance).rayonKm / 2;
+}
 
 interface MockPlace {
   placeName: string;
@@ -77,7 +76,7 @@ async function buildMockItinerary(
         PLACES_BY_PERIOD[period][
           (day - 1 + indexInDay + variant) % PLACES_BY_PERIOD[period].length
         ]!;
-      const spread = SPREAD_KM[mode] * (0.3 + 0.7 * ((globalIndex % 4) / 3));
+      const spread = spreadKm(request.distance) * (0.3 + 0.7 * ((globalIndex % 4) / 3));
       steps.push({
         id: `p${variant + 1}-step-${globalIndex + 1}`,
         day,

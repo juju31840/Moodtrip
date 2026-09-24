@@ -200,6 +200,10 @@ function StepRow({
         )}
       </button>
 
+      {/* « Changer » sur la seule étape sélectionnée (revue de surface du 24/09/2026) : quatre
+          boutons identiques en permanence sur un parcours de quatre étapes faisaient de l'écran
+          un formulaire, alors que la retouche reste l'exception — l'itinéraire arrive composé. */}
+      {(isActive || isEditing) && (
       <button
         type="button"
         onClick={onToggleEdit}
@@ -211,6 +215,7 @@ function StepRow({
       >
         {isEditing ? "Annuler" : "Changer"}
       </button>
+      )}
     </div>
   );
 }
@@ -236,6 +241,7 @@ function AlternativeList({
   onPick: (step: ItineraryStep) => void;
 }) {
   const [theme, setTheme] = useState<ThemeId>(() => themeForType(step.type));
+  const [autreEnvie, setAutreEnvie] = useState(false);
   const [nearby, setNearby] = useState<ItineraryStep[] | null>(null);
 
   useEffect(() => {
@@ -264,23 +270,39 @@ function AlternativeList({
           une section de plus dans un panneau déjà dense sur un téléphone, et faisait traverser
           `allProposals` sur deux niveaux de composants. */}
       <div className="flex flex-col gap-2">
-        <span className="text-overline uppercase text-ink-soft">Autre chose à proximité</span>
-
-        <div className="flex flex-wrap gap-1.5">
-          {THEMES.map((item) => (
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="text-overline uppercase text-ink-soft">
+            {THEMES.find((item) => item.id === theme)?.label ?? "À proximité"} · à proximité
+          </span>
+          {!autreEnvie && (
             <button
-              key={item.id}
               type="button"
-              onClick={() => setTheme(item.id)}
-              aria-pressed={theme === item.id}
-              // Mêmes étiquettes que l'écran de réglages, donc même dessin : elles marquaient
-              // ici en noir les six thèmes que « Envies » marque en vermillon.
-              className={chipClass(theme === item.id)}
+              onClick={() => setAutreEnvie(true)}
+              className="shrink-0 text-[0.6875rem] font-bold uppercase tracking-[0.08em] text-ink-soft underline underline-offset-2"
             >
-              {item.label}
+              Autre envie
             </button>
-          ))}
+          )}
         </div>
+
+        {/* Les six envies restent à un geste mais ne s'affichent plus d'office : on remplace
+            presque toujours un bar par un bar, et six étiquettes au-dessus d'une liste la
+            repoussaient sous la ligne de flottaison. */}
+        {autreEnvie && (
+          <div className="flex flex-wrap gap-1.5">
+            {THEMES.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setTheme(item.id)}
+                aria-pressed={theme === item.id}
+                className={chipClass(theme === item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {nearby === null && <p className="py-2 text-caption text-ink-mute">Recherche…</p>}
         {nearby !== null && nearby.length === 0 && (

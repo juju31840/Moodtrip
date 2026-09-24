@@ -1,3 +1,4 @@
+import { plausibilityRadiusKm } from "./distance";
 import type { GeoPoint, TripMode } from "@/types/itinerary";
 
 const EARTH_RADIUS_KM = 6371;
@@ -18,34 +19,18 @@ export function haversineDistanceKm(a: GeoPoint, b: GeoPoint): number {
 }
 
 /**
- * Bornes du rayon de plausibilité (km) selon le mode — le curseur « distance » (0-100)
- * interpole entre min et max, pour que ce réglage ait un effet réel côté serveur et
- * pas seulement dans le texte envoyé à Claude.
- *
- * Le mode « voyage » plafonnait à 400 km, ce qui autorisait des itinéraires absurdes :
- * Lyon → Paris fait 392 km, Lille → Amsterdam 232 km. Un séjour censé explorer une région se
- * retrouvait à traverser le pays. À 180 km, Lyon atteint Annecy (101 km) ou Grenoble mais
- * pas Avignon (202 km) ni Paris — on reste dans une région, ce qui est le sens du mode.
+ * Le rayon de plausibilité suit le palier de distance (`lib/distance.ts`), le même pour tous les
+ * modes. Il valait 17,5 km pour une soirée « Toute la ville » et 110 km pour un voyage : c'était
+ * la limite qui laissait passer les étapes hors de la ville que les testeurs ont signalées.
+ * `mode` reste dans la signature pour les appelants, sans effet sur la borne.
  */
-const PLAUSIBILITY_RADIUS_KM: Record<TripMode, { min: number; max: number }> = {
-  tonight: { min: 5, max: 30 },
-  weekend: { min: 15, max: 50 },
-  trip: { min: 40, max: 180 },
-};
-
-function plausibilityRadiusKm(mode: TripMode, distance: number): number {
-  const { min, max } = PLAUSIBILITY_RADIUS_KM[mode];
-  const t = Math.min(100, Math.max(0, distance)) / 100;
-  return min + (max - min) * t;
-}
-
 export function isPlausibleStepLocation(
   stepLocation: GeoPoint,
   referencePoint: GeoPoint,
-  mode: TripMode,
+  _mode: TripMode,
   distance: number
 ): boolean {
-  return haversineDistanceKm(stepLocation, referencePoint) <= plausibilityRadiusKm(mode, distance);
+  return haversineDistanceKm(stepLocation, referencePoint) <= plausibilityRadiusKm(distance);
 }
 
 /** Filtre les étapes dont les coordonnées sont trop éloignées du point de référence pour être crédibles. */

@@ -1,4 +1,4 @@
-import { levelIndex } from "./prompt";
+import { levelIndex } from "./levels";
 
 /**
  * Mots affichés sous chaque curseur, un par palier. Ils sont indexés par la même fonction que
