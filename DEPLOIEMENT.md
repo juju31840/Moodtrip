@@ -2,6 +2,11 @@
 
 **En ligne depuis le 28/08/2026 : https://vibetrip-schuft.vercel.app**
 
+**Au quotidien : un push sur `main` suffit.** Le projet Vercel est relié au dépôt GitHub et
+redéploie la production tout seul (constaté le 24/09/2026, compilation en ~2 min). La commande
+`npx vercel --prod` ci-dessous ne sert qu'à la mise en place, et demande un `vercel login`
+préalable sur la machine — ce Mac n'en a pas.
+
 Tout est prêt côté code. Il reste trois commandes et un réglage, dans cet ordre.
 
 ## 1. Se connecter
