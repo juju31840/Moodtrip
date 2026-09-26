@@ -1304,6 +1304,25 @@ le **vrai repérage** (carte du quartier, adresses examinées), le serveur conna
 en ~0,3 s — événement `scouting` à ajouter au flux. Afficher les étapes au fil de l'eau a été
 écarté par l'utilisateur (« un peu chiant »).
 
+**Repérage : fait (26/09/2026)**, sur le site (`components/ScoutingMap.tsx`) et dans
+l'application (`mobile/src/ui/scouting-map.tsx`). Événement `scouting` du flux : point de départ et
+adresses des viviers, émis dès qu'ils sont tirés — les viviers sont désormais tirés une seule fois
+dans `generateProposals` et partagés avec la génération. Mesuré : ~75 adresses examinées pour une
+soirée à Lyon, dont ~55 reconnues. Au passage, la première idée arrive en 3-4 s à Lyon.
+Défaut révélé par le bandeau : pour une **soirée**, les lieux « recommandés » sont souvent des
+églises — Wikidata donne de la notoriété aux monuments religieux, qui ne sont pas des étapes du
+soir. À traiter avec les horaires (règle par type et par créneau).
+
+**Vivier équitable entre envies (26/09/2026)** : le resserrage complétait les lieux reconnus dans
+l'ordre alphabétique des envies — culture et bars épuisaient le quota, et « autour de la table » à
+Lyon n'avait plus un seul restaurant. `resserrer` sert désormais les envies à tour de rôle, avec un
+minimum par envie ; sans signal, c'est le tirage d'avant.
+
+**Curation sur Sonnet : plus chère qu'estimé.** Lyon, deux envies : 1,84 $ (Sonnet lit bien plus
+de pages qu'Opus : 722 000 jetons), et l'envie « manger » est revenue **vide** après 11 min —
+cause non élucidée, à diagnostiquer (journaliser `stop_reason` et la longueur du texte) avant de
+relancer quoi que ce soit.
+
 **`ProposalDetailScreen` allégé** : « Changer » n'apparaît que sur l'étape sélectionnée, les six
 envies du panneau derrière un lien « Autre envie ».
 
