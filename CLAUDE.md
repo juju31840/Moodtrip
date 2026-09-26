@@ -1340,8 +1340,17 @@ en dessous.** Ne plus dépenser de crédit pour les petites communes. Le premier
 plus de 400 lieux) y répond ; le second (965 villes moyennes, 1,22 $) est allé au-delà du besoin —
 ses données restent en base, mais aucun passage futur ne doit descendre sous ce seuil.
 
-**Photos des villes** (`scripts/city-photos.mjs` → `mobile/src/data/city-photos.json`) : l'image
-principale Wikidata des 100 plus grandes communes, Paris ajoutée à part (non classée « commune »).
+**Photos des villes** (`scripts/city-photos.mjs` → `mobile/src/data/city-photos.json`) : **jusqu'à
+cinq photos par ville** — l'image principale Wikidata de la commune, plus celles de ses monuments
+les plus connus, filtrés par **liste blanche** de sortes (sans elle : campus d'écoles, la Joconde,
+rames de métro). 98 villes, 286 photos. Deux sorties dans la même ville prennent des photos
+différentes ; une sortie sans ville connue est rattachée à la grande ville la plus proche (≤ 25 km).
+Crédits dans une page repliable du profil — les licences CC BY / BY-SA imposent de citer l'auteur,
+pas l'endroit. **Pièges Wikidata**, tous rencontrés le 26/09/2026 : trier les 35 000 communes par
+population dépasse le délai du service (filtrer d'abord au-dessus de 40 000 habitants : 3 s) ; les
+coupures (ECONNRESET) doivent être reprises comme les 429/502/504 ; et un `fetch` sans délai peut
+rester suspendu indéfiniment — `AbortSignal.timeout(60_000)` sur chaque appel.
+Première version, remplacée : l'image principale Wikidata des 100 plus grandes communes, Paris ajoutée à part (non classée « commune »).
 Gratuit. Elles remplacent la carte répétée dans « Sorties » (« carte, carte, carte ») ; la carte
 reste en repli. Licence libre ≠ sans auteur : chaque photo est créditée en bas de la liste. En
 août, Wikimedia avait été écarté pour les **lieux** (images du voisinage) ; pour une **ville**,

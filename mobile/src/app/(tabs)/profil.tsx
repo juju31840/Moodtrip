@@ -9,7 +9,9 @@ import { patchDraft } from "@/lib/draft";
 import { pickProfilePhoto } from "@/lib/photo";
 import { DEFAULT_CITIES, profileStore, recentCitiesStore, type Preferences } from "@/lib/profile";
 import { ratingsStore } from "@/lib/ratings";
+import { useSavedItineraries } from "@/lib/storage";
 import { readTaste, visitsStore, VISITS_MINIMUM } from "@/lib/visits";
+import { photoFor, photoRanks, type CreditedPhoto } from "@/ui/city-photo";
 import { CameraIcon, StarIcon } from "@/ui/icons";
 import { Body, Chip, Display, Masthead, Overline, SecondaryButton, StepPicker } from "@/ui/kit";
 import { Paper } from "@/ui/paper";
@@ -28,6 +30,19 @@ export default function ProfilScreen() {
   const places = visitsStore.useValue();
   const recent = recentCitiesStore.useValue();
   const ratings = ratingsStore.useValue();
+  const saved = useSavedItineraries();
+  const [showCredits, setShowCredits] = useState(false);
+  // Les photos affichées dans « Sorties », créditées ici plutôt que sous la liste (retour du
+  // 26/09/2026) : les licences CC BY et CC BY-SA imposent de citer l'auteur, pas l'endroit.
+  const ranks = photoRanks(saved.map((entry) => ({ id: entry.id, steps: entry.itinerary.steps })));
+  const credited = [
+    ...new Map(
+      saved
+        .map((entry) => photoFor(entry.itinerary.steps, ranks.get(entry.id) ?? 0))
+        .filter((photo): photo is CreditedPhoto => photo !== null)
+        .map((photo) => [photo.url, photo])
+    ).values(),
+  ];
   const taste = readTaste(places);
   const [newCity, setNewCity] = useState("");
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -249,6 +264,19 @@ export default function ProfilScreen() {
             ))}
           </View>
         )}
+        {credited.length > 0 && (
+          <View style={{ marginTop: 12, gap: 6 }}>
+            <Pressable accessibilityRole="button" accessibilityState={{ expanded: showCredits }} onPress={() => setShowCredits((value) => !value)} hitSlop={8}>
+              <Text style={styles.creditsToggle}>{showCredits ? "Masquer les crédits photos" : "Crédits photos"}</Text>
+            </Pressable>
+            {showCredits &&
+              credited.map((photo) => (
+                <Text key={photo.url} style={styles.credit}>
+                  {photo.ville} — {photo.auteur}, {photo.licence}, via Wikimedia Commons
+                </Text>
+              ))}
+          </View>
+        )}
       </ScrollView>
     </Paper>
   );
@@ -272,6 +300,8 @@ const styles = StyleSheet.create({
   dot: { flex: 1, height: 10, borderWidth: rule.thin, borderColor: colors.blue },
   track: { height: 10, borderWidth: rule.thin, borderColor: colors.blue },
   fill: { height: "100%", backgroundColor: colors.blue },
+  creditsToggle: { fontFamily: fonts.bodyHeavy, fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: colors.inkMute, textDecorationLine: "underline" },
+  credit: { fontFamily: fonts.body, fontSize: 12, lineHeight: 17, color: colors.inkMute },
   ratingRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderTopWidth: 1, borderColor: colors.paper3, paddingVertical: 8, gap: 10 },
   ratingName: { flex: 1, fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
 });
