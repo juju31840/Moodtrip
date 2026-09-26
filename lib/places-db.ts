@@ -154,7 +154,7 @@ export async function fetchCandidates(options: {
     const lignes = await interroger(fonction, corps);
     if (!lignes) return [];
     const utiles = lignes.filter((l) => !estUneChaine(l.nom));
-    return resserrer(utiles, mode, plafond)
+    return resserrer(utiles, mode, plafond, themes)
       .map((l) => ({
         ref: l.ref,
         id: l.fsq_id,
@@ -174,14 +174,46 @@ export async function fetchCandidates(options: {
   }
 }
 
-/** Voir `VIVIER_CURE`. L'ordre des lignes est préservé : il porte la répartition par envie. */
-function resserrer(lignes: LigneRpc[], mode: TripMode, plafond: number): LigneRpc[] {
+/** Minimum de lieux gardés par envie, reconnus ou non — voir `resserrer`. */
+const MINIMUM_PAR_ENVIE: Record<TripMode, number> = { tonight: 4, weekend: 6, trip: 10 };
+
+/**
+ * Choisit le vivier envie par envie, **à tour de rôle**, et non dans l'ordre des lignes.
+ *
+ * Défaut trouvé le 26/09/2026 : les lignes arrivent groupées par envie, dans l'ordre alphabétique
+ * (culture, drink, eat…). Compléter les lieux reconnus « dans l'ordre » laissait culture et bars
+ * épuiser le quota d'inconnus avant que les restaurants ne soient servis — une proposition « autour
+ * de la table » à Lyon n'avait plus un seul restaurant. Le `slice(plafond)` final avait le même
+ * biais sans curation. Désormais chaque envie garde ses lieux reconnus et au moins
+ * `MINIMUM_PAR_ENVIE` lieux ; là où rien n'est reconnu, on retombe sur le tirage d'avant.
+ */
+function resserrer(lignes: LigneRpc[], mode: TripMode, plafond: number, themes?: ThemeId[]): LigneRpc[] {
+  const groupes = new Map<string, LigneRpc[]>();
+  for (const ligne of lignes) {
+    // Même clé que `theme_cle` en SQL : la première envie demandée que le lieu porte.
+    const cle = ligne.themes.find((t) => !themes?.length || themes.includes(t as ThemeId)) ?? "autre";
+    groupes.set(cle, [...(groupes.get(cle) ?? []), ligne]);
+  }
   const reconnus = lignes.filter((l) => (l.notoriete ?? 0) > 0).length;
-  if (reconnus < RECONNUS_MINIMUM) return lignes.slice(0, plafond);
-  let inconnusPermis = Math.max(0, VIVIER_CURE[mode] - reconnus);
-  return lignes
-    .filter((l) => (l.notoriete ?? 0) > 0 || inconnusPermis-- > 0)
-    .slice(0, plafond);
+  const cure = reconnus >= RECONNUS_MINIMUM;
+  const cible = Math.min(plafond, cure ? Math.max(VIVIER_CURE[mode], reconnus) : plafond);
+
+  const gardes = new Set<LigneRpc>();
+  // 1. L'indispensable de chaque envie : ses lieux reconnus, et de quoi atteindre le minimum.
+  for (const groupe of groupes.values()) {
+    groupe.forEach((ligne, rang) => {
+      if ((ligne.notoriete ?? 0) > 0 || rang < MINIMUM_PAR_ENVIE[mode]) gardes.add(ligne);
+    });
+  }
+  // 2. Le reste, à tour de rôle entre envies, jusqu'à la cible.
+  const files = [...groupes.values()].map((groupe) => groupe.filter((l) => !gardes.has(l)));
+  while (gardes.size < cible && files.some((file) => file.length > 0)) {
+    for (const file of files) {
+      const suivant = file.shift();
+      if (suivant && gardes.size < cible) gardes.add(suivant);
+    }
+  }
+  return lignes.filter((l) => gardes.has(l));
 }
 
 /**

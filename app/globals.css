@@ -89,3 +89,19 @@ input[type="range"].vibe-slider::-moz-range-thumb {
     animation: none;
   }
 }
+
+/*
+ * Repérage (écran d'attente) : chaque adresse examinée « tombe » sur la carte, et le bandeau fait
+ * défiler les noms des lieux recommandés. Les deux sont neutralisés sous
+ * `prefers-reduced-motion` (classes `motion-safe:` côté composants).
+ */
+@keyframes scout-pop {
+  from { transform: scale(0); }
+  70% { transform: scale(1.5); }
+  to { transform: scale(1); }
+}
+
+@keyframes scout-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}

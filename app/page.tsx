@@ -214,7 +214,7 @@ export default function Page() {
     // les générations sont parallèles, attendre la plus lente faisait payer le pire des trois
     // appels. L'écran d'attente ne sert donc plus qu'au temps où il n'y a encore rien à montrer.
     if (state.status === "loading" && state.itineraries.length === 0) {
-      return <LoadingState />;
+      return <LoadingState scouting={state.scouting} />;
     }
 
     if (state.status === "loading" || state.status === "success") {

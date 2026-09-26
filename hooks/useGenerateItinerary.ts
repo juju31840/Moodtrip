@@ -8,6 +8,8 @@ import type {
   Itinerary,
 } from "@/types/itinerary";
 
+export type Scouting = Extract<GenerationEvent, { type: "scouting" }>;
+
 /**
  * `loading` porte désormais les propositions **déjà arrivées** : l'écran de choix s'affiche dès
  * la première, les suivantes s'y ajoutent. `expected` sert à annoncer combien il en reste, pour
@@ -15,7 +17,7 @@ import type {
  */
 type GenerationState =
   | { status: "idle" }
-  | { status: "loading"; itineraries: Itinerary[]; expected: number }
+  | { status: "loading"; itineraries: Itinerary[]; expected: number; scouting: Scouting | null }
   | { status: "success"; itineraries: Itinerary[] }
   | { status: "error"; message: string };
 
@@ -64,7 +66,7 @@ export function useGenerateItinerary() {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    setState({ status: "loading", itineraries: [], expected: 0 });
+    setState({ status: "loading", itineraries: [], expected: 0, scouting: null });
 
     try {
       const response = await fetch("/api/generate-itinerary", {
@@ -89,6 +91,7 @@ export function useGenerateItinerary() {
       const received: Itinerary[] = [];
       let buffer = "";
       let expected = 0;
+      let scouting: Scouting | null = null;
       let failed = false;
 
       while (true) {
@@ -116,10 +119,13 @@ export function useGenerateItinerary() {
 
           if (event.type === "start") {
             expected = event.expected;
-            setState({ status: "loading", itineraries: [...received], expected });
+            setState({ status: "loading", itineraries: [...received], expected, scouting });
+          } else if (event.type === "scouting") {
+            scouting = event;
+            setState({ status: "loading", itineraries: [...received], expected, scouting });
           } else if (event.type === "proposal") {
             received.push(event.itinerary);
-            setState({ status: "loading", itineraries: [...received], expected });
+            setState({ status: "loading", itineraries: [...received], expected, scouting });
           } else {
             failed = true;
             setState({ status: "error", message: event.error.message });

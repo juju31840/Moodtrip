@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
   const referencePointPromise =
     "lat" in location ? Promise.resolve(location) : geocodeCity(location.city);
 
-  const tasks = generateProposals(parsedRequest.data);
+  const { proposals: tasks, scouting } = generateProposals(parsedRequest.data);
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -128,6 +128,12 @@ export async function POST(request: NextRequest) {
 
       const startedAt = Date.now();
       send({ type: "start", expected: tasks.length });
+
+      // Le repérage part dès qu'il est connu, sans attendre ni bloquer les propositions : s'il
+      // arrivait après la première (cas improbable), l'écran d'attente serait déjà quitté.
+      void scouting.then((event) => {
+        if (event && delivered === 0) send(event);
+      });
 
       let delivered = 0;
       let implausible = 0;

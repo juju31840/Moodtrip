@@ -12,7 +12,7 @@ import {
   type PlaceCandidate,
 } from "./places-db";
 import { geocodeCity } from "./geocode";
-import type { GenerateItineraryRequest, GeoPoint, Itinerary, ItineraryStep } from "@/types/itinerary";
+import type { GenerateItineraryRequest, GenerationEvent, GeoPoint, Itinerary, ItineraryStep } from "@/types/itinerary";
 
 const client = new Anthropic();
 
@@ -85,11 +85,11 @@ async function generateOne(
   request: GenerateItineraryRequest,
   angle: string,
   index: number,
-  origin: Promise<GeoPoint | null>
+  pool: Promise<PlaceCandidate[]>
 ): Promise<Itinerary> {
   // Le socle d'abord : le modèle compose parmi des lieux qui existent au lieu d'en inventer.
   // Une graine par proposition, sinon les trois angles piochent exactement les mêmes adresses.
-  const candidates = await candidatesFor(request, index, origin);
+  const candidates = await pool;
 
   let response = await requestItinerary(request, angle, false, candidates);
 
@@ -195,13 +195,19 @@ function choisirCandidat(
  * Aucune promesse n'est rejetée collectivement : l'appelant traite chacune séparément, pour
  * qu'une proposition en échec n'emporte pas les autres.
  */
-export function generateProposals(request: GenerateItineraryRequest): Promise<Itinerary>[] {
+export interface GenerationTasks {
+  proposals: Promise<Itinerary>[];
+  /** Le repérage, pour l'écran d'attente ; `null` sans point de départ ni socle (ou en mock). */
+  scouting: Promise<Extract<GenerationEvent, { type: "scouting" }> | null>;
+}
+
+export function generateProposals(request: GenerateItineraryRequest): GenerationTasks {
   // Mock de développement (VIBETRIP_MOCK=1) : évite de consommer du crédit API pour itérer
   // sur l'interface. L'échelonnement est délibéré — un mock instantané ne ferait jamais passer
   // l'écran par son état d'attente partielle, qui est précisément ce qu'on veut pouvoir régler.
   if (process.env.VIBETRIP_MOCK === "1") {
     const mocks = buildMockItineraries(request);
-    return Array.from(
+    const proposals = Array.from(
       { length: proposalCountForMode(request.mode) },
       (_, index) =>
         new Promise<Itinerary>((resolve, reject) => {
@@ -210,6 +216,7 @@ export function generateProposals(request: GenerateItineraryRequest): Promise<It
           }, 700 * (index + 1));
         })
     );
+    return { proposals, scouting: Promise.resolve(null) };
   }
 
   // Résolu une seule fois et partagé : géocoder la même ville trois fois serait trois fois le
@@ -220,7 +227,23 @@ export function generateProposals(request: GenerateItineraryRequest): Promise<It
       ? Promise.resolve(request.location)
       : geocodeCity(request.location.city);
 
-  return PROPOSAL_ANGLES.slice(0, proposalCountForMode(request.mode)).map((angle, index) =>
-    generateOne(request, angle, index, origin)
-  );
+  const angles = PROPOSAL_ANGLES.slice(0, proposalCountForMode(request.mode));
+  // Les viviers sont tirés ici, une fois, et partagés : la même requête sert au repérage et à
+  // la proposition, sans aller-retour de plus vers le socle.
+  const pools = angles.map((_, index) => candidatesFor(request, index, origin));
+
+  return {
+    proposals: angles.map((angle, index) => generateOne(request, angle, index, pools[index]!)),
+    scouting: Promise.all([origin, ...pools]).then(([point, ...viviers]) => {
+      if (!point || !("lat" in point)) return null;
+      const vus = new Map<string, PlaceCandidate>();
+      for (const candidat of (viviers as PlaceCandidate[][]).flat()) vus.set(candidat.id, candidat);
+      if (vus.size === 0) return null;
+      return {
+        type: "scouting" as const,
+        origin: point,
+        places: [...vus.values()].map((c) => ({ name: c.name, location: c.location, recognized: c.notoriety > 0 })),
+      };
+    }),
+  };
 }

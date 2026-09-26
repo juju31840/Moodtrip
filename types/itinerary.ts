@@ -122,10 +122,23 @@ export type GenerationEvent =
   | { type: "start"; expected: number }
   | { type: "proposal"; itinerary: Itinerary }
   /**
+   * Le repérage : le point de départ et les adresses parmi lesquelles le modèle compose. Connu
+   * en ~0,3 s, bien avant la première proposition — c'est ce que montre l'écran d'attente, au
+   * lieu d'une animation qui ne dirait rien (retour des testeurs, 24/09/2026 : « trop long »).
+   */
+  | { type: "scouting"; origin: GeoPoint; places: ScoutedPlace[] }
+  /**
    * Émis seulement si *aucune* proposition n'a abouti. Une panne partielle ne produit pas
    * d'erreur : deux itinéraires valent mieux qu'un écran d'erreur.
    */
   | { type: "error"; error: ApiErrorResponse["error"] };
+
+export interface ScoutedPlace {
+  name: string;
+  location: GeoPoint;
+  /** Recommandé par une source (presse, guide, Wikipédia) : dessiné plus fort sur la carte. */
+  recognized: boolean;
+}
 
 export type ApiErrorCode =
   | "INVALID_INPUT"
