@@ -48,7 +48,9 @@ export function PinIcon({ size = 18, color = colors.ink }: IconProps) {
 
 export function StarIcon({ size = 28, filled, color = colors.accent }: IconProps & { filled: boolean }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
+    // `pointerEvents="none"` : sans lui, le dessin capte le toucher avant le bouton qui l'entoure,
+    // et les étoiles paraissaient mortes (retour du 26/09/2026).
+    <Svg width={size} height={size} viewBox="0 0 24 24" pointerEvents="none">
       <Path
         d="M12 3.5l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L3.4 9.8l6-.7z"
         stroke={filled ? color : colors.inkMute}

@@ -94,7 +94,7 @@ export default function CreerScreen() {
       <ScrollView
         contentInsetAdjustmentBehavior="never"
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: insets.bottom + 110, gap: 20 }}
+        contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: insets.bottom + TAB_BAR + 110, gap: 20 }}
       >
         <Masthead title="Vibetrip" />
 
@@ -158,12 +158,6 @@ export default function CreerScreen() {
           </ScrollView>
         </View>
 
-        {/* L'action juste après les deux décisions qui la déterminent — quand et où. Tenue en
-            pied fixe, elle passait sous la barre d'onglets de l'iPhone (retours des 24 et
-            26/09/2026 : « caché », « il faut appuyer, c'est compliqué ») ; les nuances en dessous
-            restent facultatives, et le libellé suit toujours le mode. */}
-        <PrimaryButton label={cta} onPress={start} disabled={!canStart} />
-
         <View style={{ borderTopWidth: rule.major, borderColor: colors.ink }} />
         <Overline>Pour affiner — facultatif</Overline>
 
@@ -186,9 +180,19 @@ export default function CreerScreen() {
         </View>
       </ScrollView>
 
+      {/* L'action en pied fixe, **au-dessus** de la barre d'onglets flottante. Deux essais
+          ratés : collée au bas de l'écran, elle passait dessous ; remontée dans la liste, elle se
+          perdait entre les réglages (retours des 24 et 26/09/2026). La barre d'iOS 26 occupe
+          ~83 points du bas de l'écran, mesurés sur une capture d'iPhone. */}
+      <View style={[styles.footer, { bottom: insets.bottom + TAB_BAR - 34 }]}>
+        <PrimaryButton label={cta} onPress={start} disabled={!canStart} />
+      </View>
     </Paper>
   );
 }
+
+/** Hauteur de la barre d'onglets flottante au-dessus de la zone sûre du bas, plus un léger jour. */
+const TAB_BAR = 91;
 
 const styles = StyleSheet.create({
   segment: { flexDirection: "row", borderWidth: rule.thin, borderColor: colors.ink },
@@ -197,5 +201,6 @@ const styles = StyleSheet.create({
   prefsRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   prefsText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   input: { flex: 1, height: 48, borderWidth: rule.thin, borderColor: colors.ink, paddingHorizontal: 12, fontFamily: fonts.bodyBold, fontSize: 17, color: colors.ink },
+  footer: { position: "absolute", left: 16, right: 16 },
   locate: { width: 48, height: 48, borderWidth: rule.thin, borderColor: colors.ink, alignItems: "center", justifyContent: "center" },
 });

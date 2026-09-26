@@ -16,13 +16,15 @@ export function Cover({ onStart }: { onStart: () => void }) {
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   // Le nom occupe la colonne (reproche du 27/08 : il n'en prenait que 55 %), plafonné par la hauteur.
-  const titleSize = Math.min(width * 0.26, height * 0.13, 112);
+  const titleSize = Math.min(width * 0.23, height * 0.12, 104);
   // Le dessin n'a sa place que si l'écran est assez haut — seuil mesuré sur le site, pas deviné.
   const showSketch = height >= 660;
 
   return (
     <Paper style={[StyleSheet.absoluteFill, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 16, paddingHorizontal: 24 }]}>
-      <Text style={[styles.title, { fontSize: titleSize, lineHeight: titleSize * 1.05 }]} adjustsFontSizeToFit numberOfLines={1}>
+      {/* Interlignage large : sur iPhone, Anton dépasse de sa boîte au-dessus des capitales, et le
+          titre sortait coupé en haut avec l'interlignage serré du site (retour du 26/09/2026). */}
+      <Text style={[styles.title, { fontSize: titleSize, lineHeight: Math.round(titleSize * 1.28) }]} adjustsFontSizeToFit numberOfLines={1}>
         Vibetrip
       </Text>
       <Text style={styles.question}>On sort où ?</Text>

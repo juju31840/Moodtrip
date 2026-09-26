@@ -22,7 +22,12 @@ export function routeThumbUrl(steps: ItineraryStep[], width: number, height: num
     .slice(0, MARKERS_MAX)
     .map((step, index) => `pin-s-${index + 1}+DD3B2E(${step.location.lng.toFixed(5)},${step.location.lat.toFixed(5)})`)
     .join(",");
-  return `${STATIC_URL}/${markers}/auto/${Math.round(width)}x${Math.round(height)}@2x?access_token=${token}&logo=false&attribution=false&padding=30,30,74,30`;
+  // Marges proportionnées à l'image : les marges fixes du site (30 et 74 px) dépassaient la hauteur
+  // d'une miniature de 88 px, et Mapbox refusait la requête — un carré vide à la place de la carte.
+  // La grande marge basse ne sert qu'aux cartes qui portent un bandeau de titre.
+  const side = Math.round(Math.min(30, width * 0.14, height * 0.14));
+  const bottom = height >= 140 ? Math.round(height * 0.44) : side;
+  return `${STATIC_URL}/${markers}/auto/${Math.round(width)}x${Math.round(height)}@2x?access_token=${token}&logo=false&attribution=false&padding=${side},${side},${bottom},${side}`;
 }
 
 export function RouteThumb({ steps, width, height }: { steps: ItineraryStep[]; width: number; height: number }) {

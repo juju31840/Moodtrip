@@ -88,6 +88,9 @@ function OutingRow({ entry }: { entry: SavedItinerary }) {
  */
 function ToRate({ items }: { items: SavedItinerary[] }) {
   const [skipped, setSkipped] = useState<string[]>([]);
+  // La note choisie reste visible un instant avant que la ligne ne s'efface : sans ce retour, le
+  // geste ne se distinguait pas d'un toucher perdu.
+  const [chosen, setChosen] = useState<Record<string, number>>({});
   const pending: { itineraryId: string; step: ItineraryStep }[] = [];
   for (const item of items) {
     for (const step of item.itinerary.steps) {
@@ -115,11 +118,13 @@ function ToRate({ items }: { items: SavedItinerary[] }) {
                   accessibilityLabel={`Noter ${step.placeName} ${note} sur 5`}
                   hitSlop={4}
                   onPress={() => {
+                    const ref = `${itineraryId}:${step.id}`;
+                    setChosen((current) => ({ ...current, [ref]: note }));
                     rateStep(step, note);
-                    saveRating(itineraryId, step.id, step.placeName, note);
+                    setTimeout(() => saveRating(itineraryId, step.id, step.placeName, note), 650);
                   }}
                 >
-                  <StarIcon filled={false} size={28} />
+                  <StarIcon filled={note <= (chosen[`${itineraryId}:${step.id}`] ?? 0)} size={28} />
                 </Pressable>
               ))}
             </View>

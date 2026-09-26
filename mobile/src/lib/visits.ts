@@ -77,9 +77,13 @@ export async function resolveMissingCities(cityAt: (point: GeoPoint) => Promise<
 }
 
 /** « lyon-2eme-arrondissement » se range avec Lyon, et s'affiche « Lyon ». */
+/** Le référentiel écrit parfois la ville à l'anglaise (« Marseilles ») : on la rend en français. */
+const ALIAS: Record<string, string> = { marseilles: "marseille", lyons: "lyon" };
+
 export function cityLabel(city: string | null): string {
   if (!city) return "Ailleurs";
-  const base = city.toLowerCase().replace(/-\d+(er|e|eme)?-arrondissement$/, "").replace(/\s+\d+(er|e)?\s+arrondissement$/, "");
+  const base0 = city.toLowerCase().trim();
+  const base = (ALIAS[base0] ?? base0).toLowerCase().replace(/-\d+(er|e|eme)?-arrondissement$/, "").replace(/\s+\d+(er|e)?\s+arrondissement$/, "");
   return base.split("-").map((part) => (part.length > 2 ? part[0]!.toUpperCase() + part.slice(1) : part)).join("-");
 }
 

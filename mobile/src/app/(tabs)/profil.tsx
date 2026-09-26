@@ -178,8 +178,10 @@ export default function ProfilScreen() {
         </View>
 
         {/* 3. Les habitudes — « Ce qu'on a compris » ne se comprenait pas (retour du 26/09/2026). */}
+        {/* Titre posé sans interlignage ajouté : sur iOS, l'espace d'interligne se loge au-dessus du
+            texte, qui paraissait décentré dans sa bande (retour du 26/09/2026). */}
         <View style={styles.band}>
-          <Display size={22} color={colors.paper}>Tes habitudes</Display>
+          <Text style={styles.bandTitle}>Tes habitudes</Text>
         </View>
         <Body>
           Ce que tu fais vraiment, d’après les étapes que tu coches pendant tes sorties — à côté de ce que tu déclares au-dessus.
@@ -264,7 +266,8 @@ const styles = StyleSheet.create({
   cityInput: { flex: 1, height: 40, borderWidth: rule.thin, borderColor: colors.paper3, paddingHorizontal: 10, fontFamily: fonts.bodyBold, fontSize: 15, color: colors.paper },
   cityAdd: { height: 40, paddingHorizontal: 12, backgroundColor: colors.accent, justifyContent: "center" },
   prefs: { backgroundColor: colors.paper2, borderWidth: rule.thin, borderColor: colors.ink, padding: 14, gap: 12 },
-  band: { backgroundColor: colors.ink, paddingHorizontal: 12, paddingVertical: 8 },
+  band: { backgroundColor: colors.ink, paddingHorizontal: 12, paddingVertical: 10, justifyContent: "center" },
+  bandTitle: { fontFamily: fonts.display, fontSize: 22, color: colors.paper, textTransform: "uppercase" },
   empty: { borderWidth: rule.thin, borderStyle: "dashed", borderColor: colors.inkMute, padding: 12, gap: 8 },
   dot: { flex: 1, height: 10, borderWidth: rule.thin, borderColor: colors.blue },
   track: { height: 10, borderWidth: rule.thin, borderColor: colors.blue },

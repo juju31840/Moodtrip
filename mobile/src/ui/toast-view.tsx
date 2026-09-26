@@ -1,5 +1,5 @@
 import * as Haptics from "expo-haptics";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -17,6 +17,8 @@ import { colors, fonts } from "@/ui/theme";
 export function ToastView() {
   const insets = useSafeAreaInsets();
   const toast = toastStore.useValue();
+  const [chosen, setChosen] = useState(0);
+  useEffect(() => setChosen(0), [toast?.id]);
 
   useEffect(() => {
     if (!toast) return;
@@ -48,10 +50,11 @@ export function ToastView() {
                   // ne retient aucun registre de qui a noté quoi.
                   saveRating(itineraryId, step.id, step.placeName, note);
                   void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  showToast("Merci, c’est noté");
+                  setChosen(note);
+                  setTimeout(() => showToast("Merci, c’est noté"), 600);
                 }}
               >
-                <StarIcon filled={false} size={32} color={colors.accent} />
+                <StarIcon filled={note <= chosen} size={32} color={colors.accent} />
               </Pressable>
             ))}
           </View>
