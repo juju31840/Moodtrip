@@ -122,7 +122,18 @@ async function chercher(theme) {
   if (reponse.stop_reason === "refusal") throw new Error(`refus (${theme})`);
   const texte = reponse.content.filter((b) => b.type === "text").map((b) => b.text).join("");
   const debut = texte.indexOf("{");
-  const lieux = debut >= 0 ? JSON.parse(texte.slice(debut, texte.lastIndexOf("}") + 1)).lieux : [];
+  let lieux = [];
+  try {
+    lieux = debut >= 0 ? JSON.parse(texte.slice(debut, texte.lastIndexOf("}") + 1)).lieux ?? [] : [];
+  } catch {
+    // Le JSON n'a pas pu être lu : on le dit plutôt que de rendre « 0 citation » sans raison.
+  }
+  // Le 24/09/2026, « manger » à Lyon est revenu vide après 11 minutes et 1 $ de recherches, sans
+  // qu'on sache pourquoi. Un résultat vide dit désormais d'où il vient.
+  if (lieux.length === 0) {
+    console.log(`  ⚠ ${theme} vide — arrêt : ${reponse.stop_reason}, ${texte.length} caractères de texte, blocs : ${reponse.content.map((b) => b.type).join(",")}`);
+    console.log(`  début du texte : ${texte.slice(0, 300).replace(/\s+/g, " ")}`);
+  }
   return { lieux, usage };
 }
 

@@ -59,6 +59,10 @@ export interface ItineraryStep {
    * non confirmés.
    */
   anchored?: boolean;
+  /** Recommandé par une source éditoriale ou encyclopédique (`places.notoriete`). */
+  recognized?: boolean;
+  /** Commune du lieu, telle que le socle la connaît — sert à ranger « Ma carte » par ville. */
+  city?: string | null;
 }
 
 export interface Itinerary {

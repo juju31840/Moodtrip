@@ -119,6 +119,8 @@ async function generateOne(
       address: candidat.address,
       verified: true,
       anchored: true,
+      recognized: candidat.notoriety > 0,
+      city: candidat.city,
     };
   });
 

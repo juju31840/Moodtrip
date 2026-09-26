@@ -153,7 +153,7 @@ export async function fetchCandidates(options: {
   try {
     const lignes = await interroger(fonction, corps);
     if (!lignes) return [];
-    const utiles = lignes.filter((l) => !estUneChaine(l.nom));
+    const utiles = lignes.filter((l) => !estUneChaine(l.nom) && (mode !== "tonight" || ouvertLeSoir(l)));
     return resserrer(utiles, mode, plafond, themes)
       .map((l) => ({
         ref: l.ref,
@@ -172,6 +172,27 @@ export async function fetchCandidates(options: {
     // Socle indisponible : on ne casse pas la génération, elle repart comme avant.
     return [];
   }
+}
+
+/**
+ * Une soirée ne propose pas ce qui est fermé le soir. Le socle ne porte aucun horaire : la règle
+ * est donc par sorte de lieu. Elle est devenue urgente avec la curation (26/09/2026) — Wikidata
+ * donne de la notoriété aux églises et aux musées, qui remontaient en tête des soirées : le
+ * repérage de Lyon faisait défiler « Paroisse Saint-Nicolas » pour une sortie à 20 h.
+ * Ne vaut que pour le mode soirée ; en week-end et en voyage, le créneau du matin ou du midi les
+ * accueille, et c'est la règle par créneau (chantier « horaires ») qui devra les placer.
+ */
+const FERME_LE_SOIR = new Set(["museum", "shopping", "park"]);
+// Bornes par lettres Unicode et non `\b` : en JavaScript `\b` ignore les lettres accentuées, et
+// « Église Saint-Nicolas » ne se serait jamais fait écarter.
+const CULTE = /(?<!\p{L})(eglise|église|basilique|cathedrale|cathédrale|chapelle|primatiale|paroisse|temple|abbaye|synagogue|mosquee|mosquée|couvent|monastere|monastère)(?!\p{L})/iu;
+
+/** Un bar ou un restaurant peut s'appeler « Le Temple » : le nom ne compte que pour le reste. */
+const SORTIES_DU_SOIR = new Set(["bar", "nightlife", "restaurant", "cafe"]);
+
+function ouvertLeSoir(ligne: LigneRpc): boolean {
+  if (FERME_LE_SOIR.has(ligne.type_lieu)) return false;
+  return SORTIES_DU_SOIR.has(ligne.type_lieu) || !CULTE.test(ligne.nom);
 }
 
 /** Minimum de lieux gardés par envie, reconnus ou non — voir `resserrer`. */
