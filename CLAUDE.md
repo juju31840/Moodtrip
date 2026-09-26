@@ -1335,6 +1335,18 @@ l'ordre alphabétique des envies — culture et bars épuisaient le quota, et «
 Lyon n'avait plus un seul restaurant. `resserrer` sert désormais les envies à tour de rôle, avec un
 minimum par envie ; sans signal, c'est le tirage d'avant.
 
+**Périmètre de la curation, fixé par Jules le 26/09/2026 : les 100 plus grandes villes, et rien
+en dessous.** Ne plus dépenser de crédit pour les petites communes. Le premier lot (125 villes de
+plus de 400 lieux) y répond ; le second (965 villes moyennes, 1,22 $) est allé au-delà du besoin —
+ses données restent en base, mais aucun passage futur ne doit descendre sous ce seuil.
+
+**Photos des villes** (`scripts/city-photos.mjs` → `mobile/src/data/city-photos.json`) : l'image
+principale Wikidata des 100 plus grandes communes, Paris ajoutée à part (non classée « commune »).
+Gratuit. Elles remplacent la carte répétée dans « Sorties » (« carte, carte, carte ») ; la carte
+reste en repli. Licence libre ≠ sans auteur : chaque photo est créditée en bas de la liste. En
+août, Wikimedia avait été écarté pour les **lieux** (images du voisinage) ; pour une **ville**,
+l'image de sa propre fiche est la bonne.
+
 **Curation à l'échelle : toutes les villes (26/09/2026).** Deuxième lot le même jour : les 965
 communes de 60 à 399 lieux, 69 165 lieux, 2 500 reconnus, 1,22 $ — soit **1 090 villes** couvertes.
 Les villages de moins de 60 lieux (21 000 communes) sont laissés : le modèle n'y connaît presque

@@ -11,7 +11,7 @@ import type { ItineraryStep } from "@/types/itinerary";
 import { ModeIcon, StarIcon } from "@/ui/icons";
 import { Body, Display, Masthead, Overline } from "@/ui/kit";
 import { Paper } from "@/ui/paper";
-import { RouteThumb } from "@/ui/route-thumb";
+import { OutingThumb, photoFor, type CityPhoto } from "@/ui/city-photo";
 import { colors, fonts, rule } from "@/ui/theme";
 
 const DATE = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" });
@@ -32,6 +32,7 @@ export default function SortiesScreen() {
             {saved.map((entry) => (
               <OutingRow key={entry.id} entry={entry} />
             ))}
+            <Credits photos={saved.map((entry) => photoFor(entry.itinerary.steps)).filter((photo): photo is CityPhoto => photo !== null)} />
           </>
         )}
       </ScrollView>
@@ -52,7 +53,7 @@ function OutingRow({ entry }: { entry: SavedItinerary }) {
       style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.paper2 }]}
     >
       <View style={styles.thumb}>
-        <RouteThumb steps={itinerary.steps} width={88} height={88} />
+        <OutingThumb steps={itinerary.steps} size={88} />
       </View>
       <View style={{ flex: 1, gap: 5 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -78,6 +79,20 @@ function OutingRow({ entry }: { entry: SavedItinerary }) {
         )}
       </View>
     </Pressable>
+  );
+}
+
+/**
+ * Les photos viennent de Wikimedia Commons, sous licence libre — libre ne veut pas dire sans
+ * auteur : chaque photo affichée est créditée, une fois par ville.
+ */
+function Credits({ photos }: { photos: CityPhoto[] }) {
+  const unique = [...new Map(photos.map((photo) => [photo.ville, photo])).values()];
+  if (unique.length === 0) return null;
+  return (
+    <Text style={styles.credits}>
+      Photos Wikimedia Commons : {unique.map((photo) => `${photo.ville}, ${photo.auteur} (${photo.licence})`).join(" · ")}
+    </Text>
   );
 }
 
@@ -147,5 +162,6 @@ const styles = StyleSheet.create({
   rateHead: { backgroundColor: colors.ink, paddingHorizontal: 12, paddingVertical: 8 },
   rateHeadText: { fontFamily: fonts.bodyHeavy, fontSize: 11, letterSpacing: 1.1, textTransform: "uppercase", color: colors.paper },
   rateRow: { padding: 12, gap: 8, borderTopWidth: rule.thin, borderColor: colors.ink },
+  credits: { fontFamily: fonts.body, fontSize: 11, lineHeight: 16, color: colors.inkMute, marginTop: 8 },
   skip: { fontFamily: fonts.bodyHeavy, fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: colors.inkMute, textDecorationLine: "underline" },
 });
