@@ -1,7 +1,7 @@
 import "server-only";
 import { haversineDistanceKm } from "./geo";
 import { distanceBand } from "./distance";
-import type { GeoPoint, PlaceType, ThemeId, TripMode } from "@/types/itinerary";
+import type { GeoPoint, Period, PlaceType, ThemeId, TripMode } from "@/types/itinerary";
 
 /**
  * Le socle de lieux réels — l'inversion du pipeline.
@@ -92,6 +92,11 @@ export interface PlaceCandidate {
   notoriety: number;
   /** Ce qui le distingue, en une phrase factuelle — de la source éditoriale ou de Wikidata. */
   reason: string | null;
+  /**
+   * Créneaux où ce lieu peut raisonnablement accueillir quelqu'un — voir `periodesOuvertes`. Le
+   * schéma de réponse s'en sert pour fermer la liste des références créneau par créneau.
+   */
+  periods: Period[];
 }
 
 interface LigneRpc {
@@ -107,6 +112,7 @@ interface LigneRpc {
   distance_m: number;
   notoriete: number | null;
   raison: string | null;
+  gamme: string | null;
 }
 
 /**
@@ -124,10 +130,12 @@ export async function fetchCandidates(options: {
   themes?: ThemeId[];
   /** Différencie les propositions parallèles : sans elle, les trois angles piochent les mêmes lieux. */
   seed: string;
+  /** Curseur budget (0-100) : écarte les tables trop chères pour lui — voir `horsBudget`. */
+  budget?: number;
 }): Promise<PlaceCandidate[]> {
   if (!URL_BASE || !CLE) return [];
 
-  const { origin, mode, distance, themes, seed } = options;
+  const { origin, mode, distance, themes, seed, budget = 50 } = options;
   const plafond = CANDIDATS_MAX[mode];
   // Assez large pour que chaque période de chaque jour ait le choix, sans noyer le prompt.
   const parTheme = themes && themes.length > 0 ? Math.ceil(plafond / themes.length) : Math.ceil(plafond / 6);
@@ -153,7 +161,9 @@ export async function fetchCandidates(options: {
   try {
     const lignes = await interroger(fonction, corps);
     if (!lignes) return [];
-    const utiles = lignes.filter((l) => !estUneChaine(l.nom) && (mode !== "tonight" || ouvertLeSoir(l)));
+    const utiles = lignes.filter(
+      (l) => !estUneChaine(l.nom) && !horsBudget(l, budget) && (mode !== "tonight" || periodesOuvertes(l).includes("evening"))
+    );
     return resserrer(utiles, mode, plafond, themes)
       .map((l) => ({
         ref: l.ref,
@@ -167,6 +177,7 @@ export async function fetchCandidates(options: {
         city: l.commune,
         notoriety: l.notoriete ?? 0,
         reason: l.raison,
+        periods: periodesOuvertes(l),
       }));
   } catch {
     // Socle indisponible : on ne casse pas la génération, elle repart comme avant.
@@ -190,9 +201,34 @@ const CULTE = /(?<!\p{L})(eglise|église|basilique|cathedrale|cathédrale|chapel
 /** Un bar ou un restaurant peut s'appeler « Le Temple » : le nom ne compte que pour le reste. */
 const SORTIES_DU_SOIR = new Set(["bar", "nightlife", "restaurant", "cafe"]);
 
-function ouvertLeSoir(ligne: LigneRpc): boolean {
-  if (FERME_LE_SOIR.has(ligne.type_lieu)) return false;
-  return SORTIES_DU_SOIR.has(ligne.type_lieu) || !CULTE.test(ligne.nom);
+/**
+ * Les créneaux où un lieu peut accueillir quelqu'un. Le socle ne porte aucun horaire : la règle
+ * est par sorte de lieu, et volontairement large — elle n'écarte que l'absurde (un musée le soir,
+ * un club le matin). Défaut constaté le 24/09/2026 : la consigne du prompt ne suffisait pas, un
+ * musée tombait encore « le soir » en week-end et en voyage. Le schéma de réponse ferme désormais
+ * la liste des références créneau par créneau : l'erreur devient impossible, comme l'est déjà
+ * une période hors du mode.
+ */
+function periodesOuvertes(ligne: LigneRpc): Period[] {
+  if (FERME_LE_SOIR.has(ligne.type_lieu)) return ["morning", "midday"];
+  if (!SORTIES_DU_SOIR.has(ligne.type_lieu) && CULTE.test(ligne.nom)) return ["morning", "midday"];
+  if (ligne.type_lieu === "nightlife") return ["evening"];
+  if (ligne.type_lieu === "bar") return ["midday", "evening"];
+  if (ligne.type_lieu === "restaurant") return ["midday", "evening"];
+  return ["morning", "midday", "evening"];
+}
+
+/**
+ * Budget tenu par exclusion (défaut constaté dès le 25/08/2026 : « Le Petit Nice Passédat »,
+ * trois étoiles, proposé à budget 70). La gamme vient de `scripts/curate-price.mjs`, pour les
+ * restaurants reconnus — là où sont les tables chères. « Fauché » écarte ce qui dépasse 25 € par
+ * personne ; « serré » et « raisonnable », ce qui dépasse 60 €. Au-delà, rien n'est écarté.
+ */
+function horsBudget(ligne: LigneRpc, budget: number): boolean {
+  if (!ligne.gamme || ligne.gamme === "?") return false;
+  if (budget < 12.5) return ligne.gamme !== "€";
+  if (budget < 62.5) return ligne.gamme === "€€€";
+  return false;
 }
 
 /** Minimum de lieux gardés par envie, reconnus ou non — voir `resserrer`. */

@@ -473,6 +473,23 @@ change rien à ce plafond — c'est la limite d'exécution de 60 s qui commande.
 ignorés (musée en étape « Soir »), types parfois incohérents. Le prompt n'a pas encore été révisé
 à la lumière du banc d'essai.
 
+**Révision du prompt : faite (26/09/2026)** — trois défauts, trois contraintes plutôt que trois
+consignes, vérifiés sur de vraies générations (Bordeaux week-end serré, Marseille soirée, Lyon
+voyage fauché) : **0 étape du soir interdite, 0 table hors budget**.
+- *Horaires* : chaque candidat porte ses créneaux (`periodesOuvertes`, par sorte de lieu : musée,
+  boutique, parc, culte → jour ; club → soir ; bar, restaurant → midi et soir). Le schéma ferme la
+  liste des références **créneau par créneau** (une variante par créneau). Coût en latence mesuré
+  en A/B : nul (week-end 5-9 s contre 5-7 s, voyage 11-12 s) — un premier appel à 28 s avait fait
+  croire le contraire ; c'était un premier appel, pas un coût permanent.
+- *Budget* : `places.gamme` (€ / €€ / €€€) pour les 2 961 restaurants reconnus
+  (`scripts/curate-price.mjs`, Haiku, 0,31 $ ; 437 en €€€, échantillon juste : L'Ambroisie, La
+  Fenière, Villa Florentine). Jamais affichée, seulement filtrante : « fauché » écarte au-delà de
+  €, « serré » et « raisonnable » écartent €€€.
+- *Broderie* : sans raison sourcée, la description est **composée par le code** (« Bar, allées de
+  Tourny. ») — le modèle ne rédige plus que ce qu'il peut appuyer sur un fait. Plus sobre, et vrai.
+  Le modèle n'écrit plus qu'une catégorie pour ces lieux : moins de texte, moins d'attente.
+- `VIBETRIP_CRENEAUX=0` coupe la contrainte par créneau, pour refaire l'A/B.
+
 **Horaires et budget — prochaine étape après la pertinence (décidé le 24/09/2026).** À faire une
 fois le vivier curé stabilisé, puisqu'il change ce que le modèle reçoit :
 - *Horaires* : les rendre **impossibles** dans le schéma plutôt que les demander au prompt — même
@@ -1318,7 +1335,10 @@ l'ordre alphabétique des envies — culture et bars épuisaient le quota, et «
 Lyon n'avait plus un seul restaurant. `resserrer` sert désormais les envies à tour de rôle, avec un
 minimum par envie ; sans signal, c'est le tirage d'avant.
 
-**Curation à l'échelle : toutes les villes (26/09/2026).** Le but de la curation est que les lieux
+**Curation à l'échelle : toutes les villes (26/09/2026).** Deuxième lot le même jour : les 965
+communes de 60 à 399 lieux, 69 165 lieux, 2 500 reconnus, 1,22 $ — soit **1 090 villes** couvertes.
+Les villages de moins de 60 lieux (21 000 communes) sont laissés : le modèle n'y connaît presque
+rien, et ce serait la tranche la plus chère pour le moins d'effet. Le but de la curation est que les lieux
 soient pertinents **partout**, pas à Lyon seulement ; la recherche web (~1 $ par envie et par ville)
 ne pouvait pas y mener. `scripts/curate-knowledge*.mjs` : on donne au modèle la liste **réelle**
 des lieux de sortie d'une ville, il désigne ceux qu'il connaît précisément (références imposées :

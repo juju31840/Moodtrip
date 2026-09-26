@@ -12,7 +12,7 @@ import {
   type PlaceCandidate,
 } from "./places-db";
 import { geocodeCity } from "./geocode";
-import type { GenerateItineraryRequest, GenerationEvent, GeoPoint, Itinerary, ItineraryStep } from "@/types/itinerary";
+import type { GenerateItineraryRequest, GenerationEvent, GeoPoint, Itinerary, ItineraryStep, Period } from "@/types/itinerary";
 
 const client = new Anthropic();
 
@@ -67,12 +67,48 @@ async function requestItinerary(
         claudeItinerarySchemaFor(
           request.mode,
           totalDaysForMode(request.mode, request.distance),
-          candidates.map((c) => c.ref)
+          candidates.map((c) => c.ref),
+          process.env.VIBETRIP_CRENEAUX === "0" ? undefined : refsParCreneau(candidates)
         )
       ),
     },
     messages: [{ role: "user", content: buildUserPrompt(request, candidates) }],
   });
+}
+
+/** Les références ouvertes à chaque créneau — le schéma n'autorise qu'elles (voir `periodesOuvertes`). */
+function refsParCreneau(candidates: PlaceCandidate[]): Record<Period, string[]> {
+  const par: Record<Period, string[]> = { morning: [], midday: [], evening: [] };
+  for (const c of candidates) for (const period of c.periods) par[period].push(c.ref);
+  return par;
+}
+
+const LIBELLES_TYPE: Record<ItineraryStep["type"], string> = {
+  restaurant: "Restaurant",
+  bar: "Bar",
+  cafe: "Café",
+  museum: "Musée",
+  park: "Parc",
+  viewpoint: "Point de vue",
+  activity: "Activité",
+  shopping: "Boutique",
+  nightlife: "Sortie de nuit",
+  hotel: "Hôtel",
+  transport: "Gare",
+  other: "Lieu",
+};
+
+/**
+ * La description d'un lieu dont aucune source ne dit rien : sa sorte et son adresse, et rien
+ * d'autre. La consigne « n'invente aucune spécialité » n'était pas tenue (« ardoise qui change
+ * chaque semaine » — l'exemple même de la consigne — sur un bar que personne n'a décrit) : le
+ * partage du projet veut que les faits ne viennent jamais du modèle, on le rend donc impossible.
+ * Plus sobre, et vrai.
+ */
+function descriptionFactuelle(type: ItineraryStep["type"], candidat: PlaceCandidate): string {
+  // Le numéro et ce qui suit la première virgule (code postal, ville, pays) ne disent rien de plus.
+  const rue = candidat.address?.split(",")[0]?.replace(/^\d+[\s,-]*(bis|ter)?\s*/i, "").trim();
+  return rue ? `${LIBELLES_TYPE[type]}, ${rue}.` : `${LIBELLES_TYPE[type]}.`;
 }
 
 /**
@@ -115,6 +151,8 @@ async function generateOne(
     return {
       ...base,
       placeName: candidat.name,
+      // La description du modèle n'est gardée que s'il avait un fait sourcé à reformuler.
+      description: candidat.reason ? base.description : descriptionFactuelle(base.type, candidat),
       location: candidat.location,
       address: candidat.address,
       verified: true,
@@ -149,6 +187,7 @@ async function candidatesFor(
     distance: request.distance,
     themes: request.themes,
     seed: `p${index + 1}`,
+    budget: request.budget,
   });
 }
 

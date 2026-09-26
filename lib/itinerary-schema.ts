@@ -75,7 +75,12 @@ export const claudeItinerarySchema = itinerarySchema.omit({ id: true }).extend({
  * `totalDays` est borné de la même façon, pour la même raison : le nombre de jours est décidé par
  * `totalDaysForMode`, pas par le modèle.
  */
-export function claudeItinerarySchemaFor(mode: TripMode, totalDays: number, refs: string[] = []) {
+export function claudeItinerarySchemaFor(
+  mode: TripMode,
+  totalDays: number,
+  refs: string[] = [],
+  refsParCreneau?: Record<"morning" | "midday" | "evening", string[]>
+) {
   const period = mode === "tonight" ? z.literal("evening") : periodSchema;
 
   /**
@@ -91,6 +96,30 @@ export function claudeItinerarySchemaFor(mode: TripMode, totalDays: number, refs
    * existante. Le repli hors liste reste possible quand il n'y a **pas** de socle — sans
    * coordonnées, hors couverture, base indisponible — et c'est là qu'il a du sens.
    */
+  /**
+   * Et depuis le 26/09/2026, fermée **créneau par créneau** : une étape du soir ne peut citer
+   * qu'un lieu ouvert le soir. Le prompt le demandait (« un musée n'a pas sa place en soirée ») et
+   * n'était pas tenu en week-end ni en voyage ; une variante par créneau le rend impossible.
+   */
+  const creneaux = (mode === "tonight" ? (["evening"] as const) : (["morning", "midday", "evening"] as const)).filter(
+    (creneau) => (refsParCreneau?.[creneau]?.length ?? 0) > 0
+  );
+  if (refs.length > 0 && refsParCreneau && creneaux.length > 0) {
+    const variantes = creneaux.map((creneau) =>
+      claudeItineraryStepSchema.extend({
+        period: z.literal(creneau),
+        day: z.number().int().min(1).max(totalDays),
+        ref: z.enum(refsParCreneau[creneau] as [string, ...string[]]),
+      })
+    );
+    const stepParCreneau =
+      variantes.length === 1 ? variantes[0]! : z.union(variantes as unknown as [typeof variantes[0], typeof variantes[0], ...typeof variantes]);
+    return itinerarySchema.omit({ id: true }).extend({
+      totalDays: z.literal(totalDays),
+      steps: z.array(stepParCreneau).min(1),
+    });
+  }
+
   const step =
     refs.length > 0
       ? claudeItineraryStepSchema.extend({

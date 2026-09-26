@@ -136,7 +136,7 @@ function describeCandidates(candidates: PlaceCandidate[]): string | null {
     `Lieux vérifiés disponibles autour du point de départ (${candidates.length}) — format : ref | nom, adresse (commune) | type | lat,lng`,
     ...lignes,
     "Compose l'itinéraire avec ces lieux. Pour chaque étape : ref = la référence, placeName = le nom exact, location = les coordonnées telles quelles.",
-    "Les lieux marqués ★ sont des adresses reconnues — citées par des guides ou la presse, ou connues comme institutions locales : choisis-les en priorité. Quand une phrase suit l'étoile, elle dit pourquoi : appuie la description sur ce fait, reformulé. Pour tout autre lieu, étoilé sans phrase ou non étoilé, n'invente aucune spécialité : dis seulement ce qu'il est et où.",
+    "Les lieux marqués ★ sont des adresses reconnues — citées par des guides ou la presse, ou connues comme institutions locales : choisis-les en priorité. Quand une phrase suit l'étoile, elle dit pourquoi : appuie la description sur ce fait, reformulé. Pour tout autre lieu, étoilé sans phrase ou non étoilé, écris seulement sa catégorie en deux ou trois mots (« bar à vin », « bouchon ») : la description sera complétée à partir de son adresse, et rien ne doit y être inventé.",
   ].join("\n");
 }
 
