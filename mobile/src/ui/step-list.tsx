@@ -59,7 +59,7 @@ export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDon
                 <Overline>{showDay ? `Jour ${step.day} · ` : ""}{PERIOD[step.period]}</Overline>
                 <Display size={20} color={isDone ? colors.inkSoft : colors.ink}>{step.placeName}</Display>
                 <Body>{step.description}</Body>
-                {step.recognized && <Overline color={colors.blue}>★ Recommandé par la presse ou les guides</Overline>}
+                {step.recognized && <Overline color={colors.blue}>★ Adresse reconnue</Overline>}
                 {/* L'outremer dit le confirmé ; le doute ne prend aucune encre. */}
                 {step.verified && <Overline color={colors.blue}>✓ {step.address ?? "Adresse confirmée"}</Overline>}
                 {step.verified === false && <Overline color={colors.inkMute}>Adresse à confirmer sur place</Overline>}

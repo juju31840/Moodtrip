@@ -111,7 +111,7 @@ function ScoutingState({ scouting }: { scouting: Scouting }) {
         </p>
         <p className="mt-2 max-w-[22rem] text-body text-ink-soft [text-wrap:pretty]">
           {recognized.length > 0
-            ? `Dont ${recognized.length} recommandées par la presse ou les guides — les points rouges.`
+            ? `Dont ${recognized.length} reconnues — presse, guides ou institutions locales : les points rouges.`
             : "Tous des lieux qui existent, vérifiés dans notre base."}
         </p>
         <div className="mt-6 flex flex-col gap-3 border-t-2 border-ink pt-4">

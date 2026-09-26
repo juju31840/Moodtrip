@@ -68,7 +68,7 @@ export default function AttenteScreen() {
         {scouting && (
           <Body>
             {recognized.length > 0
-              ? `Dont ${recognized.length} recommandées par la presse ou les guides — les points rouges.`
+              ? `Dont ${recognized.length} reconnues — presse, guides ou institutions locales : les points rouges.`
               : "Tous des lieux qui existent, vérifiés dans notre base."}
           </Body>
         )}

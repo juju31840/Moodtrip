@@ -90,7 +90,7 @@ function ProposalCard({ proposal, width }: { proposal: Itinerary; width: number 
         <Overline color={colors.inkSoft}>
           {proposal.steps.length} étapes{minutes > 0 ? ` · ${minutes} min à pied au total` : ""}
         </Overline>
-        {recognized > 0 && <Overline color={colors.blue}>★ {recognized} adresse{recognized > 1 ? "s" : ""} recommandée{recognized > 1 ? "s" : ""}</Overline>}
+        {recognized > 0 && <Overline color={colors.blue}>★ {recognized} adresse{recognized > 1 ? "s" : ""} reconnue{recognized > 1 ? "s" : ""}</Overline>}
       </View>
     </Pressable>
   );

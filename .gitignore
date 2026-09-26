@@ -42,3 +42,6 @@ vercel-env.txt
 # Captures des vérifications à l'écran
 .playwright-mcp/
 *-390.png
+
+# Lots de curation en cours (identifiants de lieux, relevés)
+scripts/.knowledge-batch*.json

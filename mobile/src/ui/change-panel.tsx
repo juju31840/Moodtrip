@@ -59,7 +59,7 @@ export function ChangePanel({ step, excludeNames, onPick }: {
         <Pressable key={candidate.id} onPress={() => onPick(candidate)} style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.paper2 }]}>
           <Display size={18}>{candidate.placeName}</Display>
           <Body>{candidate.description}</Body>
-          {candidate.recognized && <Overline color={colors.blue}>★ Recommandé</Overline>}
+          {candidate.recognized && <Overline color={colors.blue}>★ Adresse reconnue</Overline>}
         </Pressable>
       ))}
     </View>
