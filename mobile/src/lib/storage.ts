@@ -47,6 +47,9 @@ function writeAll(entries: SavedItinerary[]) {
 
 export const itineraryStore = {
   list: readAll,
+  find(id: string): SavedItinerary | undefined {
+    return readAll().find((entry) => entry.id === id);
+  },
   save(itinerary: Itinerary): SavedItinerary {
     const entry: SavedItinerary = {
       id: `${Date.now().toString(36)}-${itinerary.id}`,

@@ -31,6 +31,7 @@ export default function RootLayout() {
         <Stack.Screen name="attente" options={{ gestureEnabled: false, animation: "fade" }} />
         <Stack.Screen name="propositions" />
         <Stack.Screen name="proposition/[id]" />
+        <Stack.Screen name="sortie/[id]" />
       </Stack>
     </>
   );

@@ -151,3 +151,38 @@ const styles = StyleSheet.create({
   pickerRow: { flexDirection: "row", height: 30, borderWidth: rule.thin, borderColor: colors.ink },
   pickerCell: { flex: 1, borderColor: colors.ink },
 });
+
+/** Case à cocher « j'y suis allé » — carrée, comme tout le système ; le vermillon dit l'action faite. */
+export function CheckBox({ checked, onToggle, label }: { checked: boolean; onToggle: () => void; label: string }) {
+  return (
+    <Pressable
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked }}
+      accessibilityLabel={label}
+      hitSlop={8}
+      onPress={() => {
+        void Haptics.impactAsync(checked ? Haptics.ImpactFeedbackStyle.Light : Haptics.ImpactFeedbackStyle.Medium);
+        onToggle();
+      }}
+      style={[checkStyles.box, checked && { backgroundColor: colors.accent, borderColor: colors.accent }]}
+    >
+      {checked && <Text style={checkStyles.mark}>✓</Text>}
+    </Pressable>
+  );
+}
+
+/** Bouton secondaire : filet d'encre, sans aplat. */
+export function SecondaryButton({ label, onPress, style }: { label: string; onPress: () => void; style?: StyleProp<ViewStyle> }) {
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [checkStyles.secondary, pressed && { backgroundColor: colors.paper2 }, style]}>
+      <Text style={checkStyles.secondaryText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+const checkStyles = StyleSheet.create({
+  box: { width: 30, height: 30, borderWidth: rule.thin, borderColor: colors.ink, alignItems: "center", justifyContent: "center" },
+  mark: { fontFamily: fonts.bodyHeavy, fontSize: 16, color: colors.paper },
+  secondary: { height: 48, borderWidth: rule.thin, borderColor: colors.ink, alignItems: "center", justifyContent: "center", paddingHorizontal: 14 },
+  secondaryText: { fontFamily: fonts.bodyHeavy, fontSize: 13, letterSpacing: 0.8, textTransform: "uppercase", color: colors.ink },
+});

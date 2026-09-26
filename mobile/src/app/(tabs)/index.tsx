@@ -2,14 +2,16 @@ import * as Location from "expo-location";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-screens/experimental";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-screens/experimental";
 
 import { THEMES } from "@shared/themes";
 import { vibeLabel } from "@shared/vibe-labels";
+import { draftStore, patchDraft } from "@/lib/draft";
 import { startGeneration } from "@/lib/generation";
-import type { GeoPoint, ThemeId, TripMode } from "@/types/itinerary";
-import { Chip, Masthead, Overline, PrimaryButton, StepPicker } from "@/ui/kit";
+import { cityShortcuts, preferencesUseful, profileStore, recentCitiesStore, rememberCity } from "@/lib/profile";
+import type { TripMode } from "@/types/itinerary";
+import { CheckBox, Chip, Masthead, Overline, PrimaryButton, StepPicker } from "@/ui/kit";
 import { colors, fonts, rule } from "@/ui/theme";
 
 const MODES: { id: TripMode; label: string; cta: string }[] = [
@@ -25,17 +27,41 @@ const MODES: { id: TripMode; label: string; cta: string }[] = [
  */
 export default function CreerScreen() {
   const insets = useSafeAreaInsets();
-  const [mode, setMode] = useState<TripMode>("tonight");
-  const [city, setCity] = useState("");
-  const [position, setPosition] = useState<GeoPoint | null>(null);
+  const draft = draftStore.useValue();
+  const profile = profileStore.useValue();
+  const recent = recentCitiesStore.useValue();
   const [locating, setLocating] = useState(false);
-  const [budget, setBudget] = useState(50);
-  const [ambiance, setAmbiance] = useState(50);
-  const [distance, setDistance] = useState(25);
-  const [themes, setThemes] = useState<ThemeId[]>([]);
 
+  const { mode, city, position, budget, ambiance, distance, themes } = draft;
   const canStart = position !== null || city.trim().length > 1;
   const cta = MODES.find((item) => item.id === mode)!.cta;
+  const shortcuts = cityShortcuts(profile.cities, recent);
+
+  // La case est **déduite** du brouillon, jamais gardée à part : toucher un curseur la décoche
+  // d'elle-même, parce que le réglage a cessé de suivre les préférences.
+  const prefs = profile.preferences;
+  const showPrefs = preferencesUseful(prefs);
+  const followsPrefs =
+    showPrefs &&
+    budget === prefs.budget &&
+    ambiance === prefs.ambiance &&
+    distance === prefs.distance &&
+    themes.length === prefs.themes.length &&
+    themes.every((theme) => prefs.themes.includes(theme));
+
+  function togglePrefs() {
+    if (followsPrefs) {
+      patchDraft({ budget: 50, ambiance: 50, distance: 25, themes: [] });
+    } else {
+      patchDraft({
+        budget: prefs.budget,
+        ambiance: prefs.ambiance,
+        distance: prefs.distance,
+        themes: prefs.themes,
+        ...(profile.cities[0] && !position ? { city: profile.cities[0] } : {}),
+      });
+    }
+  }
 
   async function locate() {
     setLocating(true);
@@ -43,14 +69,14 @@ export default function CreerScreen() {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") return;
       const { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-      setPosition({ lat: coords.latitude, lng: coords.longitude });
-      setCity("");
+      patchDraft({ position: { lat: coords.latitude, lng: coords.longitude }, city: "" });
     } finally {
       setLocating(false);
     }
   }
 
   function start() {
+    if (!position) rememberCity(city);
     startGeneration({
       mode,
       budget,
@@ -64,9 +90,13 @@ export default function CreerScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.paper }}>
-      {/* Défilement réglé à la main ici (« never ») : le bouton fixe est posé sous la liste,
-          dans le flux, et c'est lui qui porte la marge de la barre d'onglets. */}
-      <ScrollView contentInsetAdjustmentBehavior="never" contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 24, gap: 20 }}>
+      {/* Défilement réglé à la main (« never ») : le bouton fixe est posé sous la liste, dans le
+          flux, et c'est lui qui porte la marge de la barre d'onglets. */}
+      <ScrollView
+        contentInsetAdjustmentBehavior="never"
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 24, gap: 20 }}
+      >
         <Masthead title="Vibetrip" />
 
         <View style={{ gap: 8 }}>
@@ -77,7 +107,7 @@ export default function CreerScreen() {
                 key={item.id}
                 accessibilityRole="button"
                 accessibilityState={{ selected: mode === item.id }}
-                onPress={() => setMode(item.id)}
+                onPress={() => patchDraft({ mode: item.id })}
                 style={[styles.segmentCell, index > 0 && { borderLeftWidth: rule.thin }, mode === item.id && { backgroundColor: colors.ink }]}
               >
                 <Text style={[styles.segmentText, mode === item.id && { color: colors.paper }]}>{item.label}</Text>
@@ -86,32 +116,54 @@ export default function CreerScreen() {
           </View>
         </View>
 
+        {showPrefs && (
+          <Pressable onPress={togglePrefs} style={styles.prefsRow} accessibilityRole="checkbox" accessibilityState={{ checked: followsPrefs }}>
+            <CheckBox checked={followsPrefs} onToggle={togglePrefs} label="Partir de mes préférences" />
+            <Text style={styles.prefsText}>Partir de mes préférences</Text>
+          </Pressable>
+        )}
+
         <View style={{ gap: 8 }}>
           <Overline>Au départ de</Overline>
           <View style={{ flexDirection: "row", gap: 8 }}>
             <TextInput
               value={position ? "Ma position" : city}
-              onChangeText={(text) => {
-                setPosition(null);
-                setCity(text);
-              }}
+              onChangeText={(text) => patchDraft({ position: null, city: text })}
               placeholder="Une ville"
               placeholderTextColor={colors.inkMute}
               accessibilityLabel="Ville de départ"
               autoCapitalize="words"
+              autoCorrect={false}
               style={styles.input}
             />
-            <Pressable accessibilityRole="button" accessibilityLabel="Utiliser ma position" onPress={locate} style={[styles.locate, position && { backgroundColor: colors.ink }]}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Utiliser ma position"
+              onPress={locate}
+              style={[styles.locate, position && { backgroundColor: colors.ink }]}
+            >
               <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 18, color: position ? colors.paper : colors.ink }}>{locating ? "…" : "◎"}</Text>
             </Pressable>
           </View>
+          {/* Raccourcis : les villes du profil, puis les dernières utilisées, puis les grandes
+              villes pour un premier lancement. */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }} keyboardShouldPersistTaps="handled">
+            {shortcuts.map((item) => (
+              <Chip
+                key={item}
+                label={item}
+                selected={!position && city.trim().toLowerCase() === item.toLowerCase()}
+                onPress={() => patchDraft({ position: null, city: item })}
+              />
+            ))}
+          </ScrollView>
         </View>
 
         <View style={{ borderTopWidth: rule.major, borderColor: colors.ink }} />
 
-        <StepPicker label="Budget" word={vibeLabel("budget", budget)} value={budget} onChange={setBudget} />
-        <StepPicker label="Ambiance" word={vibeLabel("ambiance", ambiance)} value={ambiance} onChange={setAmbiance} />
-        <StepPicker label="Distance" word={vibeLabel("distance", distance)} value={distance} onChange={setDistance} />
+        <StepPicker label="Budget" word={vibeLabel("budget", budget)} value={budget} onChange={(value) => patchDraft({ budget: value })} />
+        <StepPicker label="Ambiance" word={vibeLabel("ambiance", ambiance)} value={ambiance} onChange={(value) => patchDraft({ ambiance: value })} />
+        <StepPicker label="Distance" word={vibeLabel("distance", distance)} value={distance} onChange={(value) => patchDraft({ distance: value })} />
 
         <View style={{ gap: 8 }}>
           <Overline>Envies — facultatif</Overline>
@@ -121,20 +173,15 @@ export default function CreerScreen() {
                 key={theme.id}
                 label={theme.label}
                 selected={themes.includes(theme.id)}
-                onPress={() =>
-                  setThemes((current) => (current.includes(theme.id) ? current.filter((id) => id !== theme.id) : [...current, theme.id]))
-                }
+                onPress={() => patchDraft({ themes: themes.includes(theme.id) ? themes.filter((id) => id !== theme.id) : [...themes, theme.id] })}
               />
             ))}
           </View>
         </View>
       </ScrollView>
 
-      {/* Pied fixe : 947 px de réglages pour 767 visibles sur le site, et l'action se retrouvait
-          sous la ligne de flottaison sans que rien ne dise qu'il fallait défiler. */}
-      {/* Premier essai sur Expo Go : le bouton, posé en absolu en bas d'écran, passait sous la
-          barre d'onglets — sur iOS le contenu d'un onglet s'étend dessous. La marge sûre de type
-          « all » inclut la hauteur de la barre, quelle qu'elle soit selon la version d'iOS. */}
+      {/* Premier essai sur Expo Go : le bouton, posé en absolu, passait sous la barre d'onglets —
+          sur iOS le contenu d'un onglet s'étend dessous. La marge sûre « all » inclut la barre. */}
       <SafeAreaView edges={{ bottom: true }} insetType="all" style={styles.footer}>
         <PrimaryButton label={cta} onPress={start} disabled={!canStart} />
       </SafeAreaView>
@@ -146,6 +193,8 @@ const styles = StyleSheet.create({
   segment: { flexDirection: "row", borderWidth: rule.thin, borderColor: colors.ink },
   segmentCell: { flex: 1, height: 48, alignItems: "center", justifyContent: "center", borderColor: colors.ink },
   segmentText: { fontFamily: fonts.bodyHeavy, fontSize: 13, letterSpacing: 0.8, textTransform: "uppercase", color: colors.ink },
+  prefsRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  prefsText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   input: { flex: 1, height: 48, borderWidth: rule.thin, borderColor: colors.ink, paddingHorizontal: 12, fontFamily: fonts.bodyBold, fontSize: 17, color: colors.ink },
   locate: { width: 48, height: 48, borderWidth: rule.thin, borderColor: colors.ink, alignItems: "center", justifyContent: "center" },
   footer: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12, borderTopWidth: rule.thin, borderColor: colors.ink, backgroundColor: colors.paper },

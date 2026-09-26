@@ -1,4 +1,5 @@
-import { ScrollView, StyleSheet, View } from "react-native";
+import { router } from "expo-router";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { MODE_LABELS } from "@shared/trip-modes";
 import { useSavedItineraries } from "@/lib/storage";
@@ -20,7 +21,12 @@ export default function SortiesScreen() {
         const total = itinerary.steps.length;
         const done = doneStepIds.length;
         return (
-          <View key={id} style={styles.row}>
+          <Pressable
+            key={id}
+            accessibilityRole="button"
+            onPress={() => router.push({ pathname: "/sortie/[id]", params: { id } })}
+            style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.paper2 }]}
+          >
             <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
               <Display size={22} style={{ flex: 1 }}>{itinerary.tripName}</Display>
               <Overline color={colors.inkMute}>{DATE.format(new Date(savedAt))}</Overline>
@@ -40,7 +46,7 @@ export default function SortiesScreen() {
                 <Overline color={colors.blue}>{`${done}/${total}`}</Overline>
               </View>
             )}
-          </View>
+          </Pressable>
         );
       })}
     </ScrollView>
