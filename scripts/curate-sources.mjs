@@ -20,9 +20,11 @@ import { join } from "node:path";
 import { namesMatch } from "../lib/place-match.ts";
 import { VILLES, distanceM, lit, sql } from "./lib-socle.mjs";
 
-// Sonnet par défaut, décision du 24/09/2026 sous un budget total de 10 $ : Opus coûtait ~1 $ par
-// envie et par ville, soit une seule ville couverte. Tarifs par million de jetons ci-dessous.
-const MODELE = process.env.VIBETRIP_CURATION_MODEL ?? "claude-sonnet-5";
+// Opus par défaut. Sonnet avait été choisi le 24/09/2026 pour son tarif (2 $ / 10 $ contre 5 $ /
+// 25 $), et la mesure l'a démenti : sur la même tâche, Sonnet lit cinq fois plus de pages
+// (722 000 à 795 000 jetons par envie contre ~146 000) et revient à ~1,90 $ l'envie, contre ~1 $.
+// Le prix au jeton ne dit pas le coût d'une tâche.
+const MODELE = process.env.VIBETRIP_CURATION_MODEL ?? "claude-opus-5";
 const TARIFS = { "claude-sonnet-5": [2, 10], "claude-opus-5": [5, 25] };
 /**
  * Plafond de dépense du passage, en dollars. Le crédit est partagé avec la production : le
@@ -214,10 +216,15 @@ const coutDe = (u) => {
   return (u.entree * e + u.sortie * s) / 1e6 + u.recherches * 0.01;
 };
 const depenseInitiale = Number(process.env.VIBETRIP_CURATION_DEJA ?? 0);
+const coutsParEnvie = [];
 
 for (const theme of themes) {
-  if (!rejouer && depenseInitiale + coutDe(total) >= BUDGET) {
-    console.log(`Plafond de ${BUDGET} $ atteint — arrêt avant « ${theme} ».`);
+  // Plafond **prédictif** : une envie ne s'interrompt pas en cours de route, donc on refuse de la
+  // lancer si son coût probable (la plus chère déjà faite, 1,2 $ faute de mieux) ferait déborder.
+  // Vérifier seulement après coup avait laissé une envie coûter 1,90 $ sous un plafond de 1,20 $.
+  const probable = Math.max(1.2, ...coutsParEnvie);
+  if (!rejouer && depenseInitiale + coutDe(total) + probable > BUDGET) {
+    console.log(`Plafond de ${BUDGET} $ : « ${theme} » (~${probable.toFixed(2)} $) le dépasserait — arrêt.`);
     break;
   }
   const t0 = Date.now();
@@ -225,6 +232,7 @@ for (const theme of themes) {
     ? { lieux: anciens.filter((c) => c.theme === theme), usage: { entree: 0, sortie: 0, recherches: 0 } }
     : await chercher(theme);
   for (const k of Object.keys(total)) total[k] += usage[k];
+  coutsParEnvie.push(coutDe(usage));
   const bilan = { ok: 0, absent: 0, ambigu: 0 };
   const lot = [];
   for (const c of citations) {

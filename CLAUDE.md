@@ -1318,6 +1318,13 @@ l'ordre alphabétique des envies — culture et bars épuisaient le quota, et «
 Lyon n'avait plus un seul restaurant. `resserrer` sert désormais les envies à tour de rôle, avec un
 minimum par envie ; sans signal, c'est le tirage d'avant.
 
+**Curation — bilan au 26/09/2026.** Lyon : bars (19) et restaurants (18 reconnus). Wikidata :
+les 8 villes (Nantes 147, Tours 33 rapprochés après une panne de Wikidata le 24). **Opus revient
+moins cher que Sonnet** sur cette tâche (~1 $ l'envie contre ~1,90 $ : Sonnet lit cinq fois plus
+de pages) — le script est repassé sur Opus, avec un plafond **prédictif** (il ne lance pas une
+envie dont le coût probable ferait déborder le budget). « Manger » a abouti au second essai :
+le vide du premier était un aléa, pas un défaut systématique.
+
 **Curation sur Sonnet : plus chère qu'estimé.** Lyon, deux envies : 1,84 $ (Sonnet lit bien plus
 de pages qu'Opus : 722 000 jetons), et l'envie « manger » est revenue **vide** après 11 min —
 cause non élucidée, à diagnostiquer (journaliser `stop_reason` et la longueur du texte) avant de
