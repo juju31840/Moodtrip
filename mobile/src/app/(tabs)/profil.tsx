@@ -8,6 +8,7 @@ import { patchDraft } from "@/lib/draft";
 import { profileStore, type Preferences } from "@/lib/profile";
 import { readTaste, visitsStore, VISITS_MINIMUM } from "@/lib/visits";
 import { Body, Chip, Display, Masthead, Overline, SecondaryButton, StepPicker } from "@/ui/kit";
+import { Paper } from "@/ui/paper";
 import { colors, fonts, rule } from "@/ui/theme";
 
 /**
@@ -43,8 +44,9 @@ export default function ProfilScreen() {
   }
 
   return (
+    <Paper style={{ flex: 1 }}>
     <ScrollView
-      style={{ backgroundColor: colors.paper }}
+      style={{ backgroundColor: "transparent" }}
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={{ paddingTop: 12, paddingHorizontal: 20, paddingBottom: 40, gap: 16 }}
@@ -150,6 +152,7 @@ export default function ProfilScreen() {
         </>
       )}
     </ScrollView>
+    </Paper>
   );
 }
 

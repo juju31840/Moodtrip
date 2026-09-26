@@ -7,6 +7,7 @@ import { MODE_LABELS } from "@shared/trip-modes";
 import { useSavedItineraries } from "@/lib/storage";
 import { cityLabel, visitsStore, type VisitedPlace } from "@/lib/visits";
 import { Body, Display, Masthead, Overline } from "@/ui/kit";
+import { Paper } from "@/ui/paper";
 import { colors, fonts, rule } from "@/ui/theme";
 
 const FRANCE = { latitude: 46.6, longitude: 2.4, latitudeDelta: 10.5, longitudeDelta: 10.5 };
@@ -62,7 +63,9 @@ export default function CarteScreen() {
     : [];
 
   return (
-    <ScrollView style={{ backgroundColor: colors.paper }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingTop: 12, paddingBottom: 40 }}>
+    <Paper style={{ flex: 1 }}>
+    <ScrollView
+ style={{ backgroundColor: "transparent" }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingTop: 12, paddingBottom: 40 }}>
       <View style={{ paddingHorizontal: 20 }}>
         <Masthead title="Ma carte" />
         <View style={styles.stats}>
@@ -139,6 +142,7 @@ export default function CarteScreen() {
         </>
       )}
     </ScrollView>
+    </Paper>
   );
 }
 

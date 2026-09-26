@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { cancelGeneration, useGeneration } from "@/lib/generation";
 import { Body, Display, IconButton, Overline, PrimaryButton } from "@/ui/kit";
 import { ScoutingMap } from "@/ui/scouting-map";
+import { Paper } from "@/ui/paper";
 import { colors, fonts, rule } from "@/ui/theme";
 
 /**
@@ -49,7 +50,7 @@ export default function AttenteScreen() {
   }
 
   return (
-    <View style={styles.screen}>
+    <Paper style={styles.screen}>
       <View style={styles.map}>
         {scouting ? <ScoutingMap scouting={scouting} /> : <View style={{ flex: 1, backgroundColor: colors.paper2 }} />}
         {cancel}
@@ -80,7 +81,7 @@ export default function AttenteScreen() {
           <Overline>La première idée s’ouvre dès qu’elle est prête</Overline>
         </View>
       </View>
-    </View>
+    </Paper>
   );
 }
 
@@ -121,7 +122,7 @@ function Ticker({ text }: { text: string }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.paper },
+  screen: { flex: 1 },
   map: { flex: 1 },
   badge: { position: "absolute", right: 16, backgroundColor: colors.ink, paddingHorizontal: 8, paddingVertical: 5 },
   ticker: { height: 40, backgroundColor: colors.ink, justifyContent: "center", overflow: "hidden", borderTopWidth: rule.major, borderColor: colors.ink },

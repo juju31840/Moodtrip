@@ -9,6 +9,7 @@ import { toggleVisit } from "@/lib/visits";
 import { Body, Display, IconButton, Overline, SecondaryButton } from "@/ui/kit";
 import { RouteMap } from "@/ui/route-map";
 import { StepList } from "@/ui/step-list";
+import { Paper } from "@/ui/paper";
 import { colors, rule } from "@/ui/theme";
 
 /**
@@ -48,7 +49,7 @@ export default function SortieScreen() {
   }
 
   return (
-    <View style={styles.screen}>
+    <Paper style={styles.screen}>
       <View style={styles.map}>
         <RouteMap steps={itinerary.steps} activeId={activeId} onSelect={setActiveId} />
         <IconButton label="Revenir aux sorties" glyph="←" onPress={() => router.back()} style={{ position: "absolute", top: insets.top + 8, left: 16 }} />
@@ -81,12 +82,12 @@ export default function SortieScreen() {
 
         <SecondaryButton label="Supprimer cette sortie" onPress={remove} style={{ marginTop: 24, borderColor: colors.inkMute }} />
       </ScrollView>
-    </View>
+    </Paper>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.paper },
+  screen: { flex: 1 },
   map: { height: "34%", borderBottomWidth: rule.major, borderColor: colors.ink },
   saved: { alignSelf: "flex-start", backgroundColor: colors.blue, paddingHorizontal: 8, paddingVertical: 5, marginBottom: 6 },
 });

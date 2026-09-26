@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { MODE_LABELS } from "@shared/trip-modes";
 import { useSavedItineraries } from "@/lib/storage";
 import { Body, Display, Masthead, Overline } from "@/ui/kit";
+import { Paper } from "@/ui/paper";
 import { colors, rule } from "@/ui/theme";
 
 const DATE = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" });
@@ -12,7 +13,9 @@ export default function SortiesScreen() {
   const saved = useSavedItineraries();
 
   return (
-    <ScrollView style={{ backgroundColor: colors.paper }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingTop: 12, paddingHorizontal: 20, paddingBottom: 40 }}>
+    <Paper style={{ flex: 1 }}>
+    <ScrollView
+ style={{ backgroundColor: "transparent" }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingTop: 12, paddingHorizontal: 20, paddingBottom: 40 }}>
       <Masthead title="Sorties" />
       {saved.length === 0 && (
         <Body style={{ marginTop: 16 }}>Valide une proposition dans « Créer » : elle se range ici, avec ses étapes à cocher sur place.</Body>
@@ -50,6 +53,7 @@ export default function SortiesScreen() {
         );
       })}
     </ScrollView>
+    </Paper>
   );
 }
 

@@ -12,6 +12,7 @@ import { startGeneration } from "@/lib/generation";
 import { cityShortcuts, preferencesUseful, profileStore, recentCitiesStore, rememberCity } from "@/lib/profile";
 import type { TripMode } from "@/types/itinerary";
 import { CheckBox, Chip, Masthead, Overline, PrimaryButton, StepPicker } from "@/ui/kit";
+import { Paper } from "@/ui/paper";
 import { colors, fonts, rule } from "@/ui/theme";
 
 const MODES: { id: TripMode; label: string; cta: string }[] = [
@@ -89,7 +90,7 @@ export default function CreerScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.paper }}>
+    <Paper style={{ flex: 1 }}>
       {/* Défilement réglé à la main (« never ») : le bouton fixe est posé sous la liste, dans le
           flux, et c'est lui qui porte la marge de la barre d'onglets. */}
       <ScrollView
@@ -185,7 +186,7 @@ export default function CreerScreen() {
       <SafeAreaView edges={{ bottom: true }} insetType="all" style={styles.footer}>
         <PrimaryButton label={cta} onPress={start} disabled={!canStart} />
       </SafeAreaView>
-    </View>
+    </Paper>
   );
 }
 

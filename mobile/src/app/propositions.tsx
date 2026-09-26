@@ -8,6 +8,7 @@ import { useGeneration } from "@/lib/generation";
 import type { Itinerary } from "@/types/itinerary";
 import { Body, Display, IconButton, Overline } from "@/ui/kit";
 import { RouteThumb } from "@/ui/route-thumb";
+import { Paper } from "@/ui/paper";
 import { colors, printShadow, rule } from "@/ui/theme";
 
 const MODE_TITLE = { tonight: "ce soir", weekend: "ce week-end", trip: "ton voyage" } as const;
@@ -27,7 +28,7 @@ export default function PropositionsScreen() {
   const cardWidth = width - 40;
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.paper }}>
+    <Paper style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 }}>
         <View style={{ flexDirection: "row", gap: 12, alignItems: "flex-start", paddingHorizontal: 20 }}>
           <IconButton label="Revenir aux réglages" glyph="←" onPress={() => router.dismissAll()} />
@@ -55,7 +56,7 @@ export default function PropositionsScreen() {
           ))}
         </View>
       </ScrollView>
-    </View>
+    </Paper>
   );
 }
 

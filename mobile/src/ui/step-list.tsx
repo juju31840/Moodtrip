@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { formatTrajet, trajetDepuis } from "@shared/walking";
@@ -22,7 +23,7 @@ function openInMaps(step: ItineraryStep) {
  * sélectionnée — quatre boutons permanents faisaient de l'écran un formulaire (revue du site,
  * 24/09/2026).
  */
-export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDone }: {
+export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDone, editingId, onToggleEdit, renderEdit }: {
   steps: ItineraryStep[];
   showDay: boolean;
   activeId: string | null;
@@ -30,6 +31,10 @@ export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDon
   /** Présent sur une sortie enregistrée : la case « j'y suis allé ». */
   done?: string[];
   onToggleDone?: (step: ItineraryStep) => void;
+  /** Présent sur une proposition non validée : « Changer » et son panneau. */
+  editingId?: string | null;
+  onToggleEdit?: (step: ItineraryStep) => void;
+  renderEdit?: (step: ItineraryStep) => ReactNode;
 }) {
   return (
     <View>
@@ -58,14 +63,29 @@ export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDon
                 {/* L'outremer dit le confirmé ; le doute ne prend aucune encre. */}
                 {step.verified && <Overline color={colors.blue}>✓ {step.address ?? "Adresse confirmée"}</Overline>}
                 {step.verified === false && <Overline color={colors.inkMute}>Adresse à confirmer sur place</Overline>}
-                {active && (
-                  <Pressable accessibilityRole="link" onPress={() => openInMaps(step)} style={styles.go}>
-                    <Text style={styles.goText}>Y aller →</Text>
-                  </Pressable>
+                {(active || editingId === step.id) && (
+                  <View style={{ flexDirection: "row", gap: 8, marginTop: 6 }}>
+                    <Pressable accessibilityRole="link" onPress={() => openInMaps(step)} style={styles.go}>
+                      <Text style={styles.goText}>Y aller →</Text>
+                    </Pressable>
+                    {onToggleEdit && (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityState={{ expanded: editingId === step.id }}
+                        onPress={() => onToggleEdit(step)}
+                        style={[styles.go, editingId === step.id && { backgroundColor: colors.ink }]}
+                      >
+                        <Text style={[styles.goText, editingId === step.id && { color: colors.paper }]}>
+                          {editingId === step.id ? "Annuler" : "Changer"}
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
                 )}
               </View>
               {onToggleDone && <CheckBox checked={isDone} onToggle={() => onToggleDone(step)} label={`J'y suis allé : ${step.placeName}`} />}
             </Pressable>
+            {editingId === step.id && renderEdit?.(step)}
           </View>
         );
       })}
@@ -78,6 +98,6 @@ const styles = StyleSheet.create({
   number: { width: 24, fontFamily: fonts.display, fontSize: 24, lineHeight: 30, color: colors.accent },
   walk: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 5, paddingLeft: 36 },
   walkRule: { width: 2, height: 12, backgroundColor: colors.inkMute },
-  go: { alignSelf: "flex-start", marginTop: 6, height: 36, paddingHorizontal: 12, borderWidth: rule.thin, borderColor: colors.ink, justifyContent: "center" },
+  go: { alignSelf: "flex-start", height: 36, paddingHorizontal: 12, borderWidth: rule.thin, borderColor: colors.ink, justifyContent: "center" },
   goText: { fontFamily: fonts.bodyHeavy, fontSize: 12, letterSpacing: 0.8, textTransform: "uppercase", color: colors.ink },
 });

@@ -37,6 +37,9 @@ interface LigneRpc {
   adresse: string | null;
   type_lieu: string;
   distance_m: number;
+  notoriete: number | null;
+  raison: string | null;
+  commune: string | null;
 }
 
 /**
@@ -95,6 +98,8 @@ export async function findNearby(
       // confirmer sur place, contrairement à ce que le modèle propose de lui-même.
       verified: true,
       address: ligne.adresse,
+      recognized: (ligne.notoriete ?? 0) > 0,
+      city: ligne.commune,
     });
     if (resultats.length >= limit) break;
   }
@@ -108,6 +113,8 @@ export async function findNearby(
  * La distance est l'information utile — c'est elle qui dit si le remplacement tient la route.
  */
 function descriptionCourte(ligne: LigneRpc): string {
+  // Un lieu reconnu dit pourquoi (la raison de la source) ; les autres, seulement où ils sont.
+  if (ligne.raison) return ligne.raison;
   const distance =
     ligne.distance_m < 1000
       ? `à ${ligne.distance_m} m`

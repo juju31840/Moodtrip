@@ -6,9 +6,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { findProposal } from "@/lib/generation";
 import { itineraryStore } from "@/lib/storage";
-import { Body, Display, IconButton, PrimaryButton } from "@/ui/kit";
+import type { ItineraryStep } from "@/types/itinerary";
+import { ChangePanel } from "@/ui/change-panel";
+import { Body, Display, IconButton, PrimaryButton, SecondaryButton } from "@/ui/kit";
 import { RouteMap } from "@/ui/route-map";
 import { StepList } from "@/ui/step-list";
+import { Paper } from "@/ui/paper";
 import { colors, rule } from "@/ui/theme";
 
 /**
@@ -21,6 +24,10 @@ export default function PropositionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const proposal = findProposal(id);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  // L'itinéraire arrive composé ; on peut en échanger une étape, et revenir à l'origine d'un geste.
+  const [steps, setSteps] = useState<ItineraryStep[]>(proposal?.steps ?? []);
+  const edited = proposal ? steps.some((step, index) => step.id !== proposal.steps[index]?.id) : false;
 
   if (!proposal) {
     return (
@@ -32,7 +39,7 @@ export default function PropositionScreen() {
   }
 
   function validate() {
-    const saved = itineraryStore.save(proposal!);
+    const saved = itineraryStore.save({ ...proposal!, steps });
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.dismissAll();
     router.navigate("/sorties");
@@ -40,27 +47,55 @@ export default function PropositionScreen() {
   }
 
   return (
-    <View style={styles.screen}>
+    <Paper style={styles.screen}>
       <View style={styles.map}>
-        <RouteMap steps={proposal.steps} activeId={activeId} onSelect={setActiveId} />
+        <RouteMap steps={steps} activeId={activeId} onSelect={setActiveId} />
         <IconButton label="Revenir aux propositions" glyph="←" onPress={() => router.back()} style={{ position: "absolute", top: insets.top + 8, left: 16 }} />
       </View>
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: 24 }}>
         <Display size={32} color={colors.accent}>{proposal.tripName}</Display>
         <Body style={{ marginTop: 6, marginBottom: 12 }}>{proposal.summary}</Body>
-        <StepList steps={proposal.steps} showDay={proposal.totalDays > 1} activeId={activeId} onSelect={setActiveId} />
+        {edited && (
+          <SecondaryButton
+            label="Rétablir la proposition d’origine"
+            onPress={() => {
+              setSteps(proposal.steps);
+              setEditingId(null);
+            }}
+            style={{ alignSelf: "flex-start", height: 38, marginBottom: 10 }}
+          />
+        )}
+        <StepList
+          steps={steps}
+          showDay={proposal.totalDays > 1}
+          activeId={activeId}
+          onSelect={setActiveId}
+          editingId={editingId}
+          onToggleEdit={(step) => setEditingId((current) => (current === step.id ? null : step.id))}
+          renderEdit={(step) => (
+            <ChangePanel
+              step={step}
+              excludeNames={steps.map((item) => item.placeName)}
+              onPick={(replacement) => {
+                setSteps((current) => current.map((item) => (item.id === step.id ? { ...replacement, id: `${step.id}-alt-${replacement.id}` } : item)));
+                setEditingId(null);
+                setActiveId(`${step.id}-alt-${replacement.id}`);
+              }}
+            />
+          )}
+        />
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
         <PrimaryButton label="Valider cet itinéraire" onPress={validate} />
       </View>
-    </View>
+    </Paper>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.paper },
+  screen: { flex: 1 },
   map: { height: "36%", borderBottomWidth: rule.major, borderColor: colors.ink },
   footer: { paddingHorizontal: 20, paddingTop: 12, borderTopWidth: rule.thin, borderColor: colors.ink, backgroundColor: colors.paper },
 });
