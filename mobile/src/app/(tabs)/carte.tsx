@@ -5,7 +5,11 @@ import MapView, { Marker } from "react-native-maps";
 
 import { MODE_LABELS } from "@shared/trip-modes";
 import { useSavedItineraries } from "@/lib/storage";
+import { cityProgress } from "@/lib/city-progress";
 import { cityAt } from "@/lib/geocode";
+import { ratingsStore } from "@/lib/ratings";
+import { computeStamps, seenStampsStore } from "@/lib/stamps";
+import { StampView } from "@/ui/stamp";
 import { cityLabel, resolveMissingCities, visitsStore, type VisitedPlace } from "@/lib/visits";
 import { Body, Display, Masthead, Overline } from "@/ui/kit";
 import { Paper } from "@/ui/paper";
@@ -23,6 +27,11 @@ export default function CarteScreen() {
   const places = visitsStore.useValue();
   const saved = useSavedItineraries();
   const [zone, setZone] = useState<string | null>(null);
+  const rated = ratingsStore.useValue().length;
+  const seen = seenStampsStore.useValue();
+  const stamps = computeStamps(places, saved, rated);
+  const earnedStamps = stamps.filter((stamp) => stamp.earned);
+  const [progress, setProgress] = useState<{ city: string; done: number; total: number } | null>(null);
   const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
@@ -68,6 +77,20 @@ export default function CarteScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, shown.length]);
 
+  // La progression dans la ville ouverte : ses adresses reconnues déjà faites.
+  useEffect(() => {
+    setProgress(null);
+    if (!current) return;
+    let cancelled = false;
+    void cityProgress(current, shown).then((found) => {
+      if (!cancelled && found) setProgress({ city: current, ...found });
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, shown.length]);
+
   // Les sorties rattachées à la ville : par un passage coché (preuve directe), ou par une étape
   // située dans la commune — pour retrouver aussi celles enregistrées et jamais entamées.
   const outings = current
@@ -89,6 +112,20 @@ export default function CarteScreen() {
           <Stat value={cities.length} label={cities.length > 1 ? "villes" : "ville"} />
           <Stat value={passages} label={passages > 1 ? "passages" : "passage"} />
         </View>
+
+        {/* Les tampons : les gagnés d'abord, sinon trois à gagner — c'est ce qui donne envie de
+            remplir la carte. Toute la collection est sur sa propre page. */}
+        <Pressable accessibilityRole="button" onPress={() => router.push("/tampons")} style={styles.stampsHead}>
+          <Overline color={colors.ink}>Tes tampons · {earnedStamps.length} / {stamps.length}</Overline>
+          <Text style={styles.link}>Tout voir →</Text>
+        </Pressable>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingVertical: 8, paddingRight: 20 }}>
+          {(earnedStamps.length > 0 ? earnedStamps.slice(0, 8) : stamps.slice(0, 3)).map((stamp) => (
+            <Pressable key={stamp.id} onPress={() => router.push("/tampons")}>
+              <StampView stamp={stamp} size={88} isNew={stamp.earned && !seen.includes(stamp.id)} />
+            </Pressable>
+          ))}
+        </ScrollView>
       </View>
 
       {places.length === 0 ? (
@@ -131,6 +168,16 @@ export default function CarteScreen() {
           <View style={{ paddingHorizontal: 20, marginTop: 14 }}>
             {current ? (
               <>
+                {progress?.city === current && (
+                  <View style={{ gap: 6, marginBottom: 14 }}>
+                    <Overline color={colors.ink}>
+                      {current} : {progress.done} adresse{progress.done > 1 ? "s" : ""} reconnue{progress.done > 1 ? "s" : ""} sur {progress.total}
+                    </Overline>
+                    <View style={styles.track}>
+                      <View style={[styles.fill, { width: `${Math.max(2, (progress.done / progress.total) * 100)}%` }]} />
+                    </View>
+                  </View>
+                )}
                 <Overline>Tes sorties à {current}</Overline>
                 {outings.map(({ id, itinerary, doneStepIds }) => (
                   <Pressable
@@ -181,6 +228,10 @@ const styles = StyleSheet.create({
   dot: { width: 12, height: 12, backgroundColor: colors.accent, borderWidth: 2, borderColor: colors.paper },
   cityPin: { minWidth: 34, height: 34, paddingHorizontal: 6, backgroundColor: colors.accent, borderWidth: 3, borderColor: colors.paper, alignItems: "center", justifyContent: "center" },
   cityPinText: { fontFamily: fonts.display, fontSize: 18, color: colors.paper },
+  stampsHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 16 },
+  link: { fontFamily: fonts.bodyHeavy, fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: colors.inkSoft },
+  track: { height: 10, borderWidth: rule.thin, borderColor: colors.blue },
+  fill: { height: "100%", backgroundColor: colors.blue },
   outing: { borderTopWidth: rule.thin, borderColor: colors.ink, paddingVertical: 12, gap: 4, marginTop: 8 },
   placeRow: { borderTopWidth: 1, borderColor: colors.paper3, paddingVertical: 8 },
 });

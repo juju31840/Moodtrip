@@ -1420,6 +1420,23 @@ https://claude.ai/artifact/ApcL9949yxZfsbDMFoJFrL
   le brouillon.
 - **Tracé animé** du parcours à l'ouverture d'une proposition, étape par étape.
 - **Partage** d'une sortie (menu iOS) : titre, étapes, un lien Plans par étape.
+- **Météo proposée, jamais imposée** (`lib/weather.ts`, Open-Meteo, gratuit) : pluie probable
+  (≥ 60 % et un vrai cumul) sur les heures de la sortie → encart « on reste à couvert ? ».
+  « À couvert » relance avec `sheltered` (le serveur écarte parcs, points de vue, plein air) ;
+  « Garder ces idées » ne change rien. Idée de Jules : la personne doit pouvoir refuser.
+- **Heure de départ** pour « ce soir » (`startAt`, transmis au modèle et à la météo).
+- **Appeler / Site** : chaque étape ancrée porte `placeId` ; téléphone et site lus à la demande
+  (84 % / 67 % des lieux reconnus). Les sorties antérieures au 26/09 n'en ont pas.
+- **Tampons** (`lib/stamps.ts`) : une collection qui récompense des **sorties faites**, jamais
+  l'usage — pas de points, pas de série, pas de rappel culpabilisant. Tout se déduit de ce qu'on
+  fait déjà ; les tampons à gagner restent visibles en pointillé. Une ville = un tampon outremer ;
+  quinze « premières fois » à l'encre de surimpression. Annoncés dans la confirmation du geste.
+- **Progression par ville** dans Ma carte (« Lyon : 8 adresses reconnues sur 199 »), par la
+  fonction `adresses_reconnues` : une requête REST paginée dépassait le délai de la clé publique
+  et plafonnait à 1 000 lignes (Paris en a 1 230).
+- **Recommandation pour la V1** (26/09/2026) : geler les fonctions après les tampons, ne plus
+  faire que de la qualité, puis TestFlight. Avec qui, favoris, rappels, widget, sorties en ligne :
+  V2, après de vrais utilisateurs.
 
 ## Contrôle avant test utilisateur (29/08/2026)
 

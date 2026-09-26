@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { formatTrajet, trajetDepuis } from "@shared/walking";
 import { noteVisit } from "@/lib/signals";
 import { itineraryStore, useSavedItineraries } from "@/lib/storage";
+import { earnedBy } from "@/lib/stamps";
 import { showToast } from "@/lib/toast";
 import { toggleVisit } from "@/lib/visits";
 import type { ItineraryStep } from "@/types/itinerary";
@@ -75,10 +76,13 @@ export default function EnSortieScreen() {
 
   function arrived() {
     if (!isDone) {
-      itineraryStore.toggleStepDone(saved!.id, step.id);
-      toggleVisit(saved!.id, step, true);
+      const stamps = earnedBy(() => {
+        itineraryStore.toggleStepDone(saved!.id, step.id);
+        toggleVisit(saved!.id, step, true);
+      });
       noteVisit(step);
-      showToast(`${step.placeName} — ajouté à ta carte`, { itineraryId: saved!.id, step });
+      const extra = stamps.length > 0 ? ` · Nouveau tampon : ${stamps.join(", ")}` : "";
+      showToast(`${step.placeName} — ajouté à ta carte${extra}`, { itineraryId: saved!.id, step });
     }
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     // La suivante non faite, sinon l'écran de fin.

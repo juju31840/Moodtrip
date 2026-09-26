@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MODE_LABELS } from "@shared/trip-modes";
 import { itineraryStore, useSavedItineraries } from "@/lib/storage";
 import { findClosed, noteVisit } from "@/lib/signals";
+import { earnedBy } from "@/lib/stamps";
 import { showToast } from "@/lib/toast";
 import { toggleVisit } from "@/lib/visits";
 import { Body, Display, IconButton, Overline, PrimaryButton, SecondaryButton } from "@/ui/kit";
@@ -114,13 +115,16 @@ export default function SortieScreen() {
           closed={closed}
           onToggleDone={(step) => {
             const willBeDone = !doneStepIds.includes(step.id);
-            itineraryStore.toggleStepDone(saved.id, step.id);
-            toggleVisit(saved.id, step, willBeDone);
+            const stamps = earnedBy(() => {
+              itineraryStore.toggleStepDone(saved.id, step.id);
+              toggleVisit(saved.id, step, willBeDone);
+            });
             if (willBeDone) {
               // Le même geste nourrit le compteur collectif, qui fera remonter les bons lieux, et
-              // la confirmation nomme le lieu : la carte est dans un autre onglet.
+              // la confirmation nomme le lieu — et le tampon gagné, s'il y en a un.
               noteVisit(step);
-              showToast(`${step.placeName} — ajouté à ta carte`, { itineraryId: saved.id, step });
+              const extra = stamps.length > 0 ? ` · Nouveau tampon : ${stamps.join(", ")}` : "";
+              showToast(`${step.placeName} — ajouté à ta carte${extra}`, { itineraryId: saved.id, step });
             }
           }}
         />

@@ -18,6 +18,8 @@ export interface VisitedPlace {
   location: GeoPoint;
   type: PlaceType;
   city: string | null;
+  /** Lieu reconnu (presse, guides, institutions) au moment du passage — sert aux tampons. */
+  recognized?: boolean;
   /**
    * Vrai une fois la commune cherchée par géocodage inverse. Sans cette marque, un point dont la
    * commune reste introuvable serait recherché à chaque ouverture de la carte, indéfiniment.
@@ -51,6 +53,7 @@ export function toggleVisit(itineraryId: string, step: ItineraryStep, done: bool
           location: step.location,
           type: step.type,
           city: step.city ?? null,
+          recognized: step.recognized ?? false,
           refs: [ref],
           lastAt: new Date().toISOString(),
         };

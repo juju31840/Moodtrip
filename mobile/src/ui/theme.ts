@@ -15,6 +15,8 @@ export const colors = {
   accent: "#DD3B2E",
   accentDeep: "#B32C21",
   blue: "#2B44A8",
+  /** Là où les deux encres se superposent — ici, l'encre des tampons de « premières fois ». */
+  overprint: "#7A2E63",
 } as const;
 
 export const fonts = {
