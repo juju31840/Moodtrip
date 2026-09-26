@@ -7,7 +7,7 @@
  * - ~105 000 lieux de sortie dans 125 villes ≈ 1,35 $ en Batch.
  *
  * Deux temps, parce qu'un lot se traite en différé :
- *   node --env-file=.env.local scripts/curate-knowledge-batch.mjs soumettre [--min 400]
+ *   node --env-file=.env.local scripts/curate-knowledge-batch.mjs soumettre [--min 400] [--max 1e9]
  *   node --env-file=.env.local scripts/curate-knowledge-batch.mjs relever
  *
  * La correspondance « paquet → identifiants de lieux » est gardée dans un fichier dès l'envoi :
@@ -30,11 +30,14 @@ if (action === "soumettre") {
   }
   const iMin = process.argv.indexOf("--min");
   const minimum = iMin > 0 ? Number(process.argv[iMin + 1]) : 400;
+  // `--max` pour étendre à une tranche de villes sans resoumettre celles déjà traitées.
+  const iMax = process.argv.indexOf("--max");
+  const maximum = iMax > 0 ? Number(process.argv[iMax + 1]) : 1e9;
   const lieux = await sql(`
     select p.fsq_id, p.name as nom, p.address as adresse, p.place_type, p.locality_norm as ville
     from (select * from places where ${FILTRE_SQL}) p
     join communes c on c.nom = p.locality_norm
-    where c.nb_lieux >= ${minimum}
+    where c.nb_lieux >= ${minimum} and c.nb_lieux < ${maximum}
     order by p.locality_norm, p.fsq_id`);
 
   const parVille = new Map();

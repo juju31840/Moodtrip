@@ -16,6 +16,13 @@ export interface Preferences {
 
 export interface Profile {
   firstName: string;
+  /** `null` tant qu'il n'est pas renseigné — 0 serait un âge. */
+  age: number | null;
+  /**
+   * Photo en `data:` URI, **déjà réduite** (320 px, JPEG 0,82, ~25 Ko) : une photo de téléphone
+   * en pèse 4 à 8 Mo, et ferait échouer l'écriture du magasin entier.
+   */
+  photo: string | null;
   /** Quatre au plus : au-delà ce n'est plus une référence mais une liste. */
   cities: string[];
   preferences: Preferences;
@@ -25,6 +32,8 @@ export const NEUTRAL_PREFERENCES: Preferences = { budget: 50, ambiance: 50, dist
 
 export const profileStore = createStore<Profile>("vibetrip.profile.v1", {
   firstName: "",
+  age: null,
+  photo: null,
   cities: [],
   preferences: NEUTRAL_PREFERENCES,
 });
@@ -44,7 +53,7 @@ export function preferencesUseful(preferences: Preferences): boolean {
  * profil passent devant ; à défaut, les grandes villes — celles de tout le monde et de personne,
  * mais un premier lancement doit bien proposer quelque chose.
  */
-const DEFAULT_CITIES = ["Paris", "Lyon", "Marseille", "Toulouse", "Bordeaux", "Lille"];
+export const DEFAULT_CITIES = ["Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Montpellier", "Strasbourg", "Bordeaux", "Lille", "Rennes", "Grenoble", "Tours"];
 export const recentCitiesStore = createStore<string[]>("vibetrip.recent-cities.v1", []);
 
 export function rememberCity(city: string) {
@@ -56,7 +65,7 @@ export function rememberCity(city: string) {
 
 export function cityShortcuts(profileCities: string[], recent: string[]): string[] {
   const seen = new Set<string>();
-  return [...profileCities, ...recent, ...DEFAULT_CITIES]
+  return [...profileCities, ...recent, ...DEFAULT_CITIES.slice(0, 6)]
     .filter((city) => {
       const key = city.toLowerCase();
       if (seen.has(key)) return false;

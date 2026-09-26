@@ -5,7 +5,8 @@ import MapView, { Marker } from "react-native-maps";
 
 import { MODE_LABELS } from "@shared/trip-modes";
 import { useSavedItineraries } from "@/lib/storage";
-import { cityLabel, visitsStore, type VisitedPlace } from "@/lib/visits";
+import { cityAt } from "@/lib/geocode";
+import { cityLabel, resolveMissingCities, visitsStore, type VisitedPlace } from "@/lib/visits";
 import { Body, Display, Masthead, Overline } from "@/ui/kit";
 import { Paper } from "@/ui/paper";
 import { colors, fonts, rule } from "@/ui/theme";
@@ -23,6 +24,10 @@ export default function CarteScreen() {
   const saved = useSavedItineraries();
   const [zone, setZone] = useState<string | null>(null);
   const mapRef = useRef<MapView>(null);
+
+  useEffect(() => {
+    void resolveMissingCities(cityAt);
+  }, [places.length]);
 
   const cities = useMemo(() => {
     const groups = new Map<string, VisitedPlace[]>();
@@ -43,9 +48,20 @@ export default function CarteScreen() {
       mapRef.current?.animateToRegion(FRANCE, 400);
       return;
     }
-    mapRef.current?.fitToCoordinates(
-      shown.map((place) => ({ latitude: place.location.lat, longitude: place.location.lng })),
-      { edgePadding: { top: 60, right: 50, bottom: 60, left: 50 }, animated: true }
+    // Cadre sur les lieux de la ville, mais jamais plus serré qu'un quartier : avec un seul lieu,
+    // le recadrage descendait au ras du point (retour du 26/09/2026, Toulouse).
+    const lats = shown.map((place) => place.location.lat);
+    const lngs = shown.map((place) => place.location.lng);
+    const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+    mapRef.current?.animateToRegion(
+      {
+        latitude: (minLat + maxLat) / 2,
+        longitude: (minLng + maxLng) / 2,
+        latitudeDelta: Math.max(0.035, (maxLat - minLat) * 1.6),
+        longitudeDelta: Math.max(0.035, (maxLng - minLng) * 1.6),
+      },
+      500
     );
     // `shown` change d'identité à chaque rendu : on ne recadre que quand la zone ou le nombre de
     // lieux change, sinon la carte se recadrerait en boucle.

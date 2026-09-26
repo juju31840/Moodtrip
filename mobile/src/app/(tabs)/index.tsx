@@ -3,7 +3,6 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SafeAreaView } from "react-native-screens/experimental";
 
 import { THEMES } from "@shared/themes";
 import { vibeLabel } from "@shared/vibe-labels";
@@ -91,12 +90,11 @@ export default function CreerScreen() {
 
   return (
     <Paper style={{ flex: 1 }}>
-      {/* Défilement réglé à la main (« never ») : le bouton fixe est posé sous la liste, dans le
-          flux, et c'est lui qui porte la marge de la barre d'onglets. */}
+      {/* Défilement réglé à la main (« never ») : la marge basse laisse passer la barre d'onglets. */}
       <ScrollView
         contentInsetAdjustmentBehavior="never"
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 24, gap: 20 }}
+        contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: insets.bottom + 110, gap: 20 }}
       >
         <Masthead title="Vibetrip" />
 
@@ -160,14 +158,21 @@ export default function CreerScreen() {
           </ScrollView>
         </View>
 
+        {/* L'action juste après les deux décisions qui la déterminent — quand et où. Tenue en
+            pied fixe, elle passait sous la barre d'onglets de l'iPhone (retours des 24 et
+            26/09/2026 : « caché », « il faut appuyer, c'est compliqué ») ; les nuances en dessous
+            restent facultatives, et le libellé suit toujours le mode. */}
+        <PrimaryButton label={cta} onPress={start} disabled={!canStart} />
+
         <View style={{ borderTopWidth: rule.major, borderColor: colors.ink }} />
+        <Overline>Pour affiner — facultatif</Overline>
 
         <StepPicker label="Budget" word={vibeLabel("budget", budget)} value={budget} onChange={(value) => patchDraft({ budget: value })} />
         <StepPicker label="Ambiance" word={vibeLabel("ambiance", ambiance)} value={ambiance} onChange={(value) => patchDraft({ ambiance: value })} />
         <StepPicker label="Distance" word={vibeLabel("distance", distance)} value={distance} onChange={(value) => patchDraft({ distance: value })} />
 
         <View style={{ gap: 8 }}>
-          <Overline>Envies — facultatif</Overline>
+          <Overline>Envies</Overline>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
             {THEMES.map((theme) => (
               <Chip
@@ -181,11 +186,6 @@ export default function CreerScreen() {
         </View>
       </ScrollView>
 
-      {/* Premier essai sur Expo Go : le bouton, posé en absolu, passait sous la barre d'onglets —
-          sur iOS le contenu d'un onglet s'étend dessous. La marge sûre « all » inclut la barre. */}
-      <SafeAreaView edges={{ bottom: true }} insetType="all" style={styles.footer}>
-        <PrimaryButton label={cta} onPress={start} disabled={!canStart} />
-      </SafeAreaView>
     </Paper>
   );
 }
@@ -198,5 +198,4 @@ const styles = StyleSheet.create({
   prefsText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   input: { flex: 1, height: 48, borderWidth: rule.thin, borderColor: colors.ink, paddingHorizontal: 12, fontFamily: fonts.bodyBold, fontSize: 17, color: colors.ink },
   locate: { width: 48, height: 48, borderWidth: rule.thin, borderColor: colors.ink, alignItems: "center", justifyContent: "center" },
-  footer: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12, borderTopWidth: rule.thin, borderColor: colors.ink, backgroundColor: colors.paper },
 });

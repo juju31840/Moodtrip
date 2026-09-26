@@ -16,7 +16,7 @@ import { colors, fonts, rule } from "@/ui/theme";
  */
 export default function AttenteScreen() {
   const insets = useSafeAreaInsets();
-  const { status, expected, proposals, scouting, error } = useGeneration();
+  const { status, expected, proposals, scouting, approxOrigin, error } = useGeneration();
 
   useEffect(() => {
     if (proposals.length > 0) router.replace("/propositions");
@@ -52,7 +52,7 @@ export default function AttenteScreen() {
   return (
     <Paper style={styles.screen}>
       <View style={styles.map}>
-        {scouting ? <ScoutingMap scouting={scouting} /> : <View style={{ flex: 1, backgroundColor: colors.paper2 }} />}
+        <ScoutingMap origin={scouting?.origin ?? approxOrigin} places={scouting?.places ?? []} />
         {cancel}
         <View style={[styles.badge, { top: insets.top + 18 }]}>
           <Overline color={colors.paper}>Repérage</Overline>

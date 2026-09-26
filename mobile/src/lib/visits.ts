@@ -18,6 +18,11 @@ export interface VisitedPlace {
   location: GeoPoint;
   type: PlaceType;
   city: string | null;
+  /**
+   * Vrai une fois la commune cherchée par géocodage inverse. Sans cette marque, un point dont la
+   * commune reste introuvable serait recherché à chaque ouverture de la carte, indéfiniment.
+   */
+  cityTried?: boolean;
   /** `itineraryId:stepId` de chaque passage — la preuve qui rattache une sortie à une ville. */
   refs: string[];
   lastAt: string;
@@ -58,10 +63,23 @@ export function toggleVisit(itineraryId: string, step: ItineraryStep, done: bool
   visitsStore.set(refs.length > 0 ? places.map((place) => (place.key === key ? { ...place, refs } : place)) : places.filter((place) => place.key !== key));
 }
 
+/**
+ * Retrouve après coup la commune des lieux qui ne la portaient pas — ceux cochés avant que les
+ * étapes ne la reçoivent du socle. Après coup et non au moment de cocher : le retour visuel du
+ * geste ne doit pas attendre un aller-retour réseau.
+ */
+export async function resolveMissingCities(cityAt: (point: GeoPoint) => Promise<string | null>) {
+  const missing = visitsStore.get().filter((place) => !place.city && !place.cityTried);
+  for (const place of missing) {
+    const city = await cityAt(place.location);
+    visitsStore.set(visitsStore.get().map((item) => (item.key === place.key ? { ...item, city: city ?? item.city, cityTried: true } : item)));
+  }
+}
+
 /** « lyon-2eme-arrondissement » se range avec Lyon, et s'affiche « Lyon ». */
 export function cityLabel(city: string | null): string {
   if (!city) return "Ailleurs";
-  const base = city.replace(/-\d+(er|e|eme)?-arrondissement$/, "");
+  const base = city.toLowerCase().replace(/-\d+(er|e|eme)?-arrondissement$/, "").replace(/\s+\d+(er|e)?\s+arrondissement$/, "");
   return base.split("-").map((part) => (part.length > 2 ? part[0]!.toUpperCase() + part.slice(1) : part)).join("-");
 }
 

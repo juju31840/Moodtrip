@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from "react";
 
 import { generate } from "@/lib/api";
-import type { GenerateItineraryRequest, GenerationEvent, Itinerary } from "@/types/itinerary";
+import { cityCenter } from "@/lib/geocode";
+import type { GenerateItineraryRequest, GenerationEvent, GeoPoint, Itinerary } from "@/types/itinerary";
 
 export type Scouting = Extract<GenerationEvent, { type: "scouting" }>;
 
@@ -17,10 +18,15 @@ export interface GenerationState {
   proposals: Itinerary[];
   /** Le repérage — point de départ et adresses examinées, montrés pendant l'attente. */
   scouting: Scouting | null;
+  /**
+   * Le centre de la ville, trouvé par le téléphone lui-même : il ouvre la carte d'attente sur la
+   * bonne ville avant que le repérage du serveur n'arrive.
+   */
+  approxOrigin: GeoPoint | null;
   error: string | null;
 }
 
-let state: GenerationState = { status: "idle", request: null, expected: 0, proposals: [], scouting: null, error: null };
+let state: GenerationState = { status: "idle", request: null, expected: 0, proposals: [], scouting: null, approxOrigin: null, error: null };
 const listeners = new Set<() => void>();
 let controller: AbortController | null = null;
 
@@ -43,7 +49,20 @@ export function startGeneration(request: GenerateItineraryRequest) {
   controller?.abort();
   controller = new AbortController();
   const current = controller;
-  set({ status: "loading", request, expected: 0, proposals: [], scouting: null, error: null });
+  set({
+    status: "loading",
+    request,
+    expected: 0,
+    proposals: [],
+    scouting: null,
+    approxOrigin: "lat" in request.location ? request.location : null,
+    error: null,
+  });
+  if ("city" in request.location) {
+    void cityCenter(request.location.city).then((point) => {
+      if (!current.signal.aborted && point && !state.approxOrigin) set({ approxOrigin: point });
+    });
+  }
 
   generate(
     request,

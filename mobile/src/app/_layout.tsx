@@ -4,11 +4,22 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import { toastStore } from "@/lib/toast";
+import { Cover } from "@/ui/cover";
+import { ToastView } from "@/ui/toast-view";
 
 import { colors } from "@/ui/theme";
 
 SplashScreen.preventAutoHideAsync();
+
+/**
+ * La page de garde s'affiche à chaque lancement, comme sur le site à chaque visite : c'est elle
+ * qui dit ce que fait le produit. Gardée au niveau du module pour ne pas revenir quand la pile
+ * de navigation se remonte pendant la session.
+ */
+let coverSeen = false;
 
 /**
  * Une pile au-dessus des onglets : la génération (attente, propositions, détail) s'ouvre en
@@ -16,6 +27,12 @@ SplashScreen.preventAutoHideAsync();
  */
 export default function RootLayout() {
   const [loaded] = useFonts({ Anton_400Regular, Archivo_400Regular, Archivo_700Bold, Archivo_800ExtraBold });
+  const [started, setStarted] = useState(coverSeen);
+
+  // Une confirmation restée d'une session précédente n'a plus de sens.
+  useEffect(() => {
+    toastStore.set(null);
+  }, []);
 
   useEffect(() => {
     if (loaded) void SplashScreen.hideAsync();
@@ -33,6 +50,15 @@ export default function RootLayout() {
         <Stack.Screen name="proposition/[id]" />
         <Stack.Screen name="sortie/[id]" />
       </Stack>
+      <ToastView />
+      {!started && (
+        <Cover
+          onStart={() => {
+            coverSeen = true;
+            setStarted(true);
+          }}
+        />
+      )}
     </>
   );
 }

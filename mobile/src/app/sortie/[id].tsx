@@ -1,10 +1,12 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MODE_LABELS } from "@shared/trip-modes";
 import { itineraryStore, useSavedItineraries } from "@/lib/storage";
+import { findClosed, noteVisit } from "@/lib/signals";
+import { showToast } from "@/lib/toast";
 import { toggleVisit } from "@/lib/visits";
 import { Body, Display, IconButton, Overline, SecondaryButton } from "@/ui/kit";
 import { RouteMap } from "@/ui/route-map";
@@ -22,6 +24,21 @@ export default function SortieScreen() {
   const { id, just } = useLocalSearchParams<{ id: string; just?: string }>();
   const saved = useSavedItineraries().find((entry) => entry.id === id);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [closed, setClosed] = useState<Set<string>>(new Set());
+
+  // Un itinéraire enregistré la veille garde ses lieux : on vérifie qu'ils n'ont pas fermé
+  // depuis. Sans signal, on se tait.
+  useEffect(() => {
+    if (!saved) return;
+    let cancelled = false;
+    void findClosed(saved.itinerary.steps).then((names) => {
+      if (!cancelled) setClosed(names);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saved?.id]);
 
   if (!saved) {
     return (
@@ -73,10 +90,17 @@ export default function SortieScreen() {
           activeId={activeId}
           onSelect={setActiveId}
           done={doneStepIds}
+          closed={closed}
           onToggleDone={(step) => {
             const willBeDone = !doneStepIds.includes(step.id);
             itineraryStore.toggleStepDone(saved.id, step.id);
             toggleVisit(saved.id, step, willBeDone);
+            if (willBeDone) {
+              // Le même geste nourrit le compteur collectif, qui fera remonter les bons lieux, et
+              // la confirmation nomme le lieu : la carte est dans un autre onglet.
+              noteVisit(step);
+              showToast(`${step.placeName} — ajouté à ta carte`, { itineraryId: saved.id, step });
+            }
           }}
         />
 

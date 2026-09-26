@@ -23,7 +23,7 @@ function openInMaps(step: ItineraryStep) {
  * sélectionnée — quatre boutons permanents faisaient de l'écran un formulaire (revue du site,
  * 24/09/2026).
  */
-export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDone, editingId, onToggleEdit, renderEdit }: {
+export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDone, editingId, onToggleEdit, renderEdit, closed }: {
   steps: ItineraryStep[];
   showDay: boolean;
   activeId: string | null;
@@ -35,6 +35,8 @@ export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDon
   editingId?: string | null;
   onToggleEdit?: (step: ItineraryStep) => void;
   renderEdit?: (step: ItineraryStep) => ReactNode;
+  /** Noms des lieux fermés depuis l'enregistrement. */
+  closed?: Set<string>;
 }) {
   return (
     <View>
@@ -59,6 +61,10 @@ export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDon
                 <Overline>{showDay ? `Jour ${step.day} · ` : ""}{PERIOD[step.period]}</Overline>
                 <Display size={20} color={isDone ? colors.inkSoft : colors.ink}>{step.placeName}</Display>
                 <Body>{step.description}</Body>
+                {/* Le seul endroit où le vermillon sort de son rôle d'action, comme sur le site : un
+                    lieu fermé est rare et sans appel — ne pas le distinguer laisserait partir
+                    quelqu'un devant une porte close pour préserver une règle graphique. */}
+                {closed?.has(step.placeName) && <Overline color={colors.accent}>Fermé depuis — à remplacer</Overline>}
                 {step.recognized && <Overline color={colors.blue}>★ Adresse reconnue</Overline>}
                 {/* L'outremer dit le confirmé ; le doute ne prend aucune encre. */}
                 {step.verified && <Overline color={colors.blue}>✓ {step.address ?? "Adresse confirmée"}</Overline>}
