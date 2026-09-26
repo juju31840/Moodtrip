@@ -1405,11 +1405,10 @@ https://claude.ai/artifact/ApcL9949yxZfsbDMFoJFrL
 
 ## Application : ajouts du 26/09/2026 (après les retours sur Expo Go)
 
-- **Réglages en pictogrammes** (`mobile/src/ui/vibe-slider.tsx`), troisième version : « € » qui se
-  remplissent (budget), barres d'égaliseur qui montent (ambiance), cinq étapes d'un trajet reliées
-  par le trait du parcours (distance : marcheur, maison, immeubles, arbre, train). Touchés ou
-  balayés, haptique par palier. Avant : cinq cases (« juste un carré rouge »), puis un curseur à
-  crans (« pas mal mais trop IA » — un formulaire comme les autres).
+- **Réglages : le curseur à crans** (`mobile/src/ui/vibe-slider.tsx`) — filet à cinq crans, poignée
+  carrée à ombre décalée, glissé ou touché, haptique par palier. Une version en pictogrammes (€ qui
+  se remplissent, barres d'égaliseur, marcheur → train) a été essayée le 26/09/2026 et **rejetée
+  par Jules** (« j'aime pas du tout ») : ne pas y revenir.
 - **Actions d'étape en icônes** sans cadres (Y aller en vermillon, Appeler, Site, Changer) : quatre
   boutons encadrés faisaient « trop de carrés ».
 - **Ville de départ avec suggestions** (`city-field.tsx`, `lib/city-search.ts`) : les villes
