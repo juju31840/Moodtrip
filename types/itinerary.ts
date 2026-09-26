@@ -63,6 +63,8 @@ export interface ItineraryStep {
   recognized?: boolean;
   /** Commune du lieu, telle que le socle la connaît — sert à ranger « Ma carte » par ville. */
   city?: string | null;
+  /** Identifiant du lieu dans le socle — sert à retrouver son téléphone et son site. */
+  placeId?: string;
 }
 
 export interface Itinerary {
@@ -90,6 +92,10 @@ export interface GenerateItineraryRequest extends VibeSettings {
    * modèle composer librement. Elles orientent la génération sans la dicter — voir `lib/prompt.ts`.
    */
   themes?: ThemeId[];
+  /** Heure de départ (ISO 8601). Absente : l'heure habituelle du mode. */
+  startAt?: string;
+  /** À couvert : accepté par l'utilisateur quand la pluie est annoncée, jamais imposé. */
+  sheltered?: boolean;
 }
 
 /**

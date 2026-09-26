@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { formatTrajet, trajetDepuis } from "@shared/walking";
+import { contactFor, type Contact } from "@/lib/contact";
 import type { ItineraryStep } from "@/types/itinerary";
 import { Body, CheckBox, Display, Overline } from "@/ui/kit";
 import { colors, fonts, rule } from "@/ui/theme";
@@ -70,10 +71,11 @@ export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDon
                 {step.verified && <Overline color={colors.blue}>✓ {step.address ?? "Adresse confirmée"}</Overline>}
                 {step.verified === false && <Overline color={colors.inkMute}>Adresse à confirmer sur place</Overline>}
                 {(active || editingId === step.id) && (
-                  <View style={{ flexDirection: "row", gap: 8, marginTop: 6 }}>
+                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
                     <Pressable accessibilityRole="link" onPress={() => openInMaps(step)} style={styles.go}>
                       <Text style={styles.goText}>Y aller →</Text>
                     </Pressable>
+                    <ContactButtons step={step} />
                     {onToggleEdit && (
                       <Pressable
                         accessibilityRole="button"
@@ -96,6 +98,39 @@ export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDon
         );
       })}
     </View>
+  );
+}
+
+/**
+ * « Appeler » et « Site » — le geste entre « ça me tente » et « j'y vais » : réserver une table.
+ * Lus à la demande, seulement pour l'étape sélectionnée, et absents quand le lieu n'en a pas.
+ */
+export function ContactButtons({ step }: { step: ItineraryStep }) {
+  const [contact, setContact] = useState<Contact | null>(null);
+  useEffect(() => {
+    if (!step.placeId) return;
+    let cancelled = false;
+    void contactFor(step.placeId).then((found) => {
+      if (!cancelled) setContact(found);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [step.placeId]);
+  if (!contact) return null;
+  return (
+    <>
+      {contact.tel && (
+        <Pressable accessibilityRole="link" accessibilityLabel={`Appeler ${step.placeName}`} onPress={() => void Linking.openURL(`tel:${contact.tel!.replace(/[^\d+]/g, "")}`)} style={styles.go}>
+          <Text style={styles.goText}>Appeler</Text>
+        </Pressable>
+      )}
+      {contact.website && (
+        <Pressable accessibilityRole="link" accessibilityLabel={`Site de ${step.placeName}`} onPress={() => void Linking.openURL(contact.website!.startsWith("http") ? contact.website! : `https://${contact.website}`)} style={styles.go}>
+          <Text style={styles.goText}>Site</Text>
+        </Pressable>
+      )}
+    </>
   );
 }
 

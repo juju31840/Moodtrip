@@ -5,7 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { THEMES } from "@shared/themes";
-import { draftStore, patchDraft } from "@/lib/draft";
+import { availableStarts, draftStore, patchDraft, startDate } from "@/lib/draft";
 import { startGeneration } from "@/lib/generation";
 import { preferencesUseful, profileStore, recentCitiesStore, rememberCity } from "@/lib/profile";
 import { CityField } from "@/ui/city-field";
@@ -34,6 +34,9 @@ export default function CreerScreen() {
   const [locating, setLocating] = useState(false);
 
   const { mode, city, position, budget, ambiance, distance, themes } = draft;
+  const starts = availableStarts();
+  // Un choix d'heure resté d'une autre fois peut être passé depuis : on retombe sur « tout de suite ».
+  const startChoice = starts.some((item) => item.id === draft.start) ? (draft.start ?? "now") : "now";
   const canStart = position !== null || city.trim().length > 1;
   const cta = MODES.find((item) => item.id === mode)!.cta;
 
@@ -84,6 +87,7 @@ export default function CreerScreen() {
       distance,
       location: position ?? { city: city.trim() },
       themes: themes.length > 0 ? themes : undefined,
+      startAt: mode === "tonight" ? startDate(startChoice).toISOString() : undefined,
     });
     router.push("/attente");
   }
@@ -113,6 +117,15 @@ export default function CreerScreen() {
               </Pressable>
             ))}
           </View>
+          {/* L'heure, pour « ce soir » seulement : partir à 22 h ou demain ne compose pas le même
+              parcours, et c'est aussi l'heure que la météo regarde. */}
+          {mode === "tonight" && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+              {starts.map((item) => (
+                <Chip key={item.id} label={item.label} selected={startChoice === item.id} onPress={() => patchDraft({ start: item.id })} />
+              ))}
+            </ScrollView>
+          )}
         </View>
 
         {showPrefs && (

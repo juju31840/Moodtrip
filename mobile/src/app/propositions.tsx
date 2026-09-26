@@ -1,4 +1,5 @@
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -7,6 +8,7 @@ import { trajetDepuis } from "@shared/walking";
 import { patchDraft } from "@/lib/draft";
 import { startGeneration, useGeneration } from "@/lib/generation";
 import type { GenerateItineraryRequest } from "@/types/itinerary";
+import { outingWindow, rainDuring, type RainForecast } from "@/lib/weather";
 import type { Itinerary } from "@/types/itinerary";
 import { Body, Display, IconButton, Overline } from "@/ui/kit";
 import { RouteThumb } from "@/ui/route-thumb";
@@ -47,7 +49,27 @@ const COUNT = ["Zéro", "Une", "Deux", "Trois"];
 export default function PropositionsScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const { request, proposals, expected, status } = useGeneration();
+  const { request, proposals, expected, status, scouting, approxOrigin } = useGeneration();
+  const [rain, setRain] = useState<RainForecast | null>(null);
+  const [rainDismissed, setRainDismissed] = useState(false);
+  const origin = scouting?.origin ?? approxOrigin;
+
+  // La météo des heures de la sortie, regardée une fois qu'on sait où l'on part. Jamais pour une
+  // génération déjà « à couvert » : la question a eu sa réponse.
+  useEffect(() => {
+    setRain(null);
+    if (!request || !origin || request.sheltered) return;
+    const window = outingWindow(request.mode, request.startAt);
+    if (!window) return;
+    let cancelled = false;
+    void rainDuring(origin, window.start, window.hours).then((found) => {
+      if (!cancelled) setRain(found);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [request, origin?.lat, origin?.lng]);
   const waiting = status === "loading" ? Math.max(0, expected - proposals.length) : 0;
   const total = proposals.length + waiting;
   const cardWidth = width - 40;
@@ -67,6 +89,33 @@ export default function PropositionsScreen() {
             )}
           </View>
         </View>
+
+        {/* La pluie **propose**, elle n'impose rien (idée de Jules, 26/09/2026) : « À couvert »
+            relance sans plein air ; « Garder ces idées » ferme l'encart et ne change rien. */}
+        {request && rain && !rainDismissed && (
+          <View style={styles.rain} accessibilityRole="alert">
+            <Text style={styles.rainTitle}>
+              Pluie annoncée vers {rain.hour} h ({rain.probability} %)
+            </Text>
+            <Text style={styles.rainText}>On te propose de rester à couvert : que des lieux fermés, sans parc ni terrasse.</Text>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => {
+                  startGeneration({ ...request, sheltered: true });
+                  router.replace("/attente");
+                }}
+                style={[styles.rainButton, { backgroundColor: colors.accent, borderColor: colors.accent }]}
+              >
+                <Text style={[styles.rainButtonText, { color: colors.paper }]}>À couvert</Text>
+              </Pressable>
+              <Pressable accessibilityRole="button" onPress={() => setRainDismissed(true)} style={styles.rainButton}>
+                <Text style={styles.rainButtonText}>Garder ces idées</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+        {request?.sheltered && <Overline style={{ paddingHorizontal: 20, paddingTop: 12 }} color={colors.blue}>À couvert — pluie annoncée</Overline>}
 
         {request && status !== "loading" && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.variants}>
@@ -144,6 +193,11 @@ function ProposalCard({ proposal, width }: { proposal: Itinerary; width: number 
 const styles = StyleSheet.create({
   card: { borderWidth: rule.thin, borderColor: colors.ink, backgroundColor: colors.paper },
   band: { position: "absolute", left: 0, bottom: 0, maxWidth: "92%", backgroundColor: colors.ink, paddingHorizontal: 12, paddingTop: 6, paddingBottom: 4 },
+  rain: { marginHorizontal: 20, marginTop: 14, backgroundColor: colors.ink, padding: 14, gap: 8 },
+  rainTitle: { fontFamily: fonts.display, fontSize: 20, lineHeight: 25, color: colors.paper, textTransform: "uppercase" },
+  rainText: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.paper3 },
+  rainButton: { flex: 1, height: 42, borderWidth: rule.thin, borderColor: colors.paper3, alignItems: "center", justifyContent: "center" },
+  rainButtonText: { fontFamily: fonts.bodyHeavy, fontSize: 12, letterSpacing: 0.8, textTransform: "uppercase", color: colors.paper },
   variants: { gap: 6, paddingHorizontal: 20, paddingTop: 14 },
   variant: { height: 36, paddingHorizontal: 12, borderWidth: rule.thin, borderColor: colors.ink, justifyContent: "center" },
   variantText: { fontFamily: fonts.bodyHeavy, fontSize: 12, letterSpacing: 0.6, textTransform: "uppercase", color: colors.ink },

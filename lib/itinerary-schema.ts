@@ -173,4 +173,11 @@ export const generateItineraryRequestSchema = z.object({
   // Facultatives, et par défaut vides : ne rien cocher doit rester un usage normal, pas une
   // requête incomplète. Le doublon est écarté côté schéma plutôt que côté écran.
   themes: z.array(themeIdSchema).max(6).optional(),
+  /** Heure de départ choisie (ISO 8601) — « ce soir » ne veut plus forcément dire 20 h. */
+  startAt: z.string().datetime({ offset: true }).optional(),
+  /**
+   * Rester à couvert : proposé quand la pluie est annoncée, **accepté** par l'utilisateur — jamais
+   * imposé. Écarte parcs, points de vue et lieux de plein air.
+   */
+  sheltered: z.boolean().optional(),
 });

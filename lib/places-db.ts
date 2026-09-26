@@ -132,10 +132,12 @@ export async function fetchCandidates(options: {
   seed: string;
   /** Curseur budget (0-100) : écarte les tables trop chères pour lui — voir `horsBudget`. */
   budget?: number;
+  /** À couvert (pluie annoncée, choix accepté) : ni parc, ni point de vue, ni plein air. */
+  sheltered?: boolean;
 }): Promise<PlaceCandidate[]> {
   if (!URL_BASE || !CLE) return [];
 
-  const { origin, mode, distance, themes, seed, budget = 50 } = options;
+  const { origin, mode, distance, themes, seed, budget = 50, sheltered = false } = options;
   const plafond = CANDIDATS_MAX[mode];
   // Assez large pour que chaque période de chaque jour ait le choix, sans noyer le prompt.
   const parTheme = themes && themes.length > 0 ? Math.ceil(plafond / themes.length) : Math.ceil(plafond / 6);
@@ -162,7 +164,11 @@ export async function fetchCandidates(options: {
     const lignes = await interroger(fonction, corps);
     if (!lignes) return [];
     const utiles = lignes.filter(
-      (l) => !estUneChaine(l.nom) && !horsBudget(l, budget) && (mode !== "tonight" || periodesOuvertes(l).includes("evening"))
+      (l) =>
+        !estUneChaine(l.nom) &&
+        !horsBudget(l, budget) &&
+        (!sheltered || estCouvert(l)) &&
+        (mode !== "tonight" || periodesOuvertes(l).includes("evening"))
     );
     return resserrer(utiles, mode, plafond, themes)
       .map((l) => ({
@@ -216,6 +222,15 @@ function periodesOuvertes(ligne: LigneRpc): Period[] {
   if (ligne.type_lieu === "bar") return ["midday", "evening"];
   if (ligne.type_lieu === "restaurant") return ["midday", "evening"];
   return ["morning", "midday", "evening"];
+}
+
+/**
+ * À couvert : quand la pluie est annoncée **et** que l'utilisateur a accepté de rester à l'abri.
+ * Parcs, points de vue et lieux dont la seule envie est le plein air sortent du vivier.
+ */
+function estCouvert(ligne: LigneRpc): boolean {
+  if (ligne.type_lieu === "park" || ligne.type_lieu === "viewpoint") return false;
+  return !(ligne.themes.length === 1 && ligne.themes[0] === "outdoor");
 }
 
 /**

@@ -159,6 +159,7 @@ async function generateOne(
       anchored: true,
       recognized: candidat.notoriety > 0,
       city: candidat.city,
+      placeId: candidat.id,
     };
   });
 
@@ -188,6 +189,7 @@ async function candidatesFor(
     themes: request.themes,
     seed: `p${index + 1}`,
     budget: request.budget,
+    sheltered: request.sheltered,
   });
 }
 

@@ -13,6 +13,7 @@ import type { ItineraryStep } from "@/types/itinerary";
 import { Body, Display, IconButton, Overline, PrimaryButton, SecondaryButton } from "@/ui/kit";
 import { Paper } from "@/ui/paper";
 import { RouteMap } from "@/ui/route-map";
+import { ContactButtons } from "@/ui/step-list";
 import { colors, fonts, rule } from "@/ui/theme";
 
 function openInMaps(step: ItineraryStep) {
@@ -116,6 +117,9 @@ export default function EnSortieScreen() {
         <Body style={{ fontSize: 16, lineHeight: 23 }}>{step.description}</Body>
         {step.address && <Overline color={colors.blue}>✓ {step.address}</Overline>}
         {isDone && <Overline color={colors.blue}>Déjà fait</Overline>}
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
+          <ContactButtons step={step} />
+        </View>
       </View>
 
       <View style={[styles.actions, { paddingBottom: insets.bottom + 14 }]}>

@@ -26,6 +26,18 @@ export function totalDaysForMode(mode: GenerateItineraryRequest["mode"], distanc
  * le curseur mais pas le même rayon, et « Toute la ville » menait à 110 km en voyage. La
  * consigne vient de `lib/distance.ts`, la même table que le rayon de recherche.
  */
+/**
+ * L'heure de départ choisie, en clair et à l'heure de Paris — « ce soir » ne veut plus forcément
+ * dire 20 h : partir à 22 h ou demain soir ne compose pas le même parcours.
+ */
+function describeStart(startAt: string | undefined): string | null {
+  if (!startAt) return null;
+  const date = new Date(startAt);
+  if (Number.isNaN(date.getTime())) return null;
+  const quand = new Intl.DateTimeFormat("fr-FR", { weekday: "long", hour: "numeric", minute: "2-digit", timeZone: "Europe/Paris" }).format(date);
+  return `Départ prévu ${quand} : la première étape doit convenir à cette heure-là, et les suivantes s'enchaîner à partir d'elle.`;
+}
+
 function describeDistance(distance: number): string {
   return `Distance : ${distanceBand(distance).consigne}`;
 }
@@ -161,6 +173,10 @@ export function buildUserPrompt(
       : null,
     `Ambiance souhaitée (0-100=${ambiance}) : ${ambianceLabel}.`,
     describeDistance(distance),
+    describeStart(request.startAt),
+    request.sheltered
+      ? "Il pleut, et la personne a choisi de rester à couvert : uniquement des lieux fermés et couverts, aucun parc, point de vue, terrasse ni balade."
+      : null,
     "Structure les étapes par jour (day, à partir de 1) et par période (morning/midday/evening), avec au moins une étape par période pertinente.",
     "Tiens compte des heures d'ouverture habituelles : un musée, une boutique ou un marché n'ont pas leur place en soirée, un club ni un bar de nuit n'ont pas leur place le matin. Une étape fermée à l'heure où l'on s'y présente est une étape perdue.",
     "Choisis un type (`type`) cohérent pour chaque étape parmi la liste imposée par le schéma.",
