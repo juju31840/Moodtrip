@@ -49,6 +49,7 @@ export default function RootLayout() {
         <Stack.Screen name="propositions" />
         <Stack.Screen name="proposition/[id]" />
         <Stack.Screen name="sortie/[id]" />
+        <Stack.Screen name="en-sortie/[id]" options={{ animation: "slide_from_bottom" }} />
       </Stack>
       <ToastView />
       {!started && (

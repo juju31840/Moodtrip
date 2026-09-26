@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { AccessibilityInfo, StyleSheet, Text, View } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 
 import type { ItineraryStep } from "@/types/itinerary";
@@ -13,12 +13,45 @@ import { colors, fonts } from "@/ui/theme";
  *
  * Marqueurs numérotés et non colorés par type : douze couleurs donnaient un semis illisible.
  */
-export function RouteMap({ steps, activeId, onSelect }: {
+export function RouteMap({ steps, activeId, onSelect, animate = false }: {
   steps: ItineraryStep[];
   activeId: string | null;
   onSelect: (id: string) => void;
+  /**
+   * Trace le parcours à l'ouverture : les étapes apparaissent une à une, dans l'ordre, reliées au
+   * fur et à mesure — comme on suit un itinéraire au crayon sur un plan. Dans l'esprit du repérage
+   * de l'écran d'attente. Tout est affiché d'un coup si l'on a demandé à réduire les animations.
+   */
+  animate?: boolean;
 }) {
   const ref = useRef<MapView>(null);
+  const [revealed, setRevealed] = useState(animate ? 0 : steps.length);
+
+  useEffect(() => {
+    if (!animate) return;
+    let timer: ReturnType<typeof setInterval> | undefined;
+    let cancelled = false;
+    void AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
+      if (cancelled) return;
+      if (reduce) {
+        setRevealed(steps.length);
+        return;
+      }
+      // Un court temps pour que la carte se cadre, puis une étape toutes les 350 ms.
+      setTimeout(() => {
+        if (cancelled) return;
+        setRevealed(1);
+        timer = setInterval(() => setRevealed((count) => (count >= steps.length ? count : count + 1)), 350);
+      }, 400);
+    });
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [animate, steps.length]);
+
+  // Une étape remplacée (« Changer ») ne rejoue pas l'animation : tout ce qui est déjà tracé reste.
+  const shown = animate ? steps.slice(0, revealed) : steps;
 
   useEffect(() => {
     if (steps.length === 0) return;
@@ -31,12 +64,12 @@ export function RouteMap({ steps, activeId, onSelect }: {
   return (
     <MapView ref={ref} style={StyleSheet.absoluteFill} showsPointsOfInterests={false} showsBuildings={false}>
       <Polyline
-        coordinates={steps.map((step) => ({ latitude: step.location.lat, longitude: step.location.lng }))}
+        coordinates={shown.map((step) => ({ latitude: step.location.lat, longitude: step.location.lng }))}
         strokeColor={colors.ink}
         strokeWidth={3}
         lineDashPattern={[7, 6]}
       />
-      {steps.map((step, index) => (
+      {shown.map((step, index) => (
         <Marker
           key={step.id}
           coordinate={{ latitude: step.location.lat, longitude: step.location.lng }}

@@ -1403,6 +1403,24 @@ pipeline n'est dupliqué. Types et libellés partagés avec le site via `@shared
 Go sans compte ; Mapbox demandera un build de développement. Maquettes des écrans natifs :
 https://claude.ai/artifact/ApcL9949yxZfsbDMFoJFrL
 
+## Application : ajouts du 26/09/2026 (après les retours sur Expo Go)
+
+- **Curseurs Riso** (`mobile/src/ui/vibe-slider.tsx`) : filet à cinq crans, poignée carrée à ombre
+  décalée, glissé ou touché, haptique par palier, extrêmes écrits sous la piste. Remplacent cinq
+  cases juxtaposées (« juste un carré rouge »).
+- **Ville de départ avec suggestions** (`city-field.tsx`, `lib/city-search.ts`) : les villes
+  connues répondent dès la première lettre, sans accents ; Mapbox complète avec le département
+  (homonymes). Remplace les pastilles. Limite connue : deux homonymes ont le même nom envoyé au
+  serveur, qui géocode le plus connu — à traiter si un testeur tombe dessus.
+- **Mode « en sortie »** (`app/en-sortie/[id].tsx`) : une étape à la fois, « Y aller » et
+  « J'y suis » (coche, carte, note, suivante), reprise à la première étape non faite. C'est le
+  hook de rétention rendu praticable dehors.
+- **« La même, mais… »** dans les propositions : refaire en décalant un seul réglage d'un cran
+  (plus festive, moins cher, plus près…), sans repasser par Créer ; le réglage est reporté dans
+  le brouillon.
+- **Tracé animé** du parcours à l'ouverture d'une proposition, étape par étape.
+- **Partage** d'une sortie (menu iOS) : titre, étapes, un lien Plans par étape.
+
 ## Contrôle avant test utilisateur (29/08/2026)
 
 Passage fait avant de confier l'application à des proches. Tout est mesuré en production, rien

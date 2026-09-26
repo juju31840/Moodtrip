@@ -8,7 +8,7 @@ import { itineraryStore, useSavedItineraries } from "@/lib/storage";
 import { findClosed, noteVisit } from "@/lib/signals";
 import { showToast } from "@/lib/toast";
 import { toggleVisit } from "@/lib/visits";
-import { Body, Display, IconButton, Overline, SecondaryButton } from "@/ui/kit";
+import { Body, Display, IconButton, Overline, PrimaryButton, SecondaryButton } from "@/ui/kit";
 import { RouteMap } from "@/ui/route-map";
 import { StepList } from "@/ui/step-list";
 import { Paper } from "@/ui/paper";
@@ -96,6 +96,14 @@ export default function SortieScreen() {
         </Overline>
         <Display size={32} color={colors.accent}>{itinerary.tripName}</Display>
         <Body style={{ marginBottom: 12 }}>Coche chaque étape sur place : elle rejoint ta carte.</Body>
+        {/* Le mode « en sortie » : une étape à la fois, en gros, pour avancer dehors. */}
+        {doneStepIds.length < itinerary.steps.length && (
+          <PrimaryButton
+            label={doneStepIds.length === 0 ? "Commencer la sortie" : "Reprendre la sortie"}
+            onPress={() => router.push({ pathname: "/en-sortie/[id]", params: { id: saved.id } })}
+            style={{ marginBottom: 14 }}
+          />
+        )}
 
         <StepList
           steps={itinerary.steps}

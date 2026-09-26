@@ -49,7 +49,7 @@ export default function PropositionScreen() {
   return (
     <Paper style={styles.screen}>
       <View style={styles.map}>
-        <RouteMap steps={steps} activeId={activeId} onSelect={setActiveId} />
+        <RouteMap steps={steps} activeId={activeId} onSelect={setActiveId} animate />
         <IconButton label="Revenir aux propositions" glyph="←" onPress={() => router.back()} style={{ position: "absolute", top: insets.top + 8, left: 16 }} />
       </View>
 
