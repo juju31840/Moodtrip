@@ -1,13 +1,14 @@
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { THEMES } from "@shared/themes";
 import { draftStore, patchDraft } from "@/lib/draft";
 import { startGeneration } from "@/lib/generation";
-import { cityShortcuts, preferencesUseful, profileStore, recentCitiesStore, rememberCity } from "@/lib/profile";
+import { preferencesUseful, profileStore, recentCitiesStore, rememberCity } from "@/lib/profile";
+import { CityField } from "@/ui/city-field";
 import type { TripMode } from "@/types/itinerary";
 import { CheckBox, Chip, Masthead, Overline, PrimaryButton } from "@/ui/kit";
 import { VibeSlider } from "@/ui/vibe-slider";
@@ -35,7 +36,6 @@ export default function CreerScreen() {
   const { mode, city, position, budget, ambiance, distance, themes } = draft;
   const canStart = position !== null || city.trim().length > 1;
   const cta = MODES.find((item) => item.id === mode)!.cta;
-  const shortcuts = cityShortcuts(profile.cities, recent);
 
   // La case est **déduite** du brouillon, jamais gardée à part : toucher un curseur la décoche
   // d'elle-même, parce que le réglage a cessé de suivre les préférences.
@@ -124,16 +124,16 @@ export default function CreerScreen() {
 
         <View style={{ gap: 8 }}>
           <Overline>Au départ de</Overline>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <TextInput
-              value={position ? "Ma position" : city}
+          <View style={{ flexDirection: "row", gap: 8, alignItems: "flex-start" }}>
+            {/* Liste de suggestions qui s'affine à chaque lettre (demande du 26/09/2026), à la
+                place des pastilles de villes : les villes du profil et les dernières utilisées
+                y passent en premier, et seules quand le champ est vide. */}
+            <CityField
+              value={city}
+              usingPosition={position !== null}
+              preferred={[...profile.cities, ...recent]}
               onChangeText={(text) => patchDraft({ position: null, city: text })}
-              placeholder="Une ville"
-              placeholderTextColor={colors.inkMute}
-              accessibilityLabel="Ville de départ"
-              autoCapitalize="words"
-              autoCorrect={false}
-              style={styles.input}
+              onPick={(picked) => patchDraft({ position: null, city: picked })}
             />
             <Pressable
               accessibilityRole="button"
@@ -144,18 +144,6 @@ export default function CreerScreen() {
               <Text style={{ fontFamily: fonts.bodyHeavy, fontSize: 18, color: position ? colors.paper : colors.ink }}>{locating ? "…" : "◎"}</Text>
             </Pressable>
           </View>
-          {/* Raccourcis : les villes du profil, puis les dernières utilisées, puis les grandes
-              villes pour un premier lancement. */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }} keyboardShouldPersistTaps="handled">
-            {shortcuts.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                selected={!position && city.trim().toLowerCase() === item.toLowerCase()}
-                onPress={() => patchDraft({ position: null, city: item })}
-              />
-            ))}
-          </ScrollView>
         </View>
 
         <View style={{ borderTopWidth: rule.major, borderColor: colors.ink }} />
@@ -200,7 +188,6 @@ const styles = StyleSheet.create({
   segmentText: { fontFamily: fonts.bodyHeavy, fontSize: 13, letterSpacing: 0.8, textTransform: "uppercase", color: colors.ink },
   prefsRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   prefsText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
-  input: { flex: 1, height: 48, borderWidth: rule.thin, borderColor: colors.ink, paddingHorizontal: 12, fontFamily: fonts.bodyBold, fontSize: 17, color: colors.ink },
   footer: { position: "absolute", left: 16, right: 16 },
   locate: { width: 48, height: 48, borderWidth: rule.thin, borderColor: colors.ink, alignItems: "center", justifyContent: "center" },
 });

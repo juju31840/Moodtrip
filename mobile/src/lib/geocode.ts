@@ -8,6 +8,12 @@ import type { GeoPoint } from "@/types/itinerary";
  */
 const cache = createStore<Record<string, GeoPoint>>("vibetrip.geocode.v1", {});
 
+/** Retient le centre d'une ville trouvé ailleurs (suggestions de saisie) : il servira à l'attente. */
+export function rememberCenter(city: string, point: GeoPoint) {
+  const key = city.trim().toLowerCase();
+  if (key && !cache.get()[key]) cache.set({ ...cache.get(), [key]: point });
+}
+
 export async function cityCenter(city: string): Promise<GeoPoint | null> {
   const key = city.trim().toLowerCase();
   if (!key) return null;
