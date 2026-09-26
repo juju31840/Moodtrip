@@ -1318,6 +1318,26 @@ l'ordre alphabétique des envies — culture et bars épuisaient le quota, et «
 Lyon n'avait plus un seul restaurant. `resserrer` sert désormais les envies à tour de rôle, avec un
 minimum par envie ; sans signal, c'est le tirage d'avant.
 
+**Curation à l'échelle : toutes les villes (26/09/2026).** Le but de la curation est que les lieux
+soient pertinents **partout**, pas à Lyon seulement ; la recherche web (~1 $ par envie et par ville)
+ne pouvait pas y mener. `scripts/curate-knowledge*.mjs` : on donne au modèle la liste **réelle**
+des lieux de sortie d'une ville, il désigne ceux qu'il connaît précisément (références imposées :
+il ne peut rien ajouter). Lot Batch Haiku sur les **125 villes de plus de 400 lieux** : 104 773
+lieux soumis, **2 039 reconnus, 1,38 $**, 214 requêtes sans échec.
+- Mesuré avant d'écrire : à Lyon il retrouve les **institutions** (Brasserie Georges, Le Cintra, Hot
+  Club) quand la presse cite les **ouvertures récentes** — 3 recoupements sur 30 : les sources se
+  complètent. Sur Tours, Haiku ≈ Sonnet pour un tiers du prix.
+- Sa **justification n'est jamais stockée** (erreurs de fait mesurées : « Viola, vainqueur du
+  Bocuse d'Or ») : le signal oui, la phrase non.
+- **Confiance graduée** dans `recalculer_notoriete()` : presse ×2, modèle ×1, Wikipédia 1 à 2 —
+  Haiku s'est montré trop généreux à Boulogne-Billancourt (pubs de chaîne, caviste Nicolas).
+- Effet en production : soirée à Grenoble, 12 étapes reconnues sur 14 (Café de la Table Ronde,
+  Jazz Club) ; Carcassonne 2 sur 10 — une ville moyenne a moins d'adresses connues, c'est attendu.
+- **Défaut restant** : sur un lieu reconnu sans phrase de source, le modèle brode encore
+  (« belle sélection de bordeaux », « ardoise qui change chaque semaine » — l'exemple même de la
+  consigne). À traiter avec la révision du prompt.
+- Les libellés disent « adresse reconnue », vrai quelle que soit la source.
+
 **Curation — bilan au 26/09/2026.** Lyon : bars (19) et restaurants (18 reconnus). Wikidata :
 les 8 villes (Nantes 147, Tours 33 rapprochés après une panne de Wikidata le 24). **Opus revient
 moins cher que Sonnet** sur cette tâche (~1 $ l'envie contre ~1,90 $ : Sonnet lit cinq fois plus
