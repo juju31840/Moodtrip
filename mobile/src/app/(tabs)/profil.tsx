@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { THEMES } from "@shared/themes";
-import { vibeLabel } from "@shared/vibe-labels";
 import { patchDraft } from "@/lib/draft";
 import { pickProfilePhoto } from "@/lib/photo";
 import { DEFAULT_CITIES, profileStore, recentCitiesStore, type Preferences } from "@/lib/profile";
@@ -13,7 +12,8 @@ import { useSavedItineraries } from "@/lib/storage";
 import { readTaste, visitsStore, VISITS_MINIMUM } from "@/lib/visits";
 import { photoFor, photoRanks, type CreditedPhoto } from "@/ui/city-photo";
 import { CameraIcon, StarIcon } from "@/ui/icons";
-import { Body, Chip, Display, Masthead, Overline, SecondaryButton, StepPicker } from "@/ui/kit";
+import { Body, Chip, Display, Masthead, Overline, SecondaryButton } from "@/ui/kit";
+import { VibeSlider } from "@/ui/vibe-slider";
 import { Paper } from "@/ui/paper";
 import { colors, fonts, rule } from "@/ui/theme";
 
@@ -175,9 +175,9 @@ export default function ProfilScreen() {
         <View style={styles.prefs}>
           <Display size={22}>Tes préférences</Display>
           <Body>Ce que tu veux. Elles préremplissent « Créer » quand tu coches « Partir de mes préférences ».</Body>
-          <StepPicker label="Budget" word={vibeLabel("budget", prefs.budget)} value={prefs.budget} onChange={(budget) => setPrefs({ budget })} />
-          <StepPicker label="Ambiance" word={vibeLabel("ambiance", prefs.ambiance)} value={prefs.ambiance} onChange={(ambiance) => setPrefs({ ambiance })} />
-          <StepPicker label="Distance" word={vibeLabel("distance", prefs.distance)} value={prefs.distance} onChange={(distance) => setPrefs({ distance })} />
+          <VibeSlider kind="budget" label="Budget" value={prefs.budget} onChange={(budget) => setPrefs({ budget })} />
+          <VibeSlider kind="ambiance" label="Ambiance" value={prefs.ambiance} onChange={(ambiance) => setPrefs({ ambiance })} />
+          <VibeSlider kind="distance" label="Distance" value={prefs.distance} onChange={(distance) => setPrefs({ distance })} />
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
             {THEMES.map((theme) => (
               <Chip

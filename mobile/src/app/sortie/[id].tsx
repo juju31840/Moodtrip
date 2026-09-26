@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, ScrollView, Share, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MODE_LABELS } from "@shared/trip-modes";
@@ -50,6 +50,19 @@ export default function SortieScreen() {
   }
 
   const { itinerary, doneStepIds } = saved;
+
+  /**
+   * Une sortie se fait rarement seul : le partage envoie le programme lisible tel quel dans un
+   * message — titre, étapes dans l'ordre, et pour chacune un lien Plans. Aucun compte requis, ni
+   * pour qui l'envoie ni pour qui le reçoit.
+   */
+  function share() {
+    const lines = itinerary.steps.map((step, index) => {
+      const query = encodeURIComponent([step.placeName, step.address].filter(Boolean).join(", "));
+      return `${index + 1}. ${step.placeName}${step.address ? ` — ${step.address}` : ""}\nhttps://maps.apple.com/?q=${query}&ll=${step.location.lat},${step.location.lng}`;
+    });
+    void Share.share({ message: [`${itinerary.tripName} — composé avec VibeTrip`, "", ...lines].join("\n") });
+  }
 
   function remove() {
     Alert.alert("Supprimer cette sortie ?", "Les lieux où tu es allé restent sur ta carte.", [
@@ -104,7 +117,8 @@ export default function SortieScreen() {
           }}
         />
 
-        <SecondaryButton label="Supprimer cette sortie" onPress={remove} style={{ marginTop: 24, borderColor: colors.inkMute }} />
+        <SecondaryButton label="Partager cette sortie" onPress={share} style={{ marginTop: 24 }} />
+        <SecondaryButton label="Supprimer cette sortie" onPress={remove} style={{ marginTop: 8, borderColor: colors.inkMute }} />
       </ScrollView>
     </Paper>
   );

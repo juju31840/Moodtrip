@@ -5,12 +5,12 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { THEMES } from "@shared/themes";
-import { vibeLabel } from "@shared/vibe-labels";
 import { draftStore, patchDraft } from "@/lib/draft";
 import { startGeneration } from "@/lib/generation";
 import { cityShortcuts, preferencesUseful, profileStore, recentCitiesStore, rememberCity } from "@/lib/profile";
 import type { TripMode } from "@/types/itinerary";
-import { CheckBox, Chip, Masthead, Overline, PrimaryButton, StepPicker } from "@/ui/kit";
+import { CheckBox, Chip, Masthead, Overline, PrimaryButton } from "@/ui/kit";
+import { VibeSlider } from "@/ui/vibe-slider";
 import { Paper } from "@/ui/paper";
 import { colors, fonts, rule } from "@/ui/theme";
 
@@ -161,9 +161,9 @@ export default function CreerScreen() {
         <View style={{ borderTopWidth: rule.major, borderColor: colors.ink }} />
         <Overline>Pour affiner — facultatif</Overline>
 
-        <StepPicker label="Budget" word={vibeLabel("budget", budget)} value={budget} onChange={(value) => patchDraft({ budget: value })} />
-        <StepPicker label="Ambiance" word={vibeLabel("ambiance", ambiance)} value={ambiance} onChange={(value) => patchDraft({ ambiance: value })} />
-        <StepPicker label="Distance" word={vibeLabel("distance", distance)} value={distance} onChange={(value) => patchDraft({ distance: value })} />
+        <VibeSlider kind="budget" label="Budget" value={budget} onChange={(value) => patchDraft({ budget: value })} />
+        <VibeSlider kind="ambiance" label="Ambiance" value={ambiance} onChange={(value) => patchDraft({ ambiance: value })} />
+        <VibeSlider kind="distance" label="Distance" value={distance} onChange={(value) => patchDraft({ distance: value })} />
 
         <View style={{ gap: 8 }}>
           <Overline>Envies</Overline>

@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 import { MODE_LABELS } from "@shared/trip-modes";
 import { isRated, ratingsStore, saveRating } from "@/lib/ratings";
@@ -12,7 +12,7 @@ import { ModeIcon, StarIcon } from "@/ui/icons";
 import { Body, Display, Masthead, Overline } from "@/ui/kit";
 import { Paper } from "@/ui/paper";
 import { OutingThumb, photoRanks } from "@/ui/city-photo";
-import { colors, fonts, rule } from "@/ui/theme";
+import { colors, fonts, printShadow, rule } from "@/ui/theme";
 
 const DATE = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" });
 
@@ -40,30 +40,37 @@ export default function SortiesScreen() {
   );
 }
 
-/** Une sortie : la miniature de son parcours, son mode en icône, et où on en est. */
+/**
+ * Une sortie, en carte : un bandeau photo de sa ville (retours du 26/09/2026 — « un carré blanc
+ * moche », puis « améliore la qualité »), son mode en pastille, son titre posé en bande d'encre
+ * comme sur les propositions, et où on en est.
+ */
 function OutingRow({ entry, rank }: { entry: SavedItinerary; rank: number }) {
+  const { width } = useWindowDimensions();
   const { id, itinerary, savedAt, doneStepIds } = entry;
   const total = itinerary.steps.length;
   const done = doneStepIds.length;
   const city = itinerary.steps.find((step) => step.city)?.city ?? null;
+  const cardWidth = width - 40;
   return (
     <Pressable
       accessibilityRole="button"
       onPress={() => router.push({ pathname: "/sortie/[id]", params: { id } })}
-      style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.paper2 }]}
+      style={({ pressed }) => [styles.card, printShadow, pressed && { backgroundColor: colors.paper2 }]}
     >
-      <View style={styles.thumb}>
-        <OutingThumb steps={itinerary.steps} rank={rank} size={88} />
-      </View>
-      <View style={{ flex: 1, gap: 5 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <ModeIcon mode={itinerary.mode} size={16} color={colors.accent} />
-          <Overline color={colors.accent}>{MODE_LABELS[itinerary.mode]}</Overline>
-          <Overline color={colors.inkMute}>· {DATE.format(new Date(savedAt))}</Overline>
+      <View style={{ height: 150, overflow: "hidden", borderBottomWidth: rule.thin, borderColor: colors.ink }}>
+        <OutingThumb steps={itinerary.steps} rank={rank} width={cardWidth - 4} height={150} />
+        <View style={styles.modeChip}>
+          <ModeIcon mode={itinerary.mode} size={14} color={colors.paper} />
+          <Text style={styles.modeText}>{MODE_LABELS[itinerary.mode]}</Text>
         </View>
-        <Display size={19}>{itinerary.tripName}</Display>
+        <View style={styles.titleBand}>
+          <Display size={19} color={colors.paper}>{itinerary.tripName}</Display>
+        </View>
+      </View>
+      <View style={{ padding: 12, gap: 6 }}>
         <Overline>
-          {total} étapes{city ? ` · ${cityLabel(city)}` : ""}
+          {DATE.format(new Date(savedAt))} · {total} étapes{city ? ` · ${cityLabel(city)}` : ""}
         </Overline>
         {/* Une sortie jamais entamée n'est pas « 0/8 » : un zéro sur une barre vide se lit comme
             un échec alors que c'est un programme en attente. */}
@@ -140,8 +147,11 @@ function ToRate({ items }: { items: SavedItinerary[] }) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", gap: 12, borderTopWidth: rule.thin, borderColor: colors.ink, paddingVertical: 12 },
-  thumb: { width: 88, height: 88, borderWidth: rule.thin, borderColor: colors.ink, overflow: "hidden" },
+  card: { borderWidth: rule.thin, borderColor: colors.ink, backgroundColor: colors.paper, marginBottom: 6 },
+  // Encre noire et non vermillon : le vermillon reste à l'action et à la sélection.
+  modeChip: { position: "absolute", top: 10, left: 10, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: colors.ink, paddingHorizontal: 8, paddingVertical: 5 },
+  modeText: { fontFamily: fonts.bodyHeavy, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", color: colors.paper },
+  titleBand: { position: "absolute", left: 0, bottom: 0, maxWidth: "92%", backgroundColor: colors.ink, paddingHorizontal: 12, paddingTop: 6, paddingBottom: 4 },
   track: { flex: 1, height: 10, borderWidth: rule.thin, borderColor: colors.blue },
   fill: { height: "100%", backgroundColor: colors.blue },
   rate: { borderWidth: rule.thin, borderColor: colors.ink },

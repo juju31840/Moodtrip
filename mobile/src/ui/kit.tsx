@@ -102,40 +102,6 @@ export function IconButton({ label, glyph, onPress, style }: {
   );
 }
 
-/**
- * Curseur à cinq paliers, dessiné en cinq cases et non en piste continue : sur téléphone, un
- * palier se touche mieux qu'il ne se glisse, et le mot affiché change à chaque case — c'est ce
- * qui rendait les curseurs du site lisibles.
- */
-export function StepPicker({ label, word, value, onChange }: {
-  label: string;
-  word: string;
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  const index = Math.round(value / 25);
-  return (
-    <View style={{ gap: 8 }}>
-      <View style={styles.pickerHead}>
-        <Overline>{label}</Overline>
-        <Display size={20}>{word}</Display>
-      </View>
-      <View style={styles.pickerRow} accessibilityRole="adjustable" accessibilityLabel={label} accessibilityValue={{ text: word }}>
-        {[0, 1, 2, 3, 4].map((step) => (
-          <Pressable
-            key={step}
-            onPress={() => {
-              void Haptics.selectionAsync();
-              onChange(step * 25);
-            }}
-            style={[styles.pickerCell, step > 0 && { borderLeftWidth: rule.thin }, step <= index && { backgroundColor: step === index ? colors.accent : colors.paper3 }]}
-          />
-        ))}
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   overline: { fontFamily: fonts.bodyHeavy, fontSize: 11, letterSpacing: 1.1, textTransform: "uppercase" },
   body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 21 },
@@ -147,9 +113,6 @@ const styles = StyleSheet.create({
   primary: { height: 56, backgroundColor: colors.ink, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20 },
   primaryText: { fontFamily: fonts.bodyHeavy, fontSize: 16, letterSpacing: 1, color: colors.paper, textTransform: "uppercase" },
   iconButton: { width: 44, height: 44, backgroundColor: colors.paper, borderWidth: rule.thin, borderColor: colors.ink, alignItems: "center", justifyContent: "center" },
-  pickerHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" },
-  pickerRow: { flexDirection: "row", height: 30, borderWidth: rule.thin, borderColor: colors.ink },
-  pickerCell: { flex: 1, borderColor: colors.ink },
 });
 
 /** Case à cocher « j'y suis allé » — carrée, comme tout le système ; le vermillon dit l'action faite. */

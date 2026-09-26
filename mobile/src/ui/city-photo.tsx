@@ -92,11 +92,11 @@ export function photoRanks(outings: { id: string; steps: ItineraryStep[] }[]): M
  * La vignette d'une sortie : une photo de sa ville, et la carte du parcours là où l'on n'en a pas
  * (ville hors des cent plus grandes, ou trop loin de toutes).
  */
-export function OutingThumb({ steps, rank, size }: { steps: ItineraryStep[]; rank: number; size: number }) {
+export function OutingThumb({ steps, rank, width, height }: { steps: ItineraryStep[]; rank: number; width: number; height: number }) {
   const photo = photoFor(steps, rank);
-  if (!photo) return <RouteThumb steps={steps} width={size} height={size} />;
+  if (!photo) return <RouteThumb steps={steps} width={width} height={height} />;
   return (
-    <View style={{ width: size, height: size, backgroundColor: colors.paper2 }}>
+    <View style={{ width, height, backgroundColor: colors.paper2 }}>
       <Image source={{ uri: photo.url }} alt={`Vue de ${photo.ville}`} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} />
     </View>
   );
