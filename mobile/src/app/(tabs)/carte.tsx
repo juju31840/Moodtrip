@@ -119,7 +119,7 @@ export default function CarteScreen() {
           <Overline color={colors.ink}>Tes tampons · {earnedStamps.length} / {stamps.length}</Overline>
           <Text style={styles.link}>Tout voir →</Text>
         </Pressable>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingVertical: 8, paddingRight: 20 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingTop: 14, paddingBottom: 10, paddingLeft: 4, paddingRight: 24 }}>
           {(earnedStamps.length > 0 ? earnedStamps.slice(0, 8) : stamps.slice(0, 3)).map((stamp) => (
             <Pressable key={stamp.id} onPress={() => router.push("/tampons")}>
               <StampView stamp={stamp} size={88} isNew={stamp.earned && !seen.includes(stamp.id)} />

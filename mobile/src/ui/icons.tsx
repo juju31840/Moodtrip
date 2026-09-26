@@ -76,3 +76,37 @@ export function ModeIcon({ mode, size, color }: IconProps & { mode: TripMode }) 
   if (mode === "weekend") return <CalendarIcon size={size} color={color} />;
   return <SuitcaseIcon size={size} color={color} />;
 }
+
+/** Aller : la flèche de navigation — l'action principale d'une étape. */
+export function GoIcon({ size = 22, color = colors.ink }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" pointerEvents="none">
+      <Path d="M4 11.5 20 4l-7.5 16-2-6.5z" stroke={color} strokeWidth={2} strokeLinejoin="miter" fill="none" />
+    </Svg>
+  );
+}
+
+export function PhoneIcon({ size = 22, color = colors.ink }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" pointerEvents="none">
+      <Path d="M6 3h3.5l1.5 4.5-2.2 1.4a11 11 0 0 0 6.3 6.3l1.4-2.2L21 14.5V18a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2z" {...stroke(color)} />
+    </Svg>
+  );
+}
+
+export function GlobeIcon({ size = 22, color = colors.ink }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" pointerEvents="none">
+      <Circle cx="12" cy="12" r="8.5" {...stroke(color)} />
+      <Path d="M3.5 12h17M12 3.5c2.6 2.4 3.8 5.3 3.8 8.5s-1.2 6.1-3.8 8.5c-2.6-2.4-3.8-5.3-3.8-8.5S9.4 5.9 12 3.5z" {...stroke(color)} />
+    </Svg>
+  );
+}
+
+export function SwapIcon({ size = 22, color = colors.ink }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" pointerEvents="none">
+      <Path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4" {...stroke(color)} />
+    </Svg>
+  );
+}

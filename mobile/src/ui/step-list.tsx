@@ -4,6 +4,7 @@ import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { formatTrajet, trajetDepuis } from "@shared/walking";
 import { contactFor, type Contact } from "@/lib/contact";
 import type { ItineraryStep } from "@/types/itinerary";
+import { GlobeIcon, GoIcon, PhoneIcon, SwapIcon } from "@/ui/icons";
 import { Body, CheckBox, Display, Overline } from "@/ui/kit";
 import { colors, fonts, rule } from "@/ui/theme";
 
@@ -71,22 +72,18 @@ export function StepList({ steps, showDay, activeId, onSelect, done, onToggleDon
                 {step.verified && <Overline color={colors.blue}>✓ {step.address ?? "Adresse confirmée"}</Overline>}
                 {step.verified === false && <Overline color={colors.inkMute}>Adresse à confirmer sur place</Overline>}
                 {(active || editingId === step.id) && (
-                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
-                    <Pressable accessibilityRole="link" onPress={() => openInMaps(step)} style={styles.go}>
-                      <Text style={styles.goText}>Y aller →</Text>
-                    </Pressable>
+                  // Une rangée d'icônes sans cadres plutôt que quatre boutons encadrés (« trop de
+                  // carrés », 26/09/2026). « Y aller » en vermillon : c'est l'action principale.
+                  <View style={styles.actions}>
+                    <Action icon={<GoIcon color={colors.accent} />} label="Y aller" color={colors.accent} onPress={() => openInMaps(step)} role="link" />
                     <ContactButtons step={step} />
                     {onToggleEdit && (
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityState={{ expanded: editingId === step.id }}
+                      <Action
+                        icon={<SwapIcon color={editingId === step.id ? colors.accent : colors.ink} />}
+                        label={editingId === step.id ? "Annuler" : "Changer"}
+                        color={editingId === step.id ? colors.accent : colors.ink}
                         onPress={() => onToggleEdit(step)}
-                        style={[styles.go, editingId === step.id && { backgroundColor: colors.ink }]}
-                      >
-                        <Text style={[styles.goText, editingId === step.id && { color: colors.paper }]}>
-                          {editingId === step.id ? "Annuler" : "Changer"}
-                        </Text>
-                      </Pressable>
+                      />
                     )}
                   </View>
                 )}
@@ -121,16 +118,38 @@ export function ContactButtons({ step }: { step: ItineraryStep }) {
   return (
     <>
       {contact.tel && (
-        <Pressable accessibilityRole="link" accessibilityLabel={`Appeler ${step.placeName}`} onPress={() => void Linking.openURL(`tel:${contact.tel!.replace(/[^\d+]/g, "")}`)} style={styles.go}>
-          <Text style={styles.goText}>Appeler</Text>
-        </Pressable>
+        <Action
+          icon={<PhoneIcon />}
+          label="Appeler"
+          role="link"
+          onPress={() => void Linking.openURL(`tel:${contact.tel!.replace(/[^\d+]/g, "")}`)}
+        />
       )}
       {contact.website && (
-        <Pressable accessibilityRole="link" accessibilityLabel={`Site de ${step.placeName}`} onPress={() => void Linking.openURL(contact.website!.startsWith("http") ? contact.website! : `https://${contact.website}`)} style={styles.go}>
-          <Text style={styles.goText}>Site</Text>
-        </Pressable>
+        <Action
+          icon={<GlobeIcon />}
+          label="Site"
+          role="link"
+          onPress={() => void Linking.openURL(contact.website!.startsWith("http") ? contact.website! : `https://${contact.website}`)}
+        />
       )}
     </>
+  );
+}
+
+/** Une action d'étape : une icône et un mot dessous, sans cadre ; 48 points de haut au toucher. */
+function Action({ icon, label, onPress, color = colors.ink, role = "button" }: {
+  icon: ReactNode;
+  label: string;
+  onPress: () => void;
+  color?: string;
+  role?: "button" | "link";
+}) {
+  return (
+    <Pressable accessibilityRole={role} accessibilityLabel={label} onPress={onPress} hitSlop={6} style={({ pressed }) => [styles.action, pressed && { opacity: 0.5 }]}>
+      {icon}
+      <Text style={[styles.actionText, { color }]}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -139,6 +158,7 @@ const styles = StyleSheet.create({
   number: { width: 24, fontFamily: fonts.display, fontSize: 24, lineHeight: 30, color: colors.accent },
   walk: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 5, paddingLeft: 36 },
   walkRule: { width: 2, height: 12, backgroundColor: colors.inkMute },
-  go: { alignSelf: "flex-start", height: 36, paddingHorizontal: 12, borderWidth: rule.thin, borderColor: colors.ink, justifyContent: "center" },
-  goText: { fontFamily: fonts.bodyHeavy, fontSize: 12, letterSpacing: 0.8, textTransform: "uppercase", color: colors.ink },
+  actions: { flexDirection: "row", gap: 22, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderColor: colors.paper3 },
+  action: { minHeight: 48, minWidth: 44, alignItems: "center", justifyContent: "center", gap: 4 },
+  actionText: { fontFamily: fonts.bodyHeavy, fontSize: 10, letterSpacing: 0.8, textTransform: "uppercase" },
 });
