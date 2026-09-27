@@ -1512,13 +1512,13 @@ identifiants d'appareil du quota sont effacés au bout d'un jour (`pg_cron`, tâ
 **EAS** : `mobile/eas.json` (development / preview / production, version gérée à distance).
 Les builds tournent dans le cloud et **ne voient pas `mobile/.env`** : une build sans les clés
 démarrerait sans carte ni base, sans message. `mobile/scripts/eas-env.sh` les déclare côté EAS
-(`eas env:set` — `env:create` n'existe plus). Projet `@juju31840/vibetrip`, variables déclarées
-le 27/09/2026. `bundleIdentifier` `fr.moodtrip.app` reste à
+(`eas env:set` — `env:create` n'existe plus). Projet `@juju31840/moodtrip` (renommé avec l'app), quatre
+variables déclarées en production le 27/09/2026, DSN Sentry compris. `bundleIdentifier` `fr.moodtrip.app` reste à
 confirmer avec l'équipe du compte Apple.
 
-**Sentry** : branché (`mobile/src/lib/monitoring.ts`), **éteint tant que `EXPO_PUBLIC_SENTRY_DSN`
-n'est pas fourni**. Le seul compte Sentry connecté est celui de l'employeur de l'utilisateur :
-rien n'y a été créé, il faut un compte personnel. Réglé pour ne rien envoyer de personnel —
+**Sentry** : branché (`mobile/src/lib/monitoring.ts`), **actif dans les builds EAS** depuis que
+`EXPO_PUBLIC_SENTRY_DSN` est déclaré (27/09/2026) Le compte Sentry connecté au MCP est celui de
+l'employeur de l'utilisateur : rien ne doit y être créé, le DSN doit venir d'un compte personnel. Réglé pour ne rien envoyer de personnel —
 pas d'IP, pas de fil d'Ariane réseau (les URL météo et géocodage portent des coordonnées).
 Module natif : sans effet dans Expo Go, actif dans les builds EAS.
 
