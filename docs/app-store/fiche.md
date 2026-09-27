@@ -14,7 +14,7 @@ Rédigé le 27/09/2026.
 | Champ | Valeur |
 |---|---|
 | Nom (30 max) | Moodtrip |
-| Sous-titre (30 max) | Ta sortie composée en un geste |
+| Sous-titre (30 max) | Des sorties toutes prêtes |
 | Catégorie principale | Voyages |
 | Catégorie secondaire | Style de vie |
 | Langue principale | Français |
@@ -35,32 +35,28 @@ Rédigé le 27/09/2026.
 soirée,week-end,voyage,bar,restaurant,sortir,idée,itinéraire,balade,que faire,city guide,escapade
 ```
 
-Les mots du nom et du sous-titre (« sortie », « composée ») sont déjà indexés : les répéter
+Les mots du nom et du sous-titre (« sorties », « prêtes ») sont déjà indexés : les répéter
 gaspillerait la place.
 
 ## Description (4 000 max)
 
+Réécrite le 27/09/2026 : la première version faisait « texte d'IA » (intertitres en capitales,
+tirets, formules). Phrases courtes, rien qu'on ne puisse vérifier dans l'app.
+
 ```
-On fait quoi ce soir ? Moodtrip répond à ta place.
+Moodtrip te propose des sorties toutes prêtes : une soirée, un week-end ou quelques jours de voyage.
 
-Choisis quand — ce soir, un week-end, un voyage —, d'où tu pars, puis règle trois curseurs : ton budget, l'ambiance, la distance. En quelques secondes, Moodtrip compose deux ou trois programmes différents, étape par étape, sur une carte.
+Tu dis quand tu sors et d'où tu pars. Tu règles ton budget, l'ambiance que tu cherches et jusqu'où tu veux aller. Moodtrip te propose alors deux ou trois programmes, avec les étapes sur une carte.
 
-DE VRAIES ADRESSES
-Chaque étape est tirée d'une base de plus de 575 000 lieux en France, vérifiée régulièrement pour écarter ceux qui ont fermé. Les adresses reconnues — citées par la presse, les guides, ou institutions de leur ville — passent en priorité. Pas de lieu inventé : tu t'y rends vraiment.
+Les adresses sont réelles. Elles viennent d'une base de lieux en France, et on retire régulièrement ceux qui ont fermé.
 
-TU CHOISIS, TU AJUSTES
-Compare les propositions, ouvre celle qui te tente. Une étape ne te plaît pas ? Change-la contre un autre lieu du même genre, juste à côté. Envie d'une version plus festive, moins chère ou plus proche ? Un geste suffit.
+Si une étape ne te plaît pas, tu peux la remplacer par un autre lieu à côté. Quand tu as choisi, « Y aller » t'ouvre le trajet dans Plans.
 
-DEHORS
-« Y aller » ouvre l'itinéraire dans Plans. Le mode « en sortie » te guide une étape à la fois. S'il pleut sur les heures de ta sortie, Moodtrip te propose une variante à couvert — libre à toi de la garder ou non.
+Les lieux où tu es allé s'ajoutent sur ta carte, ville par ville.
 
-TA CARTE
-Chaque lieu où tu es allé se pose sur ta carte personnelle, ville par ville. Tes tampons gardent la trace de tes premières fois. Tes préférences orientent les propositions suivantes.
+Pas de compte à créer, pas de pub. Tout reste sur ton téléphone.
 
-SANS COMPTE
-Pas d'inscription, pas de publicité, pas de pistage. Tes sorties, ta carte et ton profil restent sur ton téléphone.
-
-Moodtrip fonctionne partout en France.
+Pour l'instant, Moodtrip ne fonctionne qu'en France.
 ```
 
 ## Nouveautés de la version (1.0)
