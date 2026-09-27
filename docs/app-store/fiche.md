@@ -26,8 +26,7 @@ Rédigé le 27/09/2026.
 
 ## Texte promotionnel (170 max)
 
-> Ce soir, ce week-end ou pour un voyage : règle ton budget, l'ambiance et la distance, et
-> Moodtrip compose trois programmes parmi de vraies adresses autour de toi.
+> Une soirée, un week-end ou quelques jours ailleurs : dis d'où tu pars et ce dont tu as envie, Moodtrip te propose des programmes avec de vraies adresses.
 
 ## Mots-clés (100 max, séparés par des virgules, sans espace)
 
