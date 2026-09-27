@@ -1567,3 +1567,19 @@ retiré du prompt.
 verrait rien), liste des captures. `/support` créée et liée depuis le Profil. Manifeste de
 confidentialité et texte d'accès à la photothèque dans `mobile/app.json` — le profil ouvrait la
 photothèque sans texte d'autorisation déclaré. Caméra et micro retirés, l'app ne s'en sert pas.
+
+## Titres et broderie (27/09/2026, soir)
+
+- **Titres en double** (« Soirée culturelle à Lyon » deux fois) : les propositions s'écrivent en
+  parallèle sans se voir. Le prompt demande un titre qui nomme ce qui distingue le parcours ; la
+  route ajoute l'angle (`PROPOSAL_ANGLE_LABELS`) au second titre venu s'ils coïncident encore.
+  Mesuré : 6 titres distincts sur Lyon et Paris.
+- **Broderie sur les lieux sourcés** : `ajouteDesFaits` (`lib/claude.ts`) repère dans la
+  description un nombre, un siècle, une époque ou un style, un superlatif absents de la source ;
+  la description retombe alors sur la source elle-même. Ne détecte pas un adjectif de trop, et
+  c'est assumé. Piège : les chiffres romains en expression **sensible à la casse**, sinon
+  « ville » se lit « VIIIe ».
+- Vu et non traité : Église Saint-Julien-le-Pauvre dans une soirée à Paris (elle accueille des
+  concerts, mais la règle « fermé le soir » ne l'a pas écartée).
+- Le nom « Vibetrip » ne reste que dans le dépôt GitHub et des clés internes — invisibles d'Apple.
+  Ne jamais renommer les clés de stockage local : les sorties des testeurs seraient perdues.
