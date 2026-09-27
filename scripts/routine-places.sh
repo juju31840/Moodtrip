@@ -69,7 +69,7 @@ if [ -n "$JOURS" ] && [ "$JOURS" -lt 8 ]; then
   echo "  .claude/settings.local.json sous FOURSQUARE_TOKEN."
   # Une notification visible : un avertissement dans un journal que personne n'ouvre
   # n'avertit personne.
-  osascript -e 'display notification "Jeton Foursquare à renouveler" with title "VibeTrip"' 2>/dev/null
+  osascript -e 'display notification "Jeton Foursquare à renouveler" with title "Moodtrip"' 2>/dev/null
 fi
 
 # 2. Le rechargement, si et seulement si le catalogue expose enfin le jeu de données.

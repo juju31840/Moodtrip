@@ -1,4 +1,4 @@
-# Projet : VibeTrip (MVP technique)
+# Projet : Moodtrip (MVP technique)
 
 Webapp mobile-first : l'utilisateur choisit une "vibe" (curseurs Budget / Ambiance / Distance) et un mode (Tonight / Weekend / Trip). L'IA génère un itinéraire (JSON) affiché sur une carte avec une timeline.
 

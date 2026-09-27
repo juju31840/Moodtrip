@@ -1,9 +1,9 @@
 ---
 name: check-mapbox-perf
-description: Audite les performances et fuites potentielles de MapView.tsx (Mapbox GL) dans VibeTrip.
+description: Audite les performances et fuites potentielles de MapView.tsx (Mapbox GL) dans Moodtrip.
 ---
 
-# Auditer les performances Mapbox de VibeTrip
+# Auditer les performances Mapbox de Moodtrip
 
 `MapView.tsx` est chargé en `dynamic(..., { ssr: false })` et recrée des markers à chaque génération d'itinéraire — cette skill vérifie que ça reste propre sur la durée d'une session (plusieurs générations successives sans recharger la page).
 

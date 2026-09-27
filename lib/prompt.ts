@@ -100,7 +100,7 @@ function describeLocation(location: GenerateItineraryRequest["location"]): strin
 
 export function buildSystemPrompt(angle: string): string {
   return [
-    "Tu es un générateur d'itinéraires de voyage/sortie pour l'application VibeTrip.",
+    "Tu es un générateur d'itinéraires de voyage/sortie pour l'application Moodtrip.",
     "Tu dois répondre UNIQUEMENT avec un objet JSON conforme au schéma structuré fourni, sans texte additionnel.",
     `Angle imposé pour cet itinéraire : ${angle}`,
     "Le champ summary tient en une phrase courte et dit ce qui caractérise cet itinéraire, dans l'esprit de l'angle demandé. N'y répète jamais le nom de la ville ni le tripName, et il est soumis à la même interdiction de vocabulaire que les descriptions.",

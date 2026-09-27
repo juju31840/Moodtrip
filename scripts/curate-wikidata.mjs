@@ -132,7 +132,7 @@ async function interrogerWikidata() {
   for (let essai = 0; essai < 4; essai++) {
     const res = await fetch(
       "https://query.wikidata.org/sparql?format=json&query=" + encodeURIComponent(requete),
-      { headers: { "User-Agent": "VibeTrip/1.0 (jules.schuft@gmail.com)", Accept: "application/sparql-results+json" } }
+      { headers: { "User-Agent": "Moodtrip/1.0 (jules.schuft@gmail.com)", Accept: "application/sparql-results+json" } }
     );
     if (res.ok) {
       const json = await res.json();

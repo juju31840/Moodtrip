@@ -118,7 +118,7 @@ export function HomeScreen({
       <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-10">
       <div className="flex items-end justify-between border-b-3 border-ink pb-2">
         <h1 className="font-display text-[2.6rem] uppercase leading-[0.85] tracking-[-0.015em] text-ink">
-          Vibetrip
+          Moodtrip
         </h1>
       </div>
 

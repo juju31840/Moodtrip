@@ -1,4 +1,4 @@
-# Go-to-market — VibeTrip
+# Go-to-market — Moodtrip
 
 *Notes de lancement, angle business. Le détail technique de l'affiliation/premium/paiement est traité séparément dans `docs/conception/roadmap-v2.md` — ce document reste volontairement synthétique sur la monétisation.*
 
@@ -18,7 +18,7 @@ Pas de budget pub, pas de nom de domaine ni de présence publique pour l'instant
 
 1. **Vidéo démo courte (15-30s) filmée à l'écran** montrant le parcours complet : curseurs → génération → carte/timeline. C'est l'asset le plus réutilisable (TikTok, Instagram, Reddit, Product Hunt, futurs posts LinkedIn).
 2. **Test "concierge" manuel avant l'outil public** : proposer à 5-10 personnes de l'entourage de dire "j'ai un vendredi soir libre à [ville], budget X" et leur envoyer l'itinéraire généré par l'app en DM — permet de valider la pertinence des itinéraires sans encore exposer l'app elle-même.
-3. **Liste d'attente / accès anticipé** : une simple page ou formulaire ("VibeTrip arrive, laisse ton email pour tester en premier") à partager dans les cercles ciblés, pour construire une base avant le lancement public.
+3. **Liste d'attente / accès anticipé** : une simple page ou formulaire ("Moodtrip arrive, laisse ton email pour tester en premier") à partager dans les cercles ciblés, pour construire une base avant le lancement public.
 4. **Cibler un événement récurrent local** : ex. proposer des "vibes" autour d'un moment précis (rentrée, Saint-Valentin, pont de mai, fêtes de fin d'année) pour avoir un angle de post concret plutôt qu'un lancement générique.
 5. **Partenariat informel avec micro-créateurs voyage/lifestyle francophones** : contacter 2-3 créateurs à petite audience (5-20k abonnés) pour un accès gratuit en échange d'un retour honnête ou d'une story — moins cher et plus crédible qu'une pub, à condition de rester sincère sur le stade "MVP".
 6. **Réutiliser le mode Tonight comme produit d'appel** : plus simple à démontrer en une vidéo de 15s qu'un voyage complet, et répond à un besoin plus fréquent (tous les vendredis soirs) donc plus de occasions de rebond/partage.

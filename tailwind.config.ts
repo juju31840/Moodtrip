@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Design system VibeTrip — direction « Riso » (affiche sérigraphiée, deux encres).
+ * Design system Moodtrip — direction « Riso » (affiche sérigraphiée, deux encres).
  *
  * Remplace la direction « Carnet » (crème chaud + terracotta + serif), abandonnée pour une raison
  * précise et vérifiable : cette palette était, à quelques points près, celle de Claude

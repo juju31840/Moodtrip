@@ -190,7 +190,7 @@ qui. Elle consomme le quota Google Places, facturé, et écrit en base avec un
 jeton d'administration. L'absence de secret ferme désormais la route par un 503.
 
 **Fait côté Vercel, vérifié le 6 septembre 2026.** `CRON_SECRET` est définie en
-production : `GET https://vibetrip-schuft.vercel.app/api/cron/verify-places` sans
+production : `GET https://moodtrip-schuft.vercel.app/api/cron/verify-places` sans
 en-tête répond **401 « non autorisé »**, et non le 503 qu'aurait rendu une
 variable absente. La garde fonctionne donc de bout en bout.
 

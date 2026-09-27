@@ -25,7 +25,7 @@ export function Cover({ onStart }: { onStart: () => void }) {
       {/* Interlignage large : sur iPhone, Anton dépasse de sa boîte au-dessus des capitales, et le
           titre sortait coupé en haut avec l'interlignage serré du site (retour du 26/09/2026). */}
       <Text style={[styles.title, { fontSize: titleSize, lineHeight: Math.round(titleSize * 1.28) }]} adjustsFontSizeToFit numberOfLines={1}>
-        Vibetrip
+        Moodtrip
       </Text>
       <Text style={styles.question}>On sort où ?</Text>
       <View style={styles.band}>

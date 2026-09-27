@@ -8,7 +8,7 @@
  *
  *   npm run check:prod
  */
-const URL_PROD = process.env.VIBETRIP_URL ?? "https://vibetrip-schuft.vercel.app";
+const URL_PROD = process.env.VIBETRIP_URL ?? "https://moodtrip-schuft.vercel.app";
 
 const ok = (m) => console.log(`  ✓ ${m}`);
 const ko = (m) => { console.log(`  ✗ ${m}`); process.exitCode = 1; };

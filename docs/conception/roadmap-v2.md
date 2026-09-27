@@ -70,7 +70,7 @@ d'affiliation ou une intégration API, générant potentiellement une commission
   distincts (délais admin hors du contrôle de l'équipe produit), gestion de deux nouvelles clés API
   et de leurs erreurs propres (indisponibilité, quotas), introduction de la notion de date calendaire
   absolue (changement structurant du contrat), et potentiellement un flux de tracking de conversion
-  (combien de réservations effectives via VibeTrip) pour mesurer le ROI de l'intégration.
+  (combien de réservations effectives via Moodtrip) pour mesurer le ROI de l'intégration.
 - **Priorité relative : la plus directement monétisable des 4**, et probablement celle qui a le plus
   de valeur produit immédiate (un itinéraire "actionnable" plutôt que juste informatif) — mais sa
   complexité technique/business la rend risquée à lancer en premier sans traction utilisateur déjà

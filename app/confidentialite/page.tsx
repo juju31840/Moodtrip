@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Confidentialité · VibeTrip",
-  description: "Ce que VibeTrip fait de tes données — et surtout ce qu'il n'en fait pas.",
+  title: "Confidentialité · Moodtrip",
+  description: "Ce que Moodtrip fait de tes données — et surtout ce qu'il n'en fait pas.",
 };
 
 /**
@@ -31,7 +31,7 @@ export default function Confidentialite() {
     <main className="grain mx-auto flex min-h-[100dvh] max-w-2xl flex-col gap-8 px-5 pb-16 pt-[max(2.5rem,env(safe-area-inset-top))]">
       <header className="flex flex-col gap-3">
         <a href="/" className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-ink-mute underline">
-          VibeTrip
+          Moodtrip
         </a>
         <h1 className="font-display text-[44px] uppercase leading-[1.04]">Confidentialité</h1>
         <p className="text-[17px] leading-snug text-ink">
@@ -113,7 +113,7 @@ export default function Confidentialite() {
         <p>Ces services reçoivent ce qui leur est nécessaire pour répondre (par exemple une coordonnée), jamais ton profil.</p>
       </Section>
 
-      <Section title="Ce que VibeTrip ne fait pas">
+      <Section title="Ce que Moodtrip ne fait pas">
         <p>
           Aucune publicité, aucun traceur publicitaire, aucune revente ni partage de données à des fins commerciales, aucun
           suivi d&apos;une application à l&apos;autre.

@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
 const FICHIER = "mobile/src/data/city-photos.json";
-const UA = { "User-Agent": "VibeTrip/1.0 (jules.schuft@gmail.com)" };
+const UA = { "User-Agent": "Moodtrip/1.0 (jules.schuft@gmail.com)" };
 const LARGEUR = 1000;
 const attendre = (ms) => new Promise((r) => setTimeout(r, ms));
 

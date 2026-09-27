@@ -1,6 +1,6 @@
 ---
 name: verify-itinerary-contract
-description: Teste la route /api/generate-itinerary de VibeTrip et valide que la sortie JSON de Claude respecte le contrat de types/itinerary.ts, indépendamment du front.
+description: Teste la route /api/generate-itinerary de Moodtrip et valide que la sortie JSON de Claude respecte le contrat de types/itinerary.ts, indépendamment du front.
 ---
 
 # Vérifier le contrat JSON de l'itinéraire

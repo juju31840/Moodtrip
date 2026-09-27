@@ -1,9 +1,9 @@
 ---
 name: check-ui
-description: Vérifie visuellement l'UI mobile-first sombre de VibeTrip (écran d'accueil, résultat, carte) via le MCP chrome-devtools.
+description: Vérifie visuellement l'UI mobile-first sombre de Moodtrip (écran d'accueil, résultat, carte) via le MCP chrome-devtools.
 ---
 
-# Vérifier l'UI de VibeTrip (mobile-first, thème sombre)
+# Vérifier l'UI de Moodtrip (mobile-first, thème sombre)
 
 Utiliser le MCP `chrome-devtools` pour piloter Chrome plutôt que de se fier au code seul — la carte Mapbox et la bottom sheet `vaul` ne se valident qu'au rendu réel.
 

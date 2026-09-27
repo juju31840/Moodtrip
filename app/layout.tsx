@@ -17,7 +17,7 @@ const body = Archivo({
 });
 
 export const metadata: Metadata = {
-  title: "VibeTrip",
+  title: "Moodtrip",
   description: "Ton budget, ton humeur, ta distance. On s'occupe du programme.",
   // `app/icon.svg` est repris automatiquement par Next ; le déclarer ici sert l'écran d'accueil
   // iOS, qui ignore le SVG et prenait jusqu'ici un rendu par défaut du navigateur.

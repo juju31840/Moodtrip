@@ -1,9 +1,9 @@
 ---
 name: check-mobile-responsive
-description: Vérifie le comportement de VibeTrip à plusieurs largeurs d'écran mobile (pas seulement un viewport unique) via chrome-devtools ou playwright.
+description: Vérifie le comportement de Moodtrip à plusieurs largeurs d'écran mobile (pas seulement un viewport unique) via chrome-devtools ou playwright.
 ---
 
-# Vérifier le responsive mobile de VibeTrip
+# Vérifier le responsive mobile de Moodtrip
 
 Complète la skill `check-ui` (qui teste un seul viewport) en balayant plusieurs tailles réelles — le brief impose mobile-first mais l'app doit rester correcte sur toute la plage de téléphones, pas seulement l'iPhone de référence.
 

@@ -100,7 +100,7 @@ export default function CreerScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: insets.bottom + TAB_BAR + 110, gap: 20 }}
       >
-        <Masthead title="Vibetrip" />
+        <Masthead title="Moodtrip" />
 
         <View style={{ gap: 8 }}>
           <Overline>Quand</Overline>

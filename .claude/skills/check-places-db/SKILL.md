@@ -1,6 +1,6 @@
 ---
 name: check-places-db
-description: Contrôle la santé du socle de lieux VibeTrip dans Supabase — volume, couverture par ville, classement en envies, dérive depuis la dernière mesure. À lancer régulièrement, et systématiquement après un rechargement du référentiel Foursquare.
+description: Contrôle la santé du socle de lieux Moodtrip dans Supabase — volume, couverture par ville, classement en envies, dérive depuis la dernière mesure. À lancer régulièrement, et systématiquement après un rechargement du référentiel Foursquare.
 ---
 
 # Contrôler le socle de lieux

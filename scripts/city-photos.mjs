@@ -20,7 +20,7 @@
  */
 import { writeFileSync } from "node:fs";
 
-const UA = { "User-Agent": "VibeTrip/1.0 (jules.schuft@gmail.com)" };
+const UA = { "User-Agent": "Moodtrip/1.0 (jules.schuft@gmail.com)" };
 const iVilles = process.argv.indexOf("--villes");
 const NOMBRE = iVilles > 0 ? Number(process.argv[iVilles + 1]) : 100;
 const PAR_VILLE = 5;

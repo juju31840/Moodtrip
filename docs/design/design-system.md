@@ -1,6 +1,6 @@
-# VibeTrip — Design System (condensé)
+# Moodtrip — Design System (condensé)
 
-> Document de référence pour le design visuel de VibeTrip. Basé sur les tokens déjà définis dans `tailwind.config.ts` et sur l'implémentation existante des composants (`components/ui/*`, `components/*`). Ce document ne redéfinit rien dans le code — il documente et complète ce qui existe pour guider les décisions visuelles à venir.
+> Document de référence pour le design visuel de Moodtrip. Basé sur les tokens déjà définis dans `tailwind.config.ts` et sur l'implémentation existante des composants (`components/ui/*`, `components/*`). Ce document ne redéfinit rien dans le code — il documente et complète ce qui existe pour guider les décisions visuelles à venir.
 
 ---
 
@@ -55,7 +55,7 @@ Police : **Manrope** (chargée via `next/font/google` dans `app/layout.tsx`), sa
 
 | Niveau | Taille / Tailwind | Poids | Usage |
 |---|---|---|---|
-| Titre principal (H1) | 24px / `text-2xl` | 600 (semibold) | Titre "VibeTrip" écran d'accueil |
+| Titre principal (H1) | 24px / `text-2xl` | 600 (semibold) | Titre "Moodtrip" écran d'accueil |
 | Corps standard | 14px / `text-sm` | 400–500 | Descriptions, sous-titres, texte de bouton |
 | Nom de lieu (step card) | 16px / `text-base` | 500 (medium) | `placeName` dans `StepCard` |
 | Label / eyebrow | 12px / `text-xs`, uppercase, `tracking-wide` | 500 | Période ("Matin/Midi/Soir"), labels de curseur |

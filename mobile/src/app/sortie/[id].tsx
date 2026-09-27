@@ -62,7 +62,7 @@ export default function SortieScreen() {
       const query = encodeURIComponent([step.placeName, step.address].filter(Boolean).join(", "));
       return `${index + 1}. ${step.placeName}${step.address ? ` — ${step.address}` : ""}\nhttps://maps.apple.com/?q=${query}&ll=${step.location.lat},${step.location.lng}`;
     });
-    void Share.share({ message: [`${itinerary.tripName} — composé avec VibeTrip`, "", ...lines].join("\n") });
+    void Share.share({ message: [`${itinerary.tripName} — composé avec Moodtrip`, "", ...lines].join("\n") });
   }
 
   function remove() {

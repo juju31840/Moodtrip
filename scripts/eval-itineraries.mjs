@@ -219,7 +219,7 @@ async function run() {
   const outPath = outArg !== -1 ? process.argv[outArg + 1] : null;
 
   const sections = [
-    "# Banc d'essai VibeTrip — qualité des itinéraires",
+    "# Banc d'essai Moodtrip — qualité des itinéraires",
     "",
     `Généré le ${new Date().toLocaleString("fr-FR")} · ${SCENARIOS.length} scénarios`,
     "",

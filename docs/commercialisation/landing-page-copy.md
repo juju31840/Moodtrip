@@ -1,4 +1,4 @@
-# Copy landing page — VibeTrip
+# Copy landing page — Moodtrip
 
 *Premier jet. Ton sombre, direct, sans superlatif marketing générique. À adapter une fois les premiers retours utilisateurs collectés.*
 
@@ -12,7 +12,7 @@
 
 **Sous-titre**
 
-> Trois curseurs, un mode, et VibeTrip construit votre sortie ou votre voyage — lieux, horaires, itinéraire sur la carte. Plus besoin d'ouvrir dix onglets pour décider.
+> Trois curseurs, un mode, et Moodtrip construit votre sortie ou votre voyage — lieux, horaires, itinéraire sur la carte. Plus besoin d'ouvrir dix onglets pour décider.
 
 **CTA (bouton principal)**
 
@@ -30,7 +30,7 @@
 
 **Phrase**
 
-> Budget, ambiance, distance : trois curseurs suffisent pour dire à VibeTrip ce que vous avez envie de vivre, sans remplir de formulaire.
+> Budget, ambiance, distance : trois curseurs suffisent pour dire à Moodtrip ce que vous avez envie de vivre, sans remplir de formulaire.
 
 ---
 

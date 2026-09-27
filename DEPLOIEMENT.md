@@ -1,6 +1,6 @@
-# Déployer VibeTrip
+# Déployer Moodtrip
 
-**En ligne depuis le 28/08/2026 : https://vibetrip-schuft.vercel.app**
+**En ligne depuis le 28/08/2026 : https://moodtrip-schuft.vercel.app**
 
 **Au quotidien : un push sur `main` suffit.** Le projet Vercel est relié au dépôt GitHub et
 redéploie la production tout seul (constaté le 24/09/2026, compilation en ~2 min). La commande
@@ -58,7 +58,7 @@ npx vercel --prod
 
 `vibetrip.vercel.app` **appartient à quelqu'un d'autre** — les sous-domaines `.vercel.app` sont
 globaux et celui-ci était pris (un site espagnol). L'adresse du projet est
-`vibetrip-schuft.vercel.app`, suffixée du nom d'équipe.
+`moodtrip-schuft.vercel.app`, suffixée du nom d'équipe.
 
 Et par défaut, **Vercel protège toutes les URLs par une authentification** : le site répondait
 302 vers une page de connexion, y compris pour l'API. Désactivé dans

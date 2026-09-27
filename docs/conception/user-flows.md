@@ -1,4 +1,4 @@
-# User flows — VibeTrip MVP
+# User flows — Moodtrip MVP
 
 Document de conception (pas de code). Basé sur l'implémentation actuelle de `app/page.tsx`,
 `hooks/useGenerateItinerary.ts`, `components/HomeScreen.tsx`, `components/LocationInput.tsx`,

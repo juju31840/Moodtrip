@@ -1,9 +1,9 @@
 ---
 name: run
-description: Lance le serveur de dev Next.js de VibeTrip et l'ouvre pour vérification visuelle.
+description: Lance le serveur de dev Next.js de Moodtrip et l'ouvre pour vérification visuelle.
 ---
 
-# Lancer VibeTrip
+# Lancer Moodtrip
 
 1. Vérifier que `.env.local` existe et contient `ANTHROPIC_API_KEY` et `NEXT_PUBLIC_MAPBOX_TOKEN` (copier `.env.local.example` sinon). Sans ces clés, l'écran d'accueil fonctionne mais la génération d'itinéraire et la carte échoueront silencieusement ou avec une erreur `CLAUDE_ERROR` / carte vide.
 2. Si `node_modules/` est absent, lancer `npm install` avant toute chose.

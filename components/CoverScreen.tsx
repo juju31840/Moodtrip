@@ -124,8 +124,8 @@ export function CoverScreen({ onStart }: CoverScreenProps) {
           Encre : noir plein, pas vermillon. La règle du système réserve le vermillon à l'action
           et à la sélection ; l'accoler au nom diluerait le seul repère qui doit rester univoque. */}
       <div className="shrink-0">
-        <h1 className="font-display text-[min(26vw,13dvh,7rem)] uppercase leading-[0.92] tracking-[-0.02em] text-ink">
-          Vibetrip
+        <h1 className="font-display text-[min(22vw,13dvh,7rem)] uppercase leading-[0.92] tracking-[-0.02em] text-ink">
+          Moodtrip
         </h1>
         <p className="mt-[clamp(0.25rem,0.8dvh,0.6rem)] text-title uppercase tracking-[0.01em] text-ink-soft">
           On sort où&nbsp;?

@@ -18,7 +18,7 @@ import { Paper } from "@/ui/paper";
 import { colors, fonts, rule } from "@/ui/theme";
 
 /** Exigée par l'App Store, et accessible depuis l'app, pas seulement depuis la fiche. */
-const PRIVACY_URL = "https://vibetrip-schuft.vercel.app/confidentialite";
+const PRIVACY_URL = "https://moodtrip-schuft.vercel.app/confidentialite";
 
 /**
  * Profil — trois registres, comme sur le site (29/08/2026) :

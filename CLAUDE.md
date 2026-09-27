@@ -1,4 +1,4 @@
-# CLAUDE.md — VibeTrip
+# CLAUDE.md — Moodtrip
 
 Ce fichier est chargé automatiquement par Claude Code à l'ouverture de ce projet. Il résume l'état
 du travail pour que la reprise soit rapide. Dernière mise à jour : 26/08/2026 (soir).
@@ -559,7 +559,7 @@ puis regardés à l'écran, à 390×844, 390×667 et 320×568. Trois arbitrages 
   système. Le noir plein reste au seul `ModeSelector`, qui n'est pas une étiquette mais une bande
   jointive à choix unique et obligatoire.
 - **Les trois mastheads d'onglet sont à `leading-[0.85]`**, pas `1.04`. Le piège Anton ne vaut que
-  pour les titres qui reviennent à la ligne : « Vibetrip », « Mes sorties » et « Ma carte » sont
+  pour les titres qui reviennent à la ligne : « Moodtrip », « Mes sorties » et « Ma carte » sont
   des chaînes fixes, et la plus longue mesure 192 px pour ~225 px disponibles à 320 px de large.
   Un interlignage différent déplaçait les capitales de 4 px au-dessus du filet : le titre sautait
   au changement d'onglet.
@@ -956,7 +956,7 @@ elle, et la prop `allProposals` qui traversait deux niveaux de composants.
 
 ### En production depuis le 28/08/2026
 
-**https://vibetrip-schuft.vercel.app** — vérifié en production : 11 étapes sur 11 confirmées,
+**https://moodtrip-schuft.vercel.app** — vérifié en production : 11 étapes sur 11 confirmées,
 10 s pour trois propositions, quota écrit en base, URL du cron protégée (401 sans jeton).
 
 Deux pièges au déploiement, consignés dans `DEPLOIEMENT.md` : `vibetrip.vercel.app` **appartient
@@ -1513,7 +1513,7 @@ identifiants d'appareil du quota sont effacés au bout d'un jour (`pg_cron`, tâ
 Les builds tournent dans le cloud et **ne voient pas `mobile/.env`** : une build sans les clés
 démarrerait sans carte ni base, sans message. `mobile/scripts/eas-env.sh` les déclare côté EAS
 (`eas env:set` — `env:create` n'existe plus). Projet `@juju31840/vibetrip`, variables déclarées
-le 27/09/2026. `bundleIdentifier` `fr.vibetrip.app` reste à
+le 27/09/2026. `bundleIdentifier` `fr.moodtrip.app` reste à
 confirmer avec l'équipe du compte Apple.
 
 **Sentry** : branché (`mobile/src/lib/monitoring.ts`), **éteint tant que `EXPO_PUBLIC_SENTRY_DSN`

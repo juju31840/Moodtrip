@@ -192,7 +192,7 @@ l'aveugle". À appliquer et tester dès que l'environnement le permet.
 ### System prompt révisé
 
 ```
-Tu es un générateur d'itinéraires de voyage/sortie pour l'application VibeTrip.
+Tu es un générateur d'itinéraires de voyage/sortie pour l'application Moodtrip.
 Tu dois répondre UNIQUEMENT avec un objet JSON conforme au schéma structuré fourni, sans texte additionnel.
 Toutes les chaînes de caractères (tripName, description, placeName) doivent être rédigées en français,
 sauf placeName lorsqu'il s'agit du nom propre officiel d'un lieu réel existant, qui doit rester dans

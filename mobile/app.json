@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "VibeTrip",
-    "slug": "vibetrip",
+    "name": "Moodtrip",
+    "slug": "moodtrip",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "vibetrip",
+    "scheme": "moodtrip",
     "userInterfaceStyle": "light",
     "ios": {
-      "bundleIdentifier": "fr.vibetrip.app",
+      "bundleIdentifier": "fr.moodtrip.app",
       "supportsTablet": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -45,7 +45,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "VibeTrip utilise ta position pour composer une sortie autour de l'endroit où tu es."
+          "locationWhenInUsePermission": "Moodtrip utilise ta position pour composer une sortie autour de l'endroit où tu es."
         }
       ],
       "@sentry/react-native",
@@ -58,7 +58,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "8debf040-eddf-44c1-9a48-242c44ddd76f"
+        "projectId": "d6cbb2ff-4291-404e-a811-32d788707530"
       }
     },
     "owner": "juju31840"

@@ -16,7 +16,7 @@ sur `docs/commercialisation/landing-page-copy.md` (direct, sans superlatif).
 
 ```
 /{mode}-a-{ville}-{budget}
-<title>{Mode label} à {Ville} : itinéraire {budget label} | VibeTrip</title>
+<title>{Mode label} à {Ville} : itinéraire {budget label} | Moodtrip</title>
 <meta description>{1 phrase reprenant l'intro + CTA implicite}
 ```
 
@@ -44,7 +44,7 @@ par le pipeline réel, non couverte ici] → FAQ (2-3 Q/R par mode) → CTA vers
     certains lieux populaires se remplissent vite le week-end — mieux vaut avoir un plan B si le
     premier lieu affiche complet.
   - *Quel budget prévoir pour une soirée à Paris ?* Ça varie énormément selon le quartier et le type
-    de sortie — VibeTrip ajuste ses propositions selon le budget que vous réglez, plutôt que de
+    de sortie — Moodtrip ajuste ses propositions selon le budget que vous réglez, plutôt que de
     viser un tarif unique.
 
 ### Weekend à Paris
@@ -155,7 +155,7 @@ par le pipeline réel, non couverte ici] → FAQ (2-3 Q/R par mode) → CTA vers
   - *Bruxelles est-elle une ville francophone ?* Bilingue (français/néerlandais), avec une vie
     nocturne largement accessible en français.
   - *Quel est le meilleur quartier pour sortir le soir à Bruxelles ?* Ça dépend surtout de
-    l'ambiance recherchée — VibeTrip ajuste la proposition selon le curseur Ambiance plutôt que de
+    l'ambiance recherchée — Moodtrip ajuste la proposition selon le curseur Ambiance plutôt que de
     recommander un seul quartier universel.
 
 ### Weekend à Bruxelles

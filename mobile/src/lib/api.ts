@@ -8,7 +8,7 @@ import type { GenerateItineraryRequest, GenerationEvent } from "@/types/itinerar
  * toute la chaîne de fiabilité (socle de lieux, curation, vérification). Rien de ce pipeline
  * n'est dupliqué côté téléphone.
  */
-export const API_BASE = process.env.EXPO_PUBLIC_API_BASE ?? "https://vibetrip-schuft.vercel.app";
+export const API_BASE = process.env.EXPO_PUBLIC_API_BASE ?? "https://moodtrip-schuft.vercel.app";
 
 const CLIENT_KEY = "vibetrip.client.v1";
 

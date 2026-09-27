@@ -1,9 +1,9 @@
 ---
 name: gen-pr-description
-description: Génère une description de pull request en français pour VibeTrip à partir des commits/diff de la branche courante.
+description: Génère une description de pull request en français pour Moodtrip à partir des commits/diff de la branche courante.
 ---
 
-# Générer une description de PR pour VibeTrip
+# Générer une description de PR pour Moodtrip
 
 1. Identifier la base de comparaison (`main` sauf indication contraire) et lister les commits de la branche courante qui n'y sont pas encore (`git log main..HEAD`).
 2. Regarder le diff complet (`git diff main...HEAD`), pas seulement les messages de commit, pour ne pas manquer un changement non documenté.
