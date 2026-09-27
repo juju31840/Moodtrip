@@ -14,14 +14,14 @@
 # Une tâche de maintenance de données peut glisser de quelques jours ; ce n'est pas un service.
 #
 # Installation : bash scripts/routine-places.sh --installer
-# Journal : ~/Library/Logs/vibetrip-places.log
+# Journal : ~/Library/Logs/moodtrip-places.log
 
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 export PATH="$HOME/.nvm/versions/node/v24.19.0/bin:$PATH"
 
-JOURNAL="$HOME/Library/Logs/vibetrip-places.log"
-PLIST="$HOME/Library/LaunchAgents/com.vibetrip.places.plist"
+JOURNAL="$HOME/Library/Logs/moodtrip-places.log"
+PLIST="$HOME/Library/LaunchAgents/com.moodtrip.places.plist"
 
 installer() {
   mkdir -p "$(dirname "$PLIST")" "$(dirname "$JOURNAL")"
@@ -30,7 +30,7 @@ installer() {
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>Label</key><string>com.vibetrip.places</string>
+  <key>Label</key><string>com.moodtrip.places</string>
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>

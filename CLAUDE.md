@@ -976,7 +976,7 @@ saisissaient forcément leur ville à la main.
 ### Routine mensuelle du socle (28/08/2026)
 
 `scripts/routine-places.sh`, installée dans launchd — **le 1er de chaque mois à 9 h**. Journal
-dans `~/Library/Logs/vibetrip-places.log` ; désinstallation par `launchctl unload`.
+dans `~/Library/Logs/moodtrip-places.log` ; désinstallation par `launchctl unload`.
 
 Elle vérifie l'accès au catalogue, **alerte quand le jeton expire dans moins de 8 jours** (avec
 une notification macOS, un avertissement dans un journal que personne n'ouvre n'avertit
