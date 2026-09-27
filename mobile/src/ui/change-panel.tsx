@@ -20,11 +20,12 @@ export function ChangePanel({ step, excludeNames, onPick }: {
 }) {
   const [theme, setTheme] = useState<ThemeId>(() => themeForType(step.type));
   const [otherTheme, setOtherTheme] = useState(false);
-  const [results, setResults] = useState<ItineraryStep[] | null>(null);
+  // `undefined` = en cours, `null` = pas de réponse (hors réseau), `[]` = rien à proximité.
+  const [results, setResults] = useState<ItineraryStep[] | null | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
-    setResults(null);
+    setResults(undefined);
     void findNearby(theme, step, excludeNames).then((found) => {
       // Une réponse arrivée après un changement d'envie est ignorée plutôt qu'affichée à tort.
       if (!cancelled) setResults(found);
@@ -53,7 +54,8 @@ export function ChangePanel({ step, excludeNames, onPick }: {
           ))}
         </View>
       )}
-      {results === null && <Body>Recherche…</Body>}
+      {results === undefined && <Body>Recherche…</Body>}
+      {results === null && <Body>Pas de connexion. Réessaie une fois en ligne.</Body>}
       {results?.length === 0 && <Body>Rien de ce type dans les environs immédiats.</Body>}
       {results?.map((candidate) => (
         <Pressable key={candidate.id} onPress={() => onPick(candidate)} style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.paper2 }]}>

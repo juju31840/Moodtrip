@@ -1491,3 +1491,43 @@ que c'était acquis** — la distinction est là, pas dans la gravité technique
   survivent au changement d'onglet (`HomeDraft` remonté dans `app/page.tsx`, `HomeScreen` et
   `LocationInput` deviennent contrôlés), et « Ce soir » est présélectionné, le libellé du bouton
   suivant désormais le mode (« Trouver mon week-end », « Trouver mon voyage »)
+
+## Préparation App Store (27/09/2026)
+
+**Icône et écran de lancement** : « V imprimé » — un V d'Anton en outremer et un en vermillon,
+décalés, leur recouvrement en encre de surimpression `#7A2E63`, sur papier `#E7E5DF`. C'est le
+geste de la sérigraphie (deux passages mal repérés), pas un logo dessiné. Sources SVG dans
+`.playwright-mcp/icones/icones.html` (non versionné), rendues au Chrome sans tête — la capture
+Playwright expirait. `icon.png` **sans canal alpha** (l'App Store refuse une icône transparente),
+`splash-icon.png` avec. Deux pièges : des tirets à bouts carrés se remplissent en traits pleins
+(`butt`), et un `multiply` donne du noir au recouvrement — il faut découper explicitement la zone
+commune et la peindre.
+
+**Politique de confidentialité** : `app/confidentialite/page.tsx`, liée depuis le Profil de l'app
+(Apple la veut accessible **dans** l'application, pas seulement sur la fiche). Écrite depuis le
+code, envoi par envoi : si un appel réseau change, la page change avec lui. Elle ne promet **pas**
+de durée de conservation des IP du quota — la table `quotas` les garde indéfiniment ; une purge
+quotidienne par `pg_cron` est prête mais attend l'accord de l'utilisateur (écriture en prod).
+
+**EAS** : `mobile/eas.json` (development / preview / production, version gérée à distance).
+Les builds tournent dans le cloud et **ne voient pas `mobile/.env`** : une build sans les clés
+démarrerait sans carte ni base, sans message. `mobile/scripts/eas-env.sh` les déclare côté EAS
+(`eas env:set` — `env:create` n'existe plus). `bundleIdentifier` `fr.vibetrip.app` reste à
+confirmer avec l'équipe du compte Apple.
+
+**Sentry** : branché (`mobile/src/lib/monitoring.ts`), **éteint tant que `EXPO_PUBLIC_SENTRY_DSN`
+n'est pas fourni**. Le seul compte Sentry connecté est celui de l'employeur de l'utilisateur :
+rien n'y a été créé, il faut un compte personnel. Réglé pour ne rien envoyer de personnel —
+pas d'IP, pas de fil d'Ariane réseau (les URL météo et géocodage portent des coordonnées).
+Module natif : sans effet dans Expo Go, actif dans les builds EAS.
+
+**Passe hors réseau** — ce qui se passait sans connexion, et ce qui a changé :
+- la génération affichait « Network request failed », en anglais → message français, bouton
+  « Réessayer » qui relance la même demande sans tout ressaisir ;
+- un flux coupé après une ou deux propositions jetait tout derrière l'écran d'erreur → on garde
+  celles qui sont arrivées, elles sont complètes et vérifiées ;
+- le panneau « Changer » disait « rien de ce type dans les environs » → il dit qu'il n'y a pas de
+  connexion (même famille que le panneau vide sans message d'erreur, déjà rencontré) ;
+- cocher et noter **dehors** perdait le signal → file d'attente (`signals.ts`), renvoyée au
+  lancement et à chaque retour dans l'app. Le cochage lui-même a toujours marché hors réseau :
+  tout est local.

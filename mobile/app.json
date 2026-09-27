@@ -8,7 +8,6 @@
     "scheme": "vibetrip",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "fr.vibetrip.app",
       "supportsTablet": false,
       "infoPlist": {
@@ -36,7 +35,7 @@
         {
           "backgroundColor": "#E7E5DF",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 200
         }
       ],
       [
@@ -44,7 +43,9 @@
         {
           "locationWhenInUsePermission": "VibeTrip utilise ta position pour composer une sortie autour de l'endroit où tu es."
         }
-      ]
+      ],
+      "@sentry/react-native",
+      "@sentry/react-native/expo"
     ],
     "experiments": {
       "typedRoutes": true,

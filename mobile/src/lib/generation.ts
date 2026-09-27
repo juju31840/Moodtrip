@@ -81,6 +81,9 @@ export function startGeneration(request: GenerateItineraryRequest) {
     })
     .catch((error: unknown) => {
       if (current.signal.aborted) return;
+      // Réseau coupé en cours de flux : les propositions déjà arrivées sont complètes et
+      // vérifiées — on les garde plutôt que de tout jeter derrière un écran d'erreur.
+      if (state.proposals.length > 0) return set({ status: "done", error: null });
       set({ status: "error", error: error instanceof Error ? error.message : "Erreur réseau." });
     });
 }

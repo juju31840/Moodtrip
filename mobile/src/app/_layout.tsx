@@ -5,13 +5,17 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { AppState } from "react-native";
 
+import { initMonitoring, wrapRoot } from "@/lib/monitoring";
+import { flushSignals } from "@/lib/signals";
 import { toastStore } from "@/lib/toast";
 import { Cover } from "@/ui/cover";
 import { ToastView } from "@/ui/toast-view";
 
 import { colors } from "@/ui/theme";
 
+initMonitoring();
 SplashScreen.preventAutoHideAsync();
 
 /**
@@ -25,13 +29,22 @@ let coverSeen = false;
  * Une pile au-dessus des onglets : la génération (attente, propositions, détail) s'ouvre en
  * plein écran, sans barre d'onglets — comme sur le site, où l'écran de résultat n'en avait pas.
  */
-export default function RootLayout() {
+function RootLayout() {
   const [loaded] = useFonts({ Anton_400Regular, Archivo_400Regular, Archivo_700Bold, Archivo_800ExtraBold });
   const [started, setStarted] = useState(coverSeen);
 
   // Une confirmation restée d'une session précédente n'a plus de sens.
   useEffect(() => {
     toastStore.set(null);
+  }, []);
+
+  // Les passages cochés sans réseau partent au lancement, puis à chaque retour dans l'app.
+  useEffect(() => {
+    void flushSignals();
+    const subscription = AppState.addEventListener("change", (status) => {
+      if (status === "active") void flushSignals();
+    });
+    return () => subscription.remove();
   }, []);
 
   useEffect(() => {
@@ -64,3 +77,5 @@ export default function RootLayout() {
     </>
   );
 }
+
+export default wrapRoot(RootLayout);

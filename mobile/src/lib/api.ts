@@ -25,6 +25,8 @@ function clientId(): string {
   return id;
 }
 
+export const OFFLINE_MESSAGE = "Pas de connexion. Vérifie ton réseau, puis relance.";
+
 /**
  * La route rend un flux NDJSON : `start`, puis une `proposal` dès que chacune est prête.
  * `expo/fetch` et non le `fetch` de React Native, qui ne sait pas lire un corps en flux — on
@@ -35,12 +37,20 @@ export async function generate(
   onEvent: (event: GenerationEvent) => void,
   signal?: AbortSignal
 ): Promise<void> {
-  const response = await fetch(`${API_BASE}/api/generate-itinerary`, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-vibetrip-client": clientId() },
-    body: JSON.stringify(request),
-    signal,
-  });
+  // Le `fetch` natif échoue hors réseau avec un message technique en anglais
+  // (« Network request failed ») : c'est lui qui s'affichait tel quel sur l'écran d'erreur.
+  let response: Awaited<ReturnType<typeof fetch>>;
+  try {
+    response = await fetch(`${API_BASE}/api/generate-itinerary`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-vibetrip-client": clientId() },
+      body: JSON.stringify(request),
+      signal,
+    });
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    throw new Error(OFFLINE_MESSAGE);
+  }
 
   // Seules la validation et le quota portent un vrai statut HTTP ; tout le reste arrive
   // comme un événement `error` à l'intérieur d'un 200.
@@ -53,7 +63,14 @@ export async function generate(
   const decoder = new TextDecoder();
   let buffer = "";
   for (;;) {
-    const { value, done } = await reader.read();
+    let chunk: Awaited<ReturnType<typeof reader.read>>;
+    try {
+      chunk = await reader.read();
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      throw new Error(OFFLINE_MESSAGE);
+    }
+    const { value, done } = chunk;
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
     let newline: number;

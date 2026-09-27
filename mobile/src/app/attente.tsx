@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { cancelGeneration, useGeneration } from "@/lib/generation";
-import { Body, Display, IconButton, Overline, PrimaryButton } from "@/ui/kit";
+import { cancelGeneration, startGeneration, useGeneration } from "@/lib/generation";
+import { Body, Display, IconButton, Overline, PrimaryButton, SecondaryButton } from "@/ui/kit";
 import { ScoutingMap } from "@/ui/scouting-map";
 import { Paper } from "@/ui/paper";
 import { colors, fonts, rule } from "@/ui/theme";
@@ -16,7 +16,7 @@ import { colors, fonts, rule } from "@/ui/theme";
  */
 export default function AttenteScreen() {
   const insets = useSafeAreaInsets();
-  const { status, expected, proposals, scouting, approxOrigin, error } = useGeneration();
+  const { status, request, expected, proposals, scouting, approxOrigin, error } = useGeneration();
 
   useEffect(() => {
     if (proposals.length > 0) router.replace("/propositions");
@@ -44,7 +44,9 @@ export default function AttenteScreen() {
         {cancel}
         <Display size={40} color={colors.accent}>Ça n’a pas marché</Display>
         <Body>{error ?? "La génération a échoué."}</Body>
-        <PrimaryButton label="Revenir aux réglages" onPress={() => router.back()} />
+        {/* Le plus souvent une coupure passagère : relancer la même demande, sans tout ressaisir. */}
+        {request && <PrimaryButton label="Réessayer" onPress={() => startGeneration(request)} />}
+        <SecondaryButton label="Revenir aux réglages" onPress={() => router.back()} />
       </View>
     );
   }

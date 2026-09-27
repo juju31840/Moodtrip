@@ -1,3 +1,4 @@
+import { createStore } from "@/lib/kv";
 import type { GeoPoint } from "@/types/itinerary";
 
 /**
@@ -27,14 +28,61 @@ async function rpc<T>(name: string, body: unknown): Promise<T | null> {
 
 type Located = { placeName: string; location: GeoPoint };
 
+/**
+ * Les signaux restés sans réseau. On coche et on note **dehors**, là où la connexion manque le
+ * plus souvent : sans cette file, chaque passage fait en sous-sol ou en zone blanche était perdu
+ * pour le classement. Plafonnée — ce sont des statistiques, pas des données de l'utilisateur.
+ */
+type Signal = { name: "noter_visite" | "noter_lieu"; body: Record<string, unknown> };
+const outbox = createStore<Signal[]>("vibetrip.signals.outbox.v1", []);
+const OUTBOX_MAX = 100;
+let flushing = false;
+
+async function send(signal: Signal): Promise<"ok" | "offline" | "rejected"> {
+  if (!URL_BASE || !KEY) return "rejected";
+  try {
+    const response = await fetch(`${URL_BASE}/rest/v1/rpc/${signal.name}`, {
+      method: "POST",
+      headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify(signal.body),
+    });
+    // Un refus du serveur ne se corrige pas en réessayant : on ne le garde pas.
+    return response.ok ? "ok" : "rejected";
+  } catch {
+    return "offline";
+  }
+}
+
+/** Renvoie la file, dans l'ordre ; s'arrête au premier échec réseau. */
+export async function flushSignals() {
+  if (flushing) return;
+  flushing = true;
+  try {
+    while (outbox.get().length > 0) {
+      const [first, ...rest] = outbox.get();
+      if ((await send(first!)) === "offline") return;
+      outbox.set(rest);
+    }
+  } finally {
+    flushing = false;
+  }
+}
+
+function emit(signal: Signal) {
+  void send(signal).then((result) => {
+    if (result === "offline") outbox.set([...outbox.get(), signal].slice(-OUTBOX_MAX));
+    else if (result === "ok") void flushSignals();
+  });
+}
+
 /** Le signal maison : « quelqu'un y est allé grâce à l'application ». Il fait remonter les lieux. */
 export function noteVisit(step: Located) {
-  void rpc("noter_visite", { p_nom: step.placeName, p_lat: step.location.lat, p_lng: step.location.lng });
+  emit({ name: "noter_visite", body: { p_nom: step.placeName, p_lat: step.location.lat, p_lng: step.location.lng } });
 }
 
 /** Une note de 1 à 5 — l'actif que ni Google ni TripAdvisor ne possèdent. */
 export function rateStep(step: Located, note: number) {
-  void rpc("noter_lieu", { p_nom: step.placeName, p_lat: step.location.lat, p_lng: step.location.lng, p_note: note });
+  emit({ name: "noter_lieu", body: { p_nom: step.placeName, p_lat: step.location.lat, p_lng: step.location.lng, p_note: note } });
 }
 
 /**

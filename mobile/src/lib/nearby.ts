@@ -26,7 +26,11 @@ interface Row {
 
 const flat = (value: string) => value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 
-export async function findNearby(theme: ThemeId, origin: ItineraryStep, excludeNames: string[], limit = 8): Promise<ItineraryStep[]> {
+/**
+ * `null` quand la base n'a pas pu répondre (réseau coupé, en pleine sortie) : ce n'est pas la
+ * même chose que « rien à proximité », et le panneau ne doit pas le dire comme tel.
+ */
+export async function findNearby(theme: ThemeId, origin: ItineraryStep, excludeNames: string[], limit = 8): Promise<ItineraryStep[] | null> {
   if (!URL_BASE || !KEY) return [];
   let rows: Row[];
   try {
@@ -35,10 +39,10 @@ export async function findNearby(theme: ThemeId, origin: ItineraryStep, excludeN
       headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({ p_lat: origin.location.lat, p_lng: origin.location.lng, p_theme: theme, p_rayon_km: RADIUS_KM, p_limite: limit * 3 }),
     });
-    if (!response.ok) return [];
+    if (!response.ok) return null;
     rows = (await response.json()) as Row[];
   } catch {
-    return [];
+    return null;
   }
 
   const excluded = new Set(excludeNames.map(flat));
