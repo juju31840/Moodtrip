@@ -88,7 +88,9 @@ THEMES = {
 # Ordre = priorité : le premier qui répond donne le type affiché à l'utilisateur.
 TYPES = [
     ("nightlife", ("Night Club", "Music Venue", "Concert Hall")),
-    ("museum", ("Museum", "Art Gallery", "Theater", "Performing Arts", "Historic", "Monument")),
+    # Avant « museum » : une salle de spectacle se visite le soir, un musée non (27/09/2026).
+    ("show", ("Theater", "Performing Arts", "Opera", "Cinema")),
+    ("museum", ("Museum", "Art Gallery", "Historic", "Monument")),
     ("cafe", ("Café", "Cafe", "Coffee", "Tea Room")),
     ("bar", ("Bar", "Pub", "Brewery", "Wine", "Cocktail")),
     ("restaurant", ("Restaurant", "Bistro", "Pizzeria", "Diner", "Steakhouse", "Creperie", "Bakery")),

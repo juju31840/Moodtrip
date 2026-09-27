@@ -24,6 +24,7 @@ const TYPE_LABELS: Record<PlaceType, string> = {
   activity: "Activités",
   shopping: "Boutiques",
   nightlife: "Sorties de nuit",
+  show: "Spectacles",
   hotel: "Hôtels",
   transport: "Trajets",
   other: "Autres",

@@ -97,6 +97,11 @@ export interface PlaceCandidate {
    * schéma de réponse s'en sert pour fermer la liste des références créneau par créneau.
    */
   periods: Period[];
+  /**
+   * Reconnu, mais laissé à une autre proposition : il reste choisissable, sans l'étoile qui le
+   * ferait prendre en priorité. Voir `repartirReconnus` (lib/claude.ts).
+   */
+  cede?: boolean;
 }
 
 interface LigneRpc {
@@ -113,6 +118,8 @@ interface LigneRpc {
   notoriete: number | null;
   raison: string | null;
   gamme: string | null;
+  /** Culte, bibliothèque, château, mémorial… — lu en base dans la catégorie Foursquare. */
+  jour_seulement?: boolean;
 }
 
 /**
@@ -140,7 +147,12 @@ export async function fetchCandidates(options: {
   const { origin, mode, distance, themes, seed, budget = 50, sheltered = false } = options;
   const plafond = CANDIDATS_MAX[mode];
   // Assez large pour que chaque période de chaque jour ait le choix, sans noyer le prompt.
-  const parTheme = themes && themes.length > 0 ? Math.ceil(plafond / themes.length) : Math.ceil(plafond / 6);
+  // En soirée, trois fois plus de lignes : le filtre du soir s'applique après la requête, et les
+  // lieux reconnus qu'elle place en tête sont souvent des musées et des églises. Mesuré le
+  // 27/09/2026 sur une soirée « culture » à Lyon : 8 lieux utilisables sur 60 tirés, et les trois
+  // propositions se partageaient les mêmes. `resserrer` ramène ensuite au plafond.
+  const base = themes && themes.length > 0 ? Math.ceil(plafond / themes.length) : Math.ceil(plafond / 6);
+  const parTheme = mode === "tonight" ? base * 3 : base;
 
   // Un voyage ne se cherche pas dans un rayon mais dans des villes : à 150 km à la ronde, le
   // balayage par proximité dépassait le délai d'exécution *par intermittence*, et cet échec est
@@ -217,8 +229,15 @@ const SORTIES_DU_SOIR = new Set(["bar", "nightlife", "restaurant", "cafe"]);
  */
 function periodesOuvertes(ligne: LigneRpc): Period[] {
   if (FERME_LE_SOIR.has(ligne.type_lieu)) return ["morning", "midday"];
-  if (!SORTIES_DU_SOIR.has(ligne.type_lieu) && CULTE.test(ligne.nom)) return ["morning", "midday"];
+  // La catégorie d'abord, le nom en second : 3 800 lieux de culte ne disent pas « église »
+  // (« Lyon Cathedral », « Sacré Cœur de Jésus », « Diyanet Fatih Camii »), et bibliothèques,
+  // châteaux et mémoriaux passaient la règle du nom (27/09/2026). Un bar installé dans un château
+  // reste un bar : la sorte de lieu prime.
+  if (!SORTIES_DU_SOIR.has(ligne.type_lieu) && (ligne.jour_seulement || CULTE.test(ligne.nom))) return ["morning", "midday"];
   if (ligne.type_lieu === "nightlife") return ["evening"];
+  // Théâtre, opéra, cinéma : l'après-midi et le soir. Ils étaient classés « museum » jusqu'au
+  // 27/09/2026, donc exclus de toutes les soirées — l'Opéra de Lyon n'avait jamais pu en être.
+  if (ligne.type_lieu === "show") return ["midday", "evening"];
   if (ligne.type_lieu === "bar") return ["midday", "evening"];
   if (ligne.type_lieu === "restaurant") return ["midday", "evening"];
   return ["morning", "midday", "evening"];

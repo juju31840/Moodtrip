@@ -12,6 +12,7 @@ export type PlaceType =
   | "activity"
   | "shopping"
   | "nightlife"
+  | "show"
   | "hotel"
   | "transport"
   | "other";

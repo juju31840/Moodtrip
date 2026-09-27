@@ -32,6 +32,7 @@ const TYPE_VERS_THEME: Record<PlaceType, ThemeId | null> = {
   viewpoint: "outdoor",
   shopping: "shopping",
   nightlife: "night",
+  show: "culture",
   activity: null,
   hotel: null,
   transport: null,

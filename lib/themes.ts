@@ -41,6 +41,7 @@ export function themeForType(type: PlaceType): ThemeId {
     case "cafe":
       return "drink";
     case "museum":
+    case "show":
       return "culture";
     case "park":
     case "viewpoint":

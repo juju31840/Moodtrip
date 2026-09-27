@@ -40,7 +40,7 @@ async function loadEnvLocal() {
 
 const PERIODS = new Set(["morning", "midday", "evening"]);
 const PLACE_TYPES = new Set([
-  "restaurant", "bar", "cafe", "museum", "park", "viewpoint",
+  "restaurant", "bar", "cafe", "museum", "show", "park", "viewpoint",
   "activity", "shopping", "nightlife", "hotel", "transport", "other",
 ]);
 

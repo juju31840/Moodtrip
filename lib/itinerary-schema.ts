@@ -15,6 +15,7 @@ export const placeTypeSchema = z.enum([
   "activity",
   "shopping",
   "nightlife",
+  "show",
   "hotel",
   "transport",
   "other",

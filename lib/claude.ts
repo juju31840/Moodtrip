@@ -93,6 +93,7 @@ const LIBELLES_TYPE: Record<ItineraryStep["type"], string> = {
   activity: "Activité",
   shopping: "Boutique",
   nightlife: "Sortie de nuit",
+  show: "Salle de spectacle",
   hotel: "Hôtel",
   transport: "Gare",
   other: "Lieu",
@@ -105,9 +106,15 @@ const LIBELLES_TYPE: Record<ItineraryStep["type"], string> = {
  * partage du projet veut que les faits ne viennent jamais du modèle, on le rend donc impossible.
  * Plus sobre, et vrai.
  */
+const VOIE = /(?<!\p{L})(rue|avenue|av|boulevard|bd|place|quai|cours|allée|allées|chemin|route|impasse|passage|square|esplanade|parvis|promenade|montée|faubourg)(?!\p{L})/iu;
+
 function descriptionFactuelle(type: ItineraryStep["type"], candidat: PlaceCandidate): string {
   // Le numéro et ce qui suit la première virgule (code postal, ville, pays) ne disent rien de plus.
-  const rue = candidat.address?.split(",")[0]?.replace(/^\d+[\s,-]*(bis|ter)?\s*/i, "").trim();
+  // Le segment qui porte la rue, pas forcément le premier : « Hangar, 16 Quai de Bacalan »
+  // donnait « Bar, Hangar. » (27/09/2026). Et le numéro peut être un intervalle (« 1-3 rue… »).
+  const segments = candidat.address?.split(",").map((s) => s.trim()) ?? [];
+  const segment = segments.find((s) => /^\d/.test(s) || VOIE.test(s)) ?? segments[0];
+  const rue = segment?.replace(/^\d+\s*(?:[-/]\s*\d+)?\s*(?:bis|ter)?[\s,]*/i, "").trim();
   return rue ? `${LIBELLES_TYPE[type]}, ${rue}.` : `${LIBELLES_TYPE[type]}.`;
 }
 
@@ -150,9 +157,12 @@ async function generateOne(
     servis.push(candidat.id);
     return {
       ...base,
+      type: typeCompatible(base.type, base.period) ? base.type : candidat.type,
       placeName: candidat.name,
       // La description du modèle n'est gardée que s'il avait un fait sourcé à reformuler.
-      description: candidat.reason ? base.description : descriptionFactuelle(base.type, candidat),
+      description: candidat.reason
+        ? base.description
+        : descriptionFactuelle(typeCompatible(base.type, base.period) ? base.type : candidat.type, candidat),
       location: candidat.location,
       address: candidat.address,
       verified: true,
@@ -167,6 +177,52 @@ async function generateOne(
   void notePropositions(servis);
 
   return { ...response.parsed_output, id: `proposal-${index + 1}`, steps };
+}
+
+/**
+ * Le type choisi par le modèle, tant qu'il ne contredit pas le créneau. Il a le droit de mettre
+ * une boulangerie en café pour un petit-déjeuner ; il n'a pas celui d'afficher en musée une salle
+ * de concert le soir — la Halle Tony Garnier était « nightlife » dans une proposition et
+ * « museum » dans la suivante (27/09/2026). Le socle garde alors le dernier mot.
+ */
+function typeCompatible(type: ItineraryStep["type"], period: Period): boolean {
+  if (period === "evening") return !["museum", "shopping", "park"].includes(type);
+  if (period === "morning") return type !== "nightlife";
+  return true;
+}
+
+/**
+ * Chaque lieu reconnu garde son étoile dans **une seule** proposition.
+ *
+ * Défaut mesuré le 27/09/2026 : les viviers mettent les lieux reconnus en tête quelle que soit la
+ * graine, et la consigne dit de les prendre en priorité — les trois propositions d'une soirée à
+ * Lyon partageaient alors les mêmes adresses (Bec de Jazz et Jazz Club Saint Georges dans les
+ * trois). La curation avait défait ce que les graines assuraient. Un lieu partagé est attribué à
+ * tour de rôle, du plus au moins reconnu ; ailleurs il reste choisissable, sans étoile.
+ */
+function repartirReconnus(viviers: PlaceCandidate[][]): PlaceCandidate[][] {
+  const presence = new Map<string, { notoriete: number; indices: number[] }>();
+  viviers.forEach((vivier, index) => {
+    for (const c of vivier) {
+      if (c.notoriety <= 0) continue;
+      const entree = presence.get(c.id) ?? { notoriete: c.notoriety, indices: [] };
+      entree.indices.push(index);
+      presence.set(c.id, entree);
+    }
+  });
+  const attribution = new Map<string, number>();
+  const charge = viviers.map(() => 0);
+  const partages = [...presence.entries()]
+    .filter(([, e]) => e.indices.length > 1)
+    .sort(([a, x], [b, y]) => y.notoriete - x.notoriete || a.localeCompare(b));
+  for (const [id, { indices }] of partages) {
+    const elu = indices.reduce((m, i) => (charge[i]! < charge[m]! ? i : m), indices[0]!);
+    charge[elu]!++;
+    attribution.set(id, elu);
+  }
+  return viviers.map((vivier, index) =>
+    vivier.map((c) => (attribution.has(c.id) && attribution.get(c.id) !== index ? { ...c, cede: true } : c))
+  );
 }
 
 async function candidatesFor(
@@ -274,9 +330,12 @@ export function generateProposals(request: GenerateItineraryRequest): Generation
   // Les viviers sont tirés ici, une fois, et partagés : la même requête sert au repérage et à
   // la proposition, sans aller-retour de plus vers le socle.
   const pools = angles.map((_, index) => candidatesFor(request, index, origin));
+  // Les requêtes partent en parallèle et durent le même temps : attendre les trois pour répartir
+  // les lieux reconnus ne retarde presque rien.
+  const repartis = Promise.all(pools).then(repartirReconnus);
 
   return {
-    proposals: angles.map((angle, index) => generateOne(request, angle, index, pools[index]!)),
+    proposals: angles.map((angle, index) => generateOne(request, angle, index, repartis.then((viviers) => viviers[index]!))),
     scouting: Promise.all([origin, ...pools]).then(([point, ...viviers]) => {
       if (!point || !("lat" in point)) return null;
       const vus = new Map<string, PlaceCandidate>();

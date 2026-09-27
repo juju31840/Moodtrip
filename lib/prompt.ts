@@ -114,7 +114,10 @@ export function buildSystemPrompt(angle: string): string {
     // et les adjectifs interchangeables. Un lecteur ne lit alors plus une adresse mais un
     // gabarit. La consigne porte donc sur le fond, pas sur la longueur : dire ce qu'on ne peut
     // pas deviner en regardant le nom du lieu.
-    "La description tient en UNE phrase de moins de quinze mots, et dit un FAIT : ce qu'on y mange ou y boit précisément, ce qu'on y voit, une particularité du lieu. Exemples de ce qui convient : « Bouchon lyonnais, tablier de sapeur et quenelles. » ; « Vins nature au verre, ardoise qui change chaque semaine. » ; « Vue sur les toits depuis le septième étage. »",
+    // L'exemple « ardoise qui change chaque semaine » a été recopié mot pour mot sur des lieux
+    // reconnus (26/09/2026) : un exemple de prompt devient un fait disponible. Retiré, et la
+    // consigne dit désormais d'où un fait a le droit de venir.
+    "La description tient en UNE phrase de moins de quinze mots, et dit un FAIT : ce qu'on y mange ou y boit précisément, ce qu'on y voit, une particularité du lieu. Exemples de la forme attendue : « Bouchon lyonnais, tablier de sapeur et quenelles. » ; « Vue sur les toits depuis le septième étage. » Ces exemples montrent la forme, jamais le contenu : n'en reprends aucun fait. Chaque fait écrit doit venir de la phrase qui suit l'étoile du lieu, ou de ce que tu sais avec certitude de CE lieu précis.",
     "N'utilise JAMAIS les mots convivial, chaleureux, accueillant, sympathique, décontracté, détendu, ambiance, atmosphère, cadre, idéal, parfait, incontournable, ni aucun adjectif du même genre : ils conviendraient à n'importe quel lieu, donc ils ne disent rien. Si tu ne connais aucun fait sur un lieu, écris simplement ce qu'il est (« Bar à vin, rue Pleney. ») plutôt que d'inventer une ambiance.",
     "N'écris pas non plus le moment de la journée dans la description (« pour débuter la soirée », « après le repas ») : la place de l'étape dans le parcours le dit déjà.",
     "Les coordonnées GPS (lat/lng) doivent rester réalistes et cohérentes avec le point de départ.",
@@ -140,7 +143,7 @@ function describeCandidates(candidates: PlaceCandidate[]): string | null {
     // La raison n'accompagne que les lieux reconnus : c'est le fait que la description doit
     // porter, au lieu d'un adjectif déduit du nom (« Oriental Saphir » devenait un « bar à
     // alcools du Moyen-Orient » que personne n'avait jamais décrit ainsi).
-    const reconnu = c.notoriety > 0 ? ` | ★ ${c.reason ?? "recommandé"}` : "";
+    const reconnu = c.notoriety > 0 && !c.cede ? ` | ★ ${c.reason ?? "recommandé"}` : "";
     return `${c.ref} | ${c.name}${adresse}${commune} | ${c.type} | ${c.location.lat.toFixed(5)},${c.location.lng.toFixed(5)}${reconnu}`;
   });
 
