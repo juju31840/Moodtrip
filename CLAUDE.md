@@ -1454,7 +1454,7 @@ n'est supposé.
 | Écrans vides (sorties, carte, profil) | tous les trois expliquent quoi faire, aucun n'est cassé |
 | Socle | 575 206 lieux, 33 fermetures détectées, **2,5 % sans thème** (seuil d'alerte à 5 %) |
 | `pg_cron` | la mesure de santé du jour est inscrite — la collecte tourne sans session ouverte |
-| Jeton Foursquare | expire le **26/09/2026** ; la routine alerte à 8 jours |
+| Jeton Foursquare | renouvelé le 24/09/2026, expire le **24/10/2026** ; la routine alerte à 8 jours |
 
 **Un seul défaut trouvé, et corrigé** : l'échec d'écriture de la photo était **silencieux et
 trompeur**. Refusée par le quota, elle restait affichée — portée par l'état React — et ne
@@ -1577,7 +1577,7 @@ photothèque sans texte d'autorisation déclaré. Caméra et micro retirés, l'a
 - **Broderie sur les lieux sourcés** : `ajouteDesFaits` (`lib/claude.ts`) repère dans la
   description un nombre, un siècle, une époque ou un style, un superlatif absents de la source ;
   la description retombe alors sur la source elle-même. Ne détecte pas un adjectif de trop, et
-  c'est assumé. Piège : les chiffres romains en expression **sensible à la casse**, sinon
+  c'est assumé. Chaque mot accepte son pluriel (« façades haussmanniennes » passait). Piège : les chiffres romains en expression **sensible à la casse**, sinon
   « ville » se lit « VIIIe ».
 - Vu et non traité : Église Saint-Julien-le-Pauvre dans une soirée à Paris (elle accueille des
   concerts, mais la règle « fermé le soir » ne l'a pas écartée).

@@ -128,8 +128,10 @@ function descriptionFactuelle(type: ItineraryStep["type"], candidat: PlaceCandid
  */
 // Les chiffres romains à part, et sensibles à la casse : sans cela « ville » se lit « VIIIe ».
 const SIECLE = /(?<!\p{L})[IVXL]+(?:e|er|ème)(?!\p{L})/gu;
+// Chaque mot accepte son pluriel : « façades haussmanniennes », « mosaïques romaines » et
+// « arbres centenaires » passaient au travers d'une liste au singulier.
 const FAITS_VERIFIABLES =
-  /\d+|(?<!\p{L})(?:siècle|siècles|plus ancien(?:ne)?|plus vieux|plus vieille|premier|première|seul|seule|unique|étoilé|étoilée|étoiles?|renaissance|belle époque|gothique|baroque|roman|romane|romain|romaine|gallo-romain|grec|grecque|antique|médiéval|médiévale|art déco|art nouveau|haussmannien|haussmannienne|fondé|fondée|construit|construite|inauguré|inaugurée)(?!\p{L})/giu;
+  /\d+|(?<!\p{L})(?:siècle|plus ancien(?:ne)?|plus vieux|plus vieille|premier|première|seul|seule|unique|étoilé|étoilée|étoile|renaissance|belle époque|gothique|baroque|roman|romane|romain|romaine|gallo-romain|gallo-romaine|grec|grecque|antique|médiéval|médiévale|médiévaux|art déco|art nouveau|haussmannien|haussmannienne|centenaire|millénaire|fondé|fondée|construit|construite|inauguré|inaugurée)(?:s|x)?(?!\p{L})/giu;
 
 const sansAccents = (s: string) =>
   s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
