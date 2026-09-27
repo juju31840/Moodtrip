@@ -1505,14 +1505,15 @@ commune et la peindre.
 
 **Politique de confidentialité** : `app/confidentialite/page.tsx`, liée depuis le Profil de l'app
 (Apple la veut accessible **dans** l'application, pas seulement sur la fiche). Écrite depuis le
-code, envoi par envoi : si un appel réseau change, la page change avec lui. Elle ne promet **pas**
-de durée de conservation des IP du quota — la table `quotas` les garde indéfiniment ; une purge
-quotidienne par `pg_cron` est prête mais attend l'accord de l'utilisateur (écriture en prod).
+code, envoi par envoi : si un appel réseau change, la page change avec lui. Les IP et
+identifiants d'appareil du quota sont effacés au bout d'un jour (`pg_cron`, tâche `purge-quotas`,
+3 h 15) — ils étaient gardés indéfiniment, et la page le promet désormais.
 
 **EAS** : `mobile/eas.json` (development / preview / production, version gérée à distance).
 Les builds tournent dans le cloud et **ne voient pas `mobile/.env`** : une build sans les clés
 démarrerait sans carte ni base, sans message. `mobile/scripts/eas-env.sh` les déclare côté EAS
-(`eas env:set` — `env:create` n'existe plus). `bundleIdentifier` `fr.vibetrip.app` reste à
+(`eas env:set` — `env:create` n'existe plus). Projet `@juju31840/vibetrip`, variables déclarées
+le 27/09/2026. `bundleIdentifier` `fr.vibetrip.app` reste à
 confirmer avec l'équipe du compte Apple.
 
 **Sentry** : branché (`mobile/src/lib/monitoring.ts`), **éteint tant que `EXPO_PUBLIC_SENTRY_DSN`

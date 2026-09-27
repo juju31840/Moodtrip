@@ -66,7 +66,8 @@ export default function Confidentialite() {
         </p>
         <p>
           Pour éviter les abus, chaque appareil porte un identifiant tiré au hasard à l&apos;installation, sans lien avec ton
-          identité. Avec ton adresse IP, il sert seulement à compter le nombre de demandes par heure.
+          identité. Avec ton adresse IP, il sert seulement à compter le nombre de demandes par heure, et les deux
+          sont effacés automatiquement au bout d&apos;un jour.
         </p>
       </Section>
 
