@@ -103,6 +103,10 @@ export default function Confidentialite() {
             à couvert s&apos;il pleut.
           </li>
           <li>
+            <strong className="text-ink">Sentry</strong> — les rapports de plantage de l&apos;application (l&apos;écran et
+            la ligne de code en cause), hébergés dans l&apos;Union européenne, sans adresse IP ni position.
+          </li>
+          <li>
             <strong className="text-ink">Wikimedia Commons</strong> — les photos de villes, affichées avec leurs crédits.
           </li>
         </ul>
