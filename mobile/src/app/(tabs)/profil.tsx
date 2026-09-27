@@ -19,6 +19,7 @@ import { colors, fonts, rule } from "@/ui/theme";
 
 /** Exigée par l'App Store, et accessible depuis l'app, pas seulement depuis la fiche. */
 const PRIVACY_URL = "https://moodtrip-schuft.vercel.app/confidentialite";
+const SUPPORT_URL = "https://moodtrip-schuft.vercel.app/support";
 
 /**
  * Profil — trois registres, comme sur le site (29/08/2026) :
@@ -270,6 +271,9 @@ export default function ProfilScreen() {
         <View style={{ marginTop: 12, gap: 6 }}>
           <Pressable accessibilityRole="link" onPress={() => void Linking.openURL(PRIVACY_URL)} hitSlop={8}>
             <Text style={styles.creditsToggle}>Confidentialité</Text>
+          </Pressable>
+          <Pressable accessibilityRole="link" onPress={() => void Linking.openURL(SUPPORT_URL)} hitSlop={8}>
+            <Text style={styles.creditsToggle}>Aide et contact</Text>
           </Pressable>
           {credited.length > 0 && (
             <Pressable accessibilityRole="button" accessibilityState={{ expanded: showCredits }} onPress={() => setShowCredits((value) => !value)} hitSlop={8}>
