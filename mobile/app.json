@@ -11,7 +11,11 @@
       "bundleIdentifier": "fr.moodtrip.app",
       "supportsTablet": false,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleDevelopmentRegion": "fr",
+        "CFBundleLocalizations": [
+          "fr"
+        ]
       },
       "privacyManifests": {
         "NSPrivacyTracking": false,

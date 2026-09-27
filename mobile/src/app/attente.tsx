@@ -69,7 +69,9 @@ export default function AttenteScreen() {
         </Display>
         {scouting && (
           <Body>
-            {recognized.length > 0
+            {recognized.length > 0 && recognized.length === scouting.places.length
+              ? "Toutes reconnues — presse, guides ou institutions locales."
+              : recognized.length > 0
               ? `Dont ${recognized.length} reconnues — presse, guides ou institutions locales : les points rouges.`
               : "Tous des lieux qui existent, vérifiés dans notre base."}
           </Body>

@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
   question: { fontFamily: fonts.display, fontSize: 24, lineHeight: 30, color: colors.inkSoft, textTransform: "uppercase" },
   band: { alignSelf: "flex-start", marginTop: 14, backgroundColor: colors.ink, paddingHorizontal: 14, paddingVertical: 8, transform: [{ rotate: "-0.6deg" }] },
   bandText: { fontFamily: fonts.bodyHeavy, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: colors.paper },
-  hook: { fontFamily: fonts.display, fontSize: 34, lineHeight: 40, textTransform: "uppercase" },
+  // Même place pour les accents que `Display` : « ITINÉRAIRE » perdait son É.
+  hook: { fontFamily: fonts.display, fontSize: 34, lineHeight: 40, textTransform: "uppercase", paddingTop: 5, marginTop: -5 },
   note: { marginTop: 10, textAlign: "center", fontFamily: fonts.body, fontSize: 13, color: colors.inkSoft },
 });

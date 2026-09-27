@@ -44,6 +44,11 @@ export default function TamponsScreen() {
           {stamps.map((stamp) => (
             <StampView key={stamp.id} stamp={stamp} isNew={stamp.earned && !seen.includes(stamp.id)} />
           ))}
+          {/* Des cases vides pour compléter la dernière rangée : avec `space-between`, deux
+              tampons seuls s'écartaient aux deux bords en laissant un trou au milieu. */}
+          {Array.from({ length: (3 - (stamps.length % 3)) % 3 }, (_, i) => (
+            <View key={`vide-${i}`} style={{ width: 104 }} />
+          ))}
         </View>
       </ScrollView>
     </Paper>
