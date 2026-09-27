@@ -1532,3 +1532,38 @@ Module natif : sans effet dans Expo Go, actif dans les builds EAS.
 - cocher et noter **dehors** perdait le signal → file d'attente (`signals.ts`), renvoyée au
   lancement et à chaque retour dans l'app. Le cochage lui-même a toujours marché hors réseau :
   tout est local.
+
+## Soirées : ce que la curation avait cassé (27/09/2026)
+
+Trois défauts trouvés sur de vraies générations, tous trois invisibles dans le code :
+
+- **Théâtres, opéras et cinémas étaient classés `museum`** (6 848 lieux), donc exclus de *toutes*
+  les soirées par la règle des créneaux : l'Opéra de Lyon n'avait jamais pu en être. Nouveau type
+  `show` (« Salle de spectacle », midi et soir), placé **avant** `museum` dans `TYPES` de
+  `scripts/ingest-places.py` pour qu'un rechargement ne le défasse pas. SQL dans `scripts/sql/`.
+- **Le filtre du soir s'appliquait après la limite de la requête.** Les lieux reconnus passent en
+  tête, or ce sont souvent des musées et des églises : une soirée « culture » à Lyon gardait 8
+  lieux sur 60. Le tirage est triplé en mode soirée, `resserrer` ramène au plafond.
+- **Les trois propositions reprenaient les mêmes adresses** : chaque vivier met les reconnus en
+  tête quelle que soit la graine, et la consigne dit de les prendre en priorité.
+  `repartirReconnus` (`lib/claude.ts`) laisse l'étoile d'un lieu partagé à une seule proposition ;
+  ailleurs il reste choisissable, sans étoile. Reprises résiduelles : le modèle choisit aussi des
+  lieux célèbres non étoilés — acceptable.
+
+Et deux resserrages : « fermé le soir » se lit désormais dans la **catégorie** Foursquare
+(`jour_seulement`, rendu par `candidats_autour`/`candidats_voyage`) — 3 800 lieux de culte ne
+disent pas « église » (« Lyon Cathedral », « Diyanet Fatih Camii ») ; le type du modèle cède au
+socle quand il contredit le créneau (`typeCompatible`).
+
+**Broderie** : le code compose déjà la description quand aucune source n'existe. Reste un cas :
+sur un lieu *avec* raison, le modèle ajoute parfois au-delà (« Théâtre grec du IIe siècle » pour
+Fourvière, gallo-romain). L'exemple « ardoise qui change chaque semaine », recopié tel quel, est
+retiré du prompt.
+
+## Fiche App Store (27/09/2026)
+
+`docs/app-store/fiche.md` : textes, déclaration « App Privacy », classification, notes au relecteur
+(en anglais, avec la consigne **France uniquement** — un relecteur géolocalisé en Californie ne
+verrait rien), liste des captures. `/support` créée et liée depuis le Profil. Manifeste de
+confidentialité et texte d'accès à la photothèque dans `mobile/app.json` — le profil ouvrait la
+photothèque sans texte d'autorisation déclaré. Caméra et micro retirés, l'app ne s'en sert pas.
