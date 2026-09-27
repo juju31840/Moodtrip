@@ -14,7 +14,7 @@ Rédigé le 27/09/2026.
 | Champ | Valeur |
 |---|---|
 | Nom (30 max) | Moodtrip |
-| Sous-titre (30 max) | Des sorties toutes prêtes |
+| Sous-titre (30 max) | On sort où ce soir ? |
 | Catégorie principale | Voyages |
 | Catégorie secondaire | Style de vie |
 | Langue principale | Français |
@@ -35,28 +35,27 @@ Rédigé le 27/09/2026.
 soirée,week-end,voyage,bar,restaurant,sortir,idée,itinéraire,balade,que faire,city guide,escapade
 ```
 
-Les mots du nom et du sous-titre (« sorties », « prêtes ») sont déjà indexés : les répéter
+Les mots du nom et du sous-titre (« sort », « soir ») sont déjà indexés : les répéter
 gaspillerait la place.
 
 ## Description (4 000 max)
 
-Réécrite le 27/09/2026 : la première version faisait « texte d'IA » (intertitres en capitales,
-tirets, formules). Phrases courtes, rien qu'on ne puisse vérifier dans l'app.
+Réécrite deux fois le 27/09/2026. La première faisait « texte d'IA » (intertitres en capitales,
+formules), la deuxième « notice » (« base de lieux », « remplacer une étape »). Celle-ci raconte
+le moment où l'on s'en sert, sans vocabulaire technique.
 
 ```
-Moodtrip te propose des sorties toutes prêtes : une soirée, un week-end ou quelques jours de voyage.
+Vendredi, 19 h. Quelqu'un lance « on fait quoi ce soir ? » dans le groupe, et personne ne répond.
 
-Tu dis quand tu sors et d'où tu pars. Tu règles ton budget, l'ambiance que tu cherches et jusqu'où tu veux aller. Moodtrip te propose alors deux ou trois programmes, avec les étapes sur une carte.
+Moodtrip est fait pour ce moment-là. Tu dis d'où tu pars, si tu as envie de quelque chose de calme ou d'animé, si tu veux dépenser peu ou te faire plaisir. Quelques secondes plus tard, tu as deux ou trois idées de soirée sur une carte : un verre pour commencer, un endroit où dîner, un bar où finir.
 
-Les adresses sont réelles. Elles viennent d'une base de lieux en France, et on retire régulièrement ceux qui ont fermé.
+Tu choisis celle qui te tente, et tu y vas.
 
-Si une étape ne te plaît pas, tu peux la remplacer par un autre lieu à côté. Quand tu as choisi, « Y aller » t'ouvre le trajet dans Plans.
+Ça marche aussi pour un week-end ailleurs, ou pour quelques jours de voyage.
 
-Les lieux où tu es allé s'ajoutent sur ta carte, ville par ville.
+Et chaque endroit où tu passes se pose sur ta carte. Au bout de quelques mois, c'est un peu le carnet de tes soirées.
 
-Pas de compte à créer, pas de pub. Tout reste sur ton téléphone.
-
-Pour l'instant, Moodtrip ne fonctionne qu'en France.
+Pas de compte, pas de pub. Pour l'instant, en France uniquement.
 ```
 
 ## Nouveautés de la version (1.0)
