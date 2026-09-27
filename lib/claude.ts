@@ -119,6 +119,34 @@ function descriptionFactuelle(type: ItineraryStep["type"], candidat: PlaceCandid
 }
 
 /**
+ * Ce que la description affirme et que la source ne dit pas : un nombre, un siècle, une
+ * époque ou un style, un superlatif. Ce sont les faits que le modèle ajoute en reformulant — « Théâtre grec du
+ * IIe siècle » pour une source qui disait « théâtre gallo-romain » (27/09/2026) — et les seuls
+ * qu'on sache repérer sans relire : un adjectif de trop ne se détecte pas, une date inventée si. Les
+ * époques ont été ajoutées après l'Opéra de Lyon, devenu « monument de la Renaissance,
+ * architecture Belle Époque » sans un seul chiffre.
+ */
+// Les chiffres romains à part, et sensibles à la casse : sans cela « ville » se lit « VIIIe ».
+const SIECLE = /(?<!\p{L})[IVXL]+(?:e|er|ème)(?!\p{L})/gu;
+const FAITS_VERIFIABLES =
+  /\d+|(?<!\p{L})(?:siècle|siècles|plus ancien(?:ne)?|plus vieux|plus vieille|premier|première|seul|seule|unique|étoilé|étoilée|étoiles?|renaissance|belle époque|gothique|baroque|roman|romane|romain|romaine|gallo-romain|grec|grecque|antique|médiéval|médiévale|art déco|art nouveau|haussmannien|haussmannienne|fondé|fondée|construit|construite|inauguré|inaugurée)(?!\p{L})/giu;
+
+const sansAccents = (s: string) =>
+  s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+
+export function ajouteDesFaits(description: string, raison: string): boolean {
+  const source = sansAccents(raison);
+  const faits = [...(description.match(FAITS_VERIFIABLES) ?? []), ...(description.match(SIECLE) ?? [])];
+  return faits.some((fait) => !source.includes(sansAccents(fait)));
+}
+
+/** La source elle-même, présentable : « théâtre Gallo-Romain de Lyon » → « Théâtre Gallo-Romain de Lyon. » */
+function descriptionDepuisRaison(raison: string): string {
+  const nette = raison.trim().replace(/,\s*(?:en\s+)?France\.?$/i, "").replace(/\.$/, "");
+  return `${nette.charAt(0).toUpperCase()}${nette.slice(1)}.`;
+}
+
+/**
  * Génère plusieurs propositions d'itinéraire via Claude en structured output (schéma Zod contraint côté API).
  * Une erreur de parsing déclenche une unique tentative de retry avant d'abandonner.
  * Les erreurs de l'API Anthropic (rate limit, indisponibilité, etc.) remontent telles
@@ -159,9 +187,12 @@ async function generateOne(
       ...base,
       type: typeCompatible(base.type, base.period) ? base.type : candidat.type,
       placeName: candidat.name,
-      // La description du modèle n'est gardée que s'il avait un fait sourcé à reformuler.
+      // La description du modèle n'est gardée que s'il avait un fait sourcé à reformuler, et
+      // qu'il n'y a rien ajouté de vérifiable que la source ne dise pas.
       description: candidat.reason
-        ? base.description
+        ? ajouteDesFaits(base.description, candidat.reason)
+          ? descriptionDepuisRaison(candidat.reason)
+          : base.description
         : descriptionFactuelle(typeCompatible(base.type, base.period) ? base.type : candidat.type, candidat),
       location: candidat.location,
       address: candidat.address,

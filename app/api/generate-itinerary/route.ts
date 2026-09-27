@@ -5,6 +5,7 @@ import { generateProposals, ItineraryParseError } from "@/lib/claude";
 import { checkRateLimit, MAX_PAR_ADRESSE } from "@/lib/rate-limit";
 import { filterPlausibleSteps } from "@/lib/geo";
 import { geocodeCity } from "@/lib/geocode";
+import { PROPOSAL_ANGLE_LABELS } from "@/lib/prompt";
 import { verifySteps } from "@/lib/verify-places";
 import type { ApiErrorResponse, GenerationEvent } from "@/types/itinerary";
 
@@ -135,6 +136,22 @@ export async function POST(request: NextRequest) {
         if (event && delivered === 0) send(event);
       });
 
+      // Deux propositions au même titre se lisent comme un doublon, même quand leurs étapes
+      // diffèrent. La consigne du prompt suffit le plus souvent ; ceci est le filet, qui ajoute
+      // l'angle au second titre venu.
+      const titres = new Set<string>();
+      const titreDistinct = (proposal: { id: string; tripName: string }) => {
+        const cle = (t: string) => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
+        let titre = proposal.tripName;
+        if (titres.has(cle(titre))) {
+          const rang = Number(proposal.id.replace(/\D/g, "")) - 1;
+          const angle = PROPOSAL_ANGLE_LABELS[rang];
+          if (angle) titre = `${titre}, ${angle}`;
+        }
+        titres.add(cle(titre));
+        return titre;
+      };
+
       let delivered = 0;
       let implausible = 0;
       const failures: unknown[] = [];
@@ -161,7 +178,7 @@ export async function POST(request: NextRequest) {
             // les supprimer viderait des itinéraires entiers.
             const steps = await verifySteps(plausibleSteps);
 
-            send({ type: "proposal", itinerary: { ...proposal, steps } });
+            send({ type: "proposal", itinerary: { ...proposal, steps, tripName: titreDistinct(proposal) } });
             delivered += 1;
             console.log(`[timing] ${proposal.id} livrée à ${Date.now() - startedAt} ms`);
           } catch (error) {

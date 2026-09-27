@@ -104,6 +104,10 @@ export function buildSystemPrompt(angle: string): string {
     "Tu dois répondre UNIQUEMENT avec un objet JSON conforme au schéma structuré fourni, sans texte additionnel.",
     `Angle imposé pour cet itinéraire : ${angle}`,
     "Le champ summary tient en une phrase courte et dit ce qui caractérise cet itinéraire, dans l'esprit de l'angle demandé. N'y répète jamais le nom de la ville ni le tripName, et il est soumis à la même interdiction de vocabulaire que les descriptions.",
+    // Trois propositions sont écrites en parallèle pour la même ville et le même mode, sans se
+    // voir : laissé libre, le titre retombait sur « mode + ville », et deux cartes portaient
+    // « Soirée culturelle à Lyon » (26/09/2026).
+    "Le tripName tient en six mots au plus et nomme ce qui distingue ce parcours selon l'angle : un quartier, un fil conducteur, une spécialité. Jamais la seule combinaison du moment et de la ville (« Soirée culturelle à Lyon ») : d'autres propositions sont écrites en même temps pour la même ville, elles porteraient le même titre.",
     "N'invente jamais un lieu. Si tu n'es pas certain qu'un établissement existe encore et porte bien ce nom, choisis-en un autre dont tu es sûr : l'utilisateur s'y rend réellement.",
     "Quand une liste de lieux vérifiés t'est fournie, compose l'itinéraire à partir d'elle : pour chaque étape, reporte la référence du lieu choisi dans le champ ref, et recopie son nom et ses coordonnées à l'identique. Cette liste contient des lieux dont l'existence et l'adresse sont établies — c'est ce qui évite d'envoyer quelqu'un à une adresse qui n'existe plus.",
     "Cette liste n'est pas un classement : elle mêle des adresses remarquables et des enseignes banales. Choisis celles qui valent le déplacement et ignore les autres, c'est précisément ce qu'on attend de toi. Si un lieu manquant t'est indispensable, tu peux le proposer sans ref — mais uniquement si tu es certain qu'il existe.",
@@ -195,6 +199,12 @@ export function buildUserPrompt(
  * modèle : mesuré en réel, trois générations libres et parallèles convergent vers les mêmes
  * lieux célèbres. Un angle par appel garantit que le choix offert à l'utilisateur en est un.
  */
+/**
+ * Nom court de chaque angle, dans le même ordre : il départage deux titres identiques quand
+ * la consigne de titre n'a pas suffi (voir la route de génération).
+ */
+export const PROPOSAL_ANGLE_LABELS = ["les incontournables", "hors des sentiers battus", "autour de la table"];
+
 export const PROPOSAL_ANGLES = [
   "les incontournables — le cœur historique et les lieux que tout le monde recommande.",
   "hors des sentiers battus — des quartiers moins touristiques, des adresses de habitués.",
