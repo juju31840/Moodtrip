@@ -32,7 +32,7 @@ Next.js, React, Tailwind, Mapbox (`react-map-gl`), vaul, Zod, SDK Anthropic, Sup
 
     npm run dev              # développement
     npm run build && npm start   # production locale
-    npm run lint
+    npm run lint && npm test     # ce que lance la CI (avec npx tsc --noEmit)
     npm run eval -- --out rapport.md   # banc d'essai de génération (contrat + qualité)
     npm run check:match | verify:google | refresh:places | routine:places | check:prod
 
@@ -84,18 +84,16 @@ texte Archivo. Détail et historique : `docs/design/design-system.md` et le jour
 
 - Secrets : `.env.local` (ignoré par git) pour l'app ; trousseau macOS, service `moodtrip`, pour les jetons des scripts et du MCP (`security add-generic-password -U -s moodtrip -a NOM -w VALEUR`). Jamais dans
   le dépôt, jamais dans un fichier de documentation.
-- Tests : `npm test` (vitest, dossier `tests/`), lancés par la CI GitHub à chaque push avec le lint
-  et les types. Toute règle du contrat d'itinéraire qu'on ajoute au schéma reçoit son test.
+- Tests : vitest, dossier `tests/`. Toute règle du contrat d'itinéraire ajoutée au schéma reçoit
+  son test.
 - Vercel : les sous-domaines `.vercel.app` sont globaux, et Vercel protège par défaut toutes les
   URLs (API comprise) : un 302 vers une page de connexion ne veut pas dire que le site est cassé.
 - Routine mensuelle du socle : `scripts/routine-places.sh` via launchd, le 1er de chaque mois à
   9 h, journal `~/Library/Logs/moodtrip-places.log`. Elle alerte (notification macOS) quand le jeton
   Foursquare expire dans moins de 8 jours mais **ne peut pas le régénérer** (un mois, page
   authentifiée). Elle tourne en local, délibérément : 2,4 Go de Parquet, ~40 minutes.
-- Skills du projet : `check-places-db` (si `sans_theme` dépasse 5 %, la correspondance des
-  catégories est cassée : panneau « Changer » vide sans erreur), `verify-places-google`,
-  `verify-itinerary-contract`, `check-ui`, `check-mobile-responsive`, `check-mapbox-perf`,
-  `gen-changelog`, `gen-pr-description`, `run`.
+- Santé du socle (skill `check-places-db`) : si `sans_theme` dépasse 5 %, la correspondance des
+  catégories est cassée (panneau « Changer » vide, sans erreur).
 
 ## Où chercher dans le journal
 
