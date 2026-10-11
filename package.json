@@ -6,14 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "eval": "node scripts/eval-itineraries.mjs",
     "check:match": "node scripts/check-place-match.mjs",
     "verify:google": "node scripts/verify-google.mjs",
     "refresh:places": "node scripts/refresh-places.mjs",
     "check:places": "node -e \"const{execSync}=require('child_process');console.log('utiliser /check-places-db pour le contrôle détaillé')\"",
     "routine:places": "bash scripts/routine-places.sh",
-    "check:prod": "node scripts/check-prod.mjs"
+    "check:prod": "node scripts/check-prod.mjs",
+    "lint": "next lint",
+    "test": "vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",
@@ -37,6 +38,7 @@
     "eslint-config-next": "^14.2.0",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.11"
   }
 }

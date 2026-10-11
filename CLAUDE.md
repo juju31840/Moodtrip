@@ -84,6 +84,8 @@ texte Archivo. Détail et historique : `docs/design/design-system.md` et le jour
 
 - Secrets : `.env.local` (ignoré par git) pour l'app ; trousseau macOS, service `moodtrip`, pour les jetons des scripts et du MCP (`security add-generic-password -U -s moodtrip -a NOM -w VALEUR`). Jamais dans
   le dépôt, jamais dans un fichier de documentation.
+- Tests : `npm test` (vitest, dossier `tests/`), lancés par la CI GitHub à chaque push avec le lint
+  et les types. Toute règle du contrat d'itinéraire qu'on ajoute au schéma reçoit son test.
 - Vercel : les sous-domaines `.vercel.app` sont globaux, et Vercel protège par défaut toutes les
   URLs (API comprise) : un 302 vers une page de connexion ne veut pas dire que le site est cassé.
 - Routine mensuelle du socle : `scripts/routine-places.sh` via launchd, le 1er de chaque mois à

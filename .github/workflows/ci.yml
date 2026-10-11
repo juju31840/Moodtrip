@@ -19,5 +19,6 @@ jobs:
         run: npm run lint
       - name: Types
         run: npx tsc --noEmit
-      # Pas de build ici : il exige les clés d'API (Mapbox, Supabase...). Les tests
-      # automatisés restent à écrire (voir verify-itinerary-contract).
+      - name: Tests
+        run: npm test
+      # Pas de build ici : il exige les clés d'API (Mapbox, Supabase...).
