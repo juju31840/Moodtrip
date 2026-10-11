@@ -1,4 +1,5 @@
 import "server-only";
+import { rpcServeur } from "./supabase-serveur";
 import { haversineDistanceKm } from "./geo";
 import { distanceBand } from "./distance";
 import type { GeoPoint, Period, PlaceType, ThemeId, TripMode } from "@/types/itinerary";
@@ -382,14 +383,11 @@ function normaliser(value: string): string {
  * faire échouer une génération.
  */
 export async function notePropositions(ids: string[]): Promise<void> {
-  if (!URL_BASE || !CLE || ids.length === 0) return;
+  if (ids.length === 0) return;
 
   try {
-    await fetch(`${URL_BASE}/rest/v1/rpc/noter_propositions`, {
-      method: "POST",
-      headers: { apikey: CLE, Authorization: `Bearer ${CLE}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ p_ids: [...new Set(ids)] }),
-    });
+    // Clé secrète : depuis l'audit du 11/10/2026, la clé publique ne peut plus gonfler ce compteur.
+    await rpcServeur("noter_propositions", { p_ids: [...new Set(ids)] });
   } catch {
     // Statistique d'usage : son échec n'a aucune conséquence pour l'utilisateur.
   }

@@ -1,5 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
+import { rpcServeur } from "@/lib/supabase-serveur";
 
 /**
  * Vérification quotidienne des lieux contre Google Places — la version serveur du script
@@ -44,22 +45,17 @@ interface Lieu {
   lng: number;
 }
 
-async function sql<T>(query: string): Promise<T[]> {
-  const ref = process.env.SUPABASE_PROJECT_REF;
-  const jeton = process.env.SUPABASE_ACCESS_TOKEN;
-  const response = await fetch(`https://api.supabase.com/v1/projects/${ref}/database/query`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${jeton}`,
-      "Content-Type": "application/json",
-      // Le pare-feu de Supabase rejette certains User-Agent par un 403 : on en pose un explicite.
-      "User-Agent": "vibetrip-cron/1.0",
-    },
-    body: JSON.stringify({ query }),
-  });
-  const data = await response.json();
-  if (!Array.isArray(data)) throw new Error(data?.message ?? "requête refusée");
-  return data as T[];
+/**
+ * Le cron ne parle plus à l'API de gestion Supabase : son jeton d'administration ouvrait tout le
+ * compte, et le SQL était construit par concaténation. Il appelle deux fonctions réservées au
+ * rôle serveur (`file_verification_google`, `enregistrer_verdict_google`, audit du 11/10/2026).
+ */
+async function rpc<T>(fonction: string, corps: unknown): Promise<T> {
+  const response = await rpcServeur(fonction, corps, { secrete: true });
+  if (!response) throw new Error("SUPABASE_SECRET_KEY absente");
+  if (!response.ok) throw new Error(`${fonction} : ${response.status}`);
+  const texte = await response.text();
+  return (texte ? JSON.parse(texte) : null) as T;
 }
 
 function distanceM(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
@@ -91,8 +87,8 @@ function memeLieu(nomSocle: string, nomGoogle: string, distance: number): boolea
 
 export async function GET(request: Request) {
   // Vercel signe ses appels de cron ; sans ce contrôle, l'URL serait une dépense publique :
-  // chaque appel consomme le quota Google Places et écrit en base avec un jeton
-  // d'administration. Le secret absent ferme donc la route, au lieu de la laisser
+  // chaque appel consomme le quota Google Places et écrit en base avec la clé
+  // secrète. Le secret absent ferme donc la route, au lieu de la laisser
   // ouverte — c'est l'inverse qui se produisait tant que la condition portait sur
   // l'existence du secret plutôt que sur sa validité.
   const secret = process.env.CRON_SECRET;
@@ -109,15 +105,7 @@ export async function GET(request: Request) {
   const cle = process.env.GOOGLE_PLACES_API_KEY;
   if (!cle) return NextResponse.json({ error: "clé Google absente" }, { status: 500 });
 
-  const file = await sql<Lieu>(`
-    select fsq_id, name as nom, address as adresse, locality as commune,
-           ST_Y(location::geometry) as lat, ST_X(location::geometry) as lng
-    from places
-    where (google_checked_at is null or google_checked_at < now() - interval '180 days')
-      and not coord_douteuse and not est_chaine and not nom_douteux
-    order by proposed_count desc, (refreshed_at < date '2022-01-01') desc, google_checked_at nulls first
-    limit ${LOT}
-  `);
+  const file = await rpc<Lieu[]>("file_verification_google", { p_lot: LOT });
 
   let ouverts = 0;
   let introuvables = 0;
@@ -175,11 +163,7 @@ export async function GET(request: Request) {
     else if (statut === "closed") fermes.push(`${lieu.nom} (${lieu.commune ?? "?"})`);
     else introuvables += 1;
 
-    await sql(`
-      update places set google_status = '${statut}', google_checked_at = now(),
-             google_place_id = ${placeId ? `'${placeId.replace(/'/g, "''")}'` : "null"}
-      where fsq_id = '${lieu.fsq_id.replace(/'/g, "''")}'
-    `);
+    await rpc("enregistrer_verdict_google", { p_fsq_id: lieu.fsq_id, p_statut: statut, p_place_id: placeId });
   }
 
   for (let i = 0; i < file.length; i += CONCURRENCE) {

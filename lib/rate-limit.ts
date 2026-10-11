@@ -1,3 +1,6 @@
+import "server-only";
+import { rpcServeur } from "./supabase-serveur";
+
 /**
  * Quota de génération, par IP et par heure.
  *
@@ -37,9 +40,6 @@ export interface RateLimitResult {
   remaining: number;
 }
 
-const URL_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const CLE = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
 /**
  * Plafond par adresse IP, quel que soit le nombre d'appareils derrière. Quatre fois le quota
  * courant : assez pour un foyer ou un groupe d'amis, pas assez pour vider un crédit en renouvelant
@@ -48,20 +48,17 @@ const CLE = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 export const MAX_PAR_ADRESSE = MAX_TOKENS * 4;
 
 export async function checkRateLimit(key: string, max = MAX_TOKENS): Promise<RateLimitResult> {
-  if (URL_BASE && CLE) {
-    try {
-      const response = await fetch(`${URL_BASE}/rest/v1/rpc/consommer_quota`, {
-        method: "POST",
-        headers: { apikey: CLE, Authorization: `Bearer ${CLE}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ p_cle: key, p_max: max }),
-      });
-      if (response.ok) {
-        const [ligne] = (await response.json()) as { autorise: boolean; restant: number }[];
-        if (ligne) return { allowed: ligne.autorise, remaining: ligne.restant };
-      }
-    } catch {
-      // Base injoignable : on retombe sur le compteur mémoire plutôt que de bloquer l'utilisateur.
+  try {
+    const response = await rpcServeur("consommer_quota", { p_cle: key, p_max: max });
+    if (response?.ok) {
+      const [ligne] = (await response.json()) as { autorise: boolean; restant: number }[];
+      if (ligne) return { allowed: ligne.autorise, remaining: ligne.restant };
     }
+    // Le repli mémoire ne limite rien en serverless : il doit se voir dans les journaux Vercel
+    // (refus de droits après l'étape 3 sans SUPABASE_SECRET_KEY, base injoignable…).
+    if (response) console.error(`quota : consommer_quota a répondu ${response.status}, repli mémoire`);
+  } catch {
+    console.error("quota : base injoignable, repli mémoire");
   }
   return checkInMemory(key, max);
 }
