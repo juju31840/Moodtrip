@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Confidentialité · Moodtrip",
@@ -30,9 +31,9 @@ export default function Confidentialite() {
   return (
     <main className="grain mx-auto flex min-h-[100dvh] max-w-2xl flex-col gap-8 px-5 pb-16 pt-[max(2.5rem,env(safe-area-inset-top))]">
       <header className="flex flex-col gap-3">
-        <a href="/" className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-ink-mute underline">
+        <Link href="/" className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-ink-mute underline">
           Moodtrip
-        </a>
+        </Link>
         <h1 className="font-display text-[44px] uppercase leading-[1.04]">Confidentialité</h1>
         <p className="text-[17px] leading-snug text-ink">
           Pas de compte, pas de publicité, pas de pistage. Tes sorties, ta carte et ton profil restent sur ton téléphone.
