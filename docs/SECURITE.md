@@ -310,5 +310,13 @@ tableau de bord.
 Audit complet par un agent au contexte neuf (46 points), constats graves contre-vérifiés. Note : à corriger avant TestFlight. Aucune donnée personnelle exposée, aucun secret dans le dépôt ni son historique, l'app mobile n'embarque que des valeurs publiques.
 
 - **Corrigé** : nom de ville limité à 100 caractères (`lib/itinerary-schema.ts`, avec son test).
-- **Correctif SQL prêt, à appliquer dans Supabase** : `scripts/sql/2026-10-11-securite-audit.sql`. Plafond du quota borné en base (`consommer_quota` acceptait le plafond fourni par l'appelant : générations illimitées possibles) ; écriture retirée à la clé publique sur `spatial_ref_sys` et `points_repli` (`TRUNCATE` ne passe pas par la RLS) ; politiques de lecture en double supprimées.
-- **Reste à traiter** : appel du quota avec la clé secrète côté serveur puis retrait du droit à `anon` ; plafonds sur `noter_lieu`, `noter_visite`, `noter_propositions` (le classement des lieux peut être truqué) ; jeton du cron limité au projet ; montée de version de Next.js 14 (fin de vie) ; plafond de dépense Anthropic et restriction de la clé Google Places dans les consoles.
+- **Appliqué le 11/10/2026** (`scripts/sql/2026-10-11-securite-audit.sql`, `-etape2.sql`, `-etape3.sql`) :
+  - quota : plafond borné en base, et `consommer_quota` réservé au serveur (clé secrète `SUPABASE_SECRET_KEY`, rôle `service_role`). Vérifié en production : une génération décompte bien les deux quotas alors que la clé publique n'a plus le droit d'exécuter la fonction.
+  - votes (`noter_lieu`, `noter_visite`) : 20 par heure et par adresse IP (`vt_vote_autorise`) ; `noter_propositions` réservé au serveur, tableau borné à 60.
+  - cron : fonctions `file_verification_google` et `enregistrer_verdict_google` réservées au serveur ; plus de jeton d'administration de l'API de gestion ni de SQL concaténé.
+  - `points_repli` : écriture et `TRUNCATE` retirés à la clé publique (`TRUNCATE` ne passe pas par la RLS) ; politiques de lecture en double supprimées.
+- **Reste à traiter** :
+  - `spatial_ref_sys` (PostGIS) : la clé publique peut encore écrire et vider la table. Les droits viennent de `supabase_admin` : seul le support Supabase peut les retirer (le `revoke` est ignoré sans erreur).
+  - retirer `SUPABASE_ACCESS_TOKEN` des variables Vercel (plus utilisé par le cron ; les scripts locaux gardent le leur dans le trousseau).
+  - Next.js 16 et React 19 : prêts sur la branche `maj-next-16` (build et essais locaux réussis), à valider sur la prévisualisation Vercel avant fusion.
+  - plafond de dépense Anthropic et restriction de la clé Google Places, dans les consoles.
