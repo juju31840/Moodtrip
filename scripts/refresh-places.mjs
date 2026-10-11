@@ -19,14 +19,9 @@
  *
  *   node scripts/refresh-places.mjs --explorer   (liste ce que le catalogue expose)
  */
-import { readFileSync } from "node:fs";
+import { reglage } from "./lib-socle.mjs";
 
 const ENDPOINT = "https://catalog.h3-hub.foursquare.com/iceberg";
-
-function jeton() {
-  const cfg = JSON.parse(readFileSync(".claude/settings.local.json", "utf8"));
-  return cfg.env?.FOURSQUARE_TOKEN ?? process.env.FOURSQUARE_TOKEN ?? null;
-}
 
 async function api(chemin, tok) {
   const r = await fetch(`${ENDPOINT}/v1/${chemin}`, {
@@ -35,9 +30,9 @@ async function api(chemin, tok) {
   return r.ok ? r.json() : { erreur: `HTTP ${r.status}` };
 }
 
-const tok = jeton();
+const tok = reglage("FOURSQUARE_TOKEN");
 if (!tok) {
-  console.error("FOURSQUARE_TOKEN absent de .claude/settings.local.json.");
+  console.error("FOURSQUARE_TOKEN absent du trousseau (service moodtrip).");
   process.exit(1);
 }
 

@@ -59,7 +59,7 @@ les avis reclasse l'appel en tarif supérieur :
 
 ```bash
 curl -s -X POST 'https://places.googleapis.com/v1/places:searchText' \
-  -H "X-Goog-Api-Key: $GOOGLE_PLACES_API_KEY" \
+  -H "X-Goog-Api-Key: $(security find-generic-password -s moodtrip -a GOOGLE_PLACES_API_KEY -w)" \
   -H 'X-Goog-FieldMask: places.id,places.location,places.businessStatus' \
   -H 'Content-Type: application/json' \
   -d '{"textQuery":"<nom> <adresse>","locationBias":{"circle":{"center":{"latitude":<lat>,"longitude":<lng>},"radius":500.0}},"languageCode":"fr","maxResultCount":1}'

@@ -82,7 +82,7 @@ texte Archivo. Détail et historique : `docs/design/design-system.md` et le jour
 
 ## Production et maintenance
 
-- Secrets : `.env.local` et `.claude/settings.local.json`, tous deux ignorés par git. Jamais dans
+- Secrets : `.env.local` (ignoré par git) pour l'app ; trousseau macOS, service `moodtrip`, pour les jetons des scripts et du MCP (`security add-generic-password -U -s moodtrip -a NOM -w VALEUR`). Jamais dans
   le dépôt, jamais dans un fichier de documentation.
 - Vercel : les sous-domaines `.vercel.app` sont globaux, et Vercel protège par défaut toutes les
   URLs (API comprise) : un 302 vers une page de connexion ne veut pas dire que le site est cassé.

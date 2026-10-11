@@ -65,8 +65,8 @@ echo "$SORTIE"
 JOURS=$(echo "$SORTIE" | grep -oE '\(([0-9-]+) jours\)' | grep -oE '[0-9-]+' | head -1)
 if [ -n "$JOURS" ] && [ "$JOURS" -lt 8 ]; then
   echo "⚠ JETON FOURSQUARE À RENOUVELER — il expire dans $JOURS jour(s)."
-  echo "  En régénérer un sur places.foursquare.com, puis le remplacer dans"
-  echo "  .claude/settings.local.json sous FOURSQUARE_TOKEN."
+  echo "  En régénérer un sur places.foursquare.com, puis le remplacer dans le trousseau :"
+  echo "  security add-generic-password -U -s moodtrip -a FOURSQUARE_TOKEN -w '<nouveau jeton>'"
   # Une notification visible : un avertissement dans un journal que personne n'ouvre
   # n'avertit personne.
   osascript -e 'display notification "Jeton Foursquare à renouveler" with title "Moodtrip"' 2>/dev/null

@@ -5,7 +5,20 @@
  * font la même chose : lire des lieux, écrire un verdict. Le `User-Agent` explicite n'est pas
  * décoratif — sans lui l'API répond 403, et le symptôme fait chercher ailleurs (voir CLAUDE.md).
  */
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+
+// Les secrets vivent dans le trousseau macOS (service « moodtrip »), pas en clair sur le disque.
+function trousseau(nom) {
+  try {
+    return execFileSync("security", ["find-generic-password", "-s", "moodtrip", "-a", nom, "-w"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim() || null;
+  } catch {
+    return null;
+  }
+}
 
 function reglages() {
   try {
@@ -16,7 +29,7 @@ function reglages() {
 }
 
 export function reglage(nom) {
-  return process.env[nom] ?? reglages()[nom] ?? null;
+  return process.env[nom] ?? trousseau(nom) ?? reglages()[nom] ?? null;
 }
 
 export async function sql(requete) {

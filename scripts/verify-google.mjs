@@ -19,6 +19,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { reglage } from "./lib-socle.mjs";
 
 const GOOGLE_URL = "https://places.googleapis.com/v1/places:searchText";
 
@@ -28,11 +29,6 @@ const MAX_DISTANCE_M = 300;
 const args = process.argv.slice(2);
 const LOT = Number(args[args.indexOf("--lot") + 1]) || 150;
 const A_SEC = args.includes("--sec");
-
-function reglage(cle) {
-  const cfg = JSON.parse(readFileSync(".claude/settings.local.json", "utf8"));
-  return cfg.env?.[cle] ?? process.env[cle] ?? null;
-}
 
 const REF = reglage("SUPABASE_PROJECT_REF");
 const JETON = reglage("SUPABASE_ACCESS_TOKEN");
@@ -99,7 +95,7 @@ async function interrogerGoogle(lieu) {
 const main = async () => {
   if (!REF || !JETON) { console.error("Identifiants Supabase absents."); process.exit(1); }
   if (!CLE_GOOGLE || CLE_GOOGLE.startsWith("<")) {
-    console.error("GOOGLE_PLACES_API_KEY absente de .claude/settings.local.json."); process.exit(1);
+    console.error("GOOGLE_PLACES_API_KEY absente du trousseau (service moodtrip)."); process.exit(1);
   }
 
   const { namesMatch, significantTokens, MIN_QUERY_TOKEN_COVERAGE } = await chargerMatcher();

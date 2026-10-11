@@ -30,6 +30,7 @@ Trois choses apprises en le construisant, toutes payées cher :
 import argparse
 import json
 import os
+import subprocess
 import sys
 import time
 import urllib.request
@@ -104,9 +105,18 @@ LOT = 2000
 
 
 def reglage(cle):
-    with open(".claude/settings.local.json") as f:
-        env = json.load(f).get("env", {})
-    return env.get(cle) or os.environ.get(cle)
+    # Les secrets vivent dans le trousseau macOS (service « moodtrip »), pas en clair sur le disque.
+    if os.environ.get(cle):
+        return os.environ[cle]
+    r = subprocess.run(["security", "find-generic-password", "-s", "moodtrip", "-a", cle, "-w"],
+                       capture_output=True, text=True)
+    if r.returncode == 0 and r.stdout.strip():
+        return r.stdout.strip()
+    try:
+        with open(".claude/settings.local.json") as f:
+            return json.load(f).get("env", {}).get(cle)
+    except OSError:
+        return None
 
 
 def sql(requete):

@@ -20,7 +20,7 @@ session). L'API de gestion fonctionne toujours :
 
 ```bash
 curl -s -X POST "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/database/query" \
-  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  -H "Authorization: Bearer $(security find-generic-password -s moodtrip -a SUPABASE_ACCESS_TOKEN -w)" \
   -H "Content-Type: application/json" \
   -d '{"query":"select count(*) from places;"}'
 ```

@@ -20,7 +20,7 @@ Ouvre le navigateur. Une seule fois.
 ## 2. Déclarer les secrets
 
 L'application ne démarrera pas sans eux. **Aucun n'est dans le dépôt**, c'est voulu : ils vivent
-dans `.env.local` et `.claude/settings.local.json`, tous deux ignorés par git.
+dans `.env.local` (ignoré par git) pour l'app ; trousseau macOS, service `moodtrip`, pour les jetons des scripts et du MCP (`security add-generic-password -U -s moodtrip -a NOM -w VALEUR`).
 
 ```bash
 # Le modèle. Sans lui, aucune génération.
