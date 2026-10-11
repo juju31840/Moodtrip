@@ -85,6 +85,10 @@ describe("contrat de l'itinéraire", () => {
       generateItineraryRequestSchema.safeParse({ ...base, mode: "trip", location: { city: "Lyon" } }).success
     ).toBe(true);
     expect(generateItineraryRequestSchema.safeParse({ ...base, mode: "tonight", budget: 150 }).success).toBe(false);
+    // Un nom de ville démesuré ferait exploser le coût du prompt.
+    expect(
+      generateItineraryRequestSchema.safeParse({ ...base, mode: "trip", location: { city: "x".repeat(101) } }).success
+    ).toBe(false);
   });
 
   it("une étape à Lyon est écartée d'une soirée à Paris", () => {

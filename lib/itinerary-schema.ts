@@ -153,7 +153,9 @@ export function proposalCountForMode(mode: z.infer<typeof tripModeSchema>): numb
 
 export const locationInputSchema = z.union([
   geoPointSchema,
-  z.object({ city: z.string().min(1) }),
+  // Borné : le nom de ville part dans le prompt, et un texte sans limite ferait payer des centaines de
+  // milliers de jetons en une requête, multipliés par le nombre de propositions (audit du 11/10/2026).
+  z.object({ city: z.string().trim().min(1).max(100) }),
 ]);
 
 export const themeIdSchema = z.enum([

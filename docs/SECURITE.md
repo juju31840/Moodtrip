@@ -304,3 +304,11 @@ comportement est déduit de l'extérieur : `consommer_quota` fonctionne alors qu
 fait de ses arguments — en particulier si `p_cle` et `p_max` peuvent être
 détournés pour épuiser le quota d'un tiers — demande de lire le SQL dans le
 tableau de bord.
+
+## Audit du 11/10/2026 (avant TestFlight)
+
+Audit complet par un agent au contexte neuf (46 points), constats graves contre-vérifiés. Note : à corriger avant TestFlight. Aucune donnée personnelle exposée, aucun secret dans le dépôt ni son historique, l'app mobile n'embarque que des valeurs publiques.
+
+- **Corrigé** : nom de ville limité à 100 caractères (`lib/itinerary-schema.ts`, avec son test).
+- **Correctif SQL prêt, à appliquer dans Supabase** : `scripts/sql/2026-10-11-securite-audit.sql`. Plafond du quota borné en base (`consommer_quota` acceptait le plafond fourni par l'appelant : générations illimitées possibles) ; écriture retirée à la clé publique sur `spatial_ref_sys` et `points_repli` (`TRUNCATE` ne passe pas par la RLS) ; politiques de lecture en double supprimées.
+- **Reste à traiter** : appel du quota avec la clé secrète côté serveur puis retrait du droit à `anon` ; plafonds sur `noter_lieu`, `noter_visite`, `noter_propositions` (le classement des lieux peut être truqué) ; jeton du cron limité au projet ; montée de version de Next.js 14 (fin de vie) ; plafond de dépense Anthropic et restriction de la clé Google Places dans les consoles.
