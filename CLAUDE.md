@@ -5,6 +5,17 @@ Règles et repères stables. L'historique daté (décisions, mesures, pièges r�
 par son titre (`grep -n "^## " docs/historique/CLAUDE-journal-2026-10-09.md`). Les nouvelles
 décisions datées vont dans `docs/historique/`, pas ici ; ce fichier ne garde que ce qui reste vrai.
 
+## État actuel (au 11/10/2026)
+
+- Web en production (https://moodtrip-schuft.vercel.app) depuis le 28/08/2026 ; dernière fonctionnalité visible le 27/09.
+- App mobile Expo SDK 57 dans `mobile/` : préparation App Store faite (EAS, icône, confidentialité, Sentry), pas encore testée sur téléphone ni envoyée sur TestFlight. `eas-cli` installé ; pas de Xcode (inutile avec EAS).
+- Qualité : 8 tests vitest du contrat d'itinéraire + CI GitHub (lint, types, tests) à chaque push.
+- Secrets des scripts et du MCP : trousseau macOS (service `moodtrip`).
+
+## Prochaine action
+
+Tester l'app mobile sur un vrai téléphone (`cd mobile && npx expo start`, QR code dans Expo Go), puis lancer `/audit-securite` avant TestFlight et 5 testeurs.
+
 ## Produit
 
 Application mobile-first : l'utilisateur règle 3 curseurs (Budget / Ambiance / Distance) et choisit
