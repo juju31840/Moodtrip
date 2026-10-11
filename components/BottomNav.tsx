@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import clsx from "clsx";
 import { BookIcon, CompassIcon, HomeIcon, UserIcon } from "@/components/ui/icons";
 
