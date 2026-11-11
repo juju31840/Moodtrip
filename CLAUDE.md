@@ -5,16 +5,18 @@ Règles et repères stables. L'historique daté (décisions, mesures, pièges r�
 par son titre (`grep -n "^## " docs/historique/CLAUDE-journal-2026-10-09.md`). Les nouvelles
 décisions datées vont dans `docs/historique/`, pas ici ; ce fichier ne garde que ce qui reste vrai.
 
-## État actuel (au 11/10/2026)
+## État actuel (au 11/11/2026)
 
 - Web en production (https://moodtrip-schuft.vercel.app) depuis le 28/08/2026 ; dernière fonctionnalité visible le 27/09.
 - App mobile Expo SDK 57 dans `mobile/` : préparation App Store faite (EAS, icône, confidentialité, Sentry), pas encore testée sur téléphone ni envoyée sur TestFlight. `eas-cli` installé ; pas de Xcode (inutile avec EAS).
-- Qualité : 8 tests vitest du contrat d'itinéraire + CI GitHub (lint, types, tests) à chaque push.
+- Qualité : 11 tests vitest + CI GitHub (lint, types, tests) à chaque push.
+- Audit de sécurité du 11/10 appliqué ; reste à traiter dans `docs/SECURITE.md`.
+- Next 16 + React 19 sur la branche `maj-next-16` (rebasée sur main le 11/11, lint/types/tests/build OK en local), prévisualisation Vercel à valider avant fusion.
 - Secrets des scripts et du MCP : trousseau macOS (service `moodtrip`).
 
 ## Prochaine action
 
-Tester l'app mobile sur un vrai téléphone (`cd mobile && npx expo start`, QR code dans Expo Go), puis lancer `/audit-securite` avant TestFlight et 5 testeurs.
+Tout régler en amont avant TestFlight : valider la prévisualisation de `maj-next-16` puis fusionner, finir le « Reste à traiter » de `docs/SECURITE.md`, tester l'app mobile sur un vrai téléphone (`cd mobile && npx expo start`, Expo Go). Ensuite seulement TestFlight (compte Apple de Nathan) et 5 testeurs ; trancher avant le copyright (Jules) vs vendeur (Nathan).
 
 ## Produit
 
