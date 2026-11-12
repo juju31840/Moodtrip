@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+# Lecture seule : la CI vérifie, elle n'écrit rien (audit du 12/11/2026).
+permissions:
+  contents: read
+
 jobs:
   verifier:
     runs-on: ubuntu-latest
