@@ -5,7 +5,7 @@ sur les données sont tirées du code (comme `app/confidentialite/page.tsx`) et 
 alignées avec le manifeste `ios.privacyManifests` de `mobile/app.json` : une contradiction entre
 la fiche, la page et le binaire est un motif de refus classique.
 
-Rédigé le 27/09/2026.
+Rédigé le 27/09/2026, mis à jour le 12/11/2026 (mesure du retour, quota par jour, compte de Nathan).
 
 ---
 
@@ -21,8 +21,8 @@ Rédigé le 27/09/2026.
 | URL d'assistance | https://moodtrip-schuft.vercel.app/support |
 | URL marketing | https://moodtrip-schuft.vercel.app |
 | URL de confidentialité | https://moodtrip-schuft.vercel.app/confidentialite |
-| Copyright | 2026 Jules Schuft |
-| Identifiant | fr.moodtrip.app (à confirmer avec le titulaire du compte) |
+| Copyright | 2026 Nathan Skwarek (proposé : Nathan est le vendeur, compte individuel ; à confirmer avec lui) |
+| Identifiant | fr.moodtrip.app (créé au premier build EAS sur le compte de Nathan) |
 
 ## Texte promotionnel (170 max)
 
@@ -74,7 +74,7 @@ adresse e-mail ne quitte le téléphone).
 |---|---|---|---|---|---|
 | Localisation | Position précise | Le point de départ part au serveur puis au modèle d'Anthropic, qui peut garder les requêtes quelque temps : c'est plus que le « temps réel » qu'Apple exempte | Fonctionnalité de l'app | Non | Non |
 | Identifiants | Identifiant d'appareil | Tiré au sort à l'installation, envoyé pour le quota, effacé au bout d'un jour | Fonctionnalité de l'app | Non | Non |
-| Utilisation | Interactions avec le produit | « J'y suis allé » et les notes incrémentent un compteur anonyme sur le lieu | Fonctionnalité de l'app | Non | Non |
+| Utilisation | Interactions avec le produit | « J'y suis allé » et les notes incrémentent un compteur anonyme sur le lieu ; chaque demande envoie le nombre de jours depuis la première (mesure du retour, depuis le 12/11) | Fonctionnalité de l'app, Analytique | Non | Non |
 | Diagnostics | Données de plantage | Sentry, sans IP ni position | Fonctionnalité de l'app | Non | Non |
 
 **Non collecté**, bien que présent dans l'app : prénom, âge et photo du profil (restent sur le
@@ -116,10 +116,38 @@ How to test:
 3. Proposals arrive within about 5 to 10 seconds. Open one to see the route on the map; "Y aller" opens Apple Maps.
 4. Tap "Valider" to save it; it appears in the "Sorties" tab, where it can be followed step by step.
 
+Each device can run 3 searches per day (a cost guard while the app is free). We raise this limit during review; if you still see the message "Tu as utilisé tes 3 recherches du jour", that is the limit, not a bug.
+
 Location permission is optional and used only to start an itinerary from the user's current position. The photo library is opened only if the user chooses a profile picture. An internet connection is required to generate itineraries.
 
 Itinerary texts are written by an AI model (Anthropic Claude) from a list of verified venues; venue names and addresses always come from the database, never from the model.
 ```
+
+---
+
+## TestFlight
+
+**Pendant la revue App Store** : monter `VIBETRIP_QUOTA_JOUR` (par exemple 20) et `VIBETRIP_PLAFOND_GLOBAL` (par exemple 100) dans Vercel, redéployer, puis redescendre après la réponse d'Apple. Un relecteur qui voit « Moodtrip a fait le plein » refuse l'app.
+
+**Description de la bêta** (testeurs externes) :
+
+```
+Moodtrip te propose une sortie, un week-end ou un voyage à partir de trois curseurs (budget, ambiance, distance), avec de vraies adresses sur une carte. Merci de tester !
+```
+
+**Quoi tester** :
+
+```
+Merci d'essayer Moodtrip pendant 2 à 3 semaines, comme tu le ferais vraiment.
+
+1. Une soirée près de chez toi (« Ce soir »), puis un week-end ou un voyage.
+2. Va dans au moins un des lieux proposés : l'adresse était-elle juste ? Le lieu était-il ouvert ?
+3. Reviens dans l'app la semaine suivante, si tu en as envie : c'est ce qu'on mesure.
+
+Chaque appareil a 3 recherches par jour. Un lieu faux, un bug ou une remarque : capture d'écran dans TestFlight (secoue le téléphone ou fais une capture), ou écris à jules.schuft@gmail.com.
+```
+
+**Adresse de retour** : jules.schuft@gmail.com.
 
 ---
 

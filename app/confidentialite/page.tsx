@@ -16,7 +16,7 @@ export const metadata: Metadata = {
  */
 
 const CONTACT = "jules.schuft@gmail.com";
-const MISE_A_JOUR = "26 septembre 2026";
+const MISE_A_JOUR = "12 novembre 2026";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -77,6 +77,11 @@ export default function Confidentialite() {
           Quand tu coches « j&apos;y suis allé » ou que tu notes un lieu, un compteur est incrémenté sur ce lieu dans notre
           base : cela fait remonter les bonnes adresses pour tout le monde. Seuls le nom du lieu, sa position et la note
           sont envoyés — ni identifiant, ni date, ni rien qui permette de savoir qui y est allé.
+        </p>
+        <p>
+          Pour savoir si Moodtrip sert vraiment, l&apos;application envoie aussi, avec chaque demande, le nombre de jours
+          écoulés depuis ta première demande (la date de celle-ci reste sur ton téléphone). Nous gardons seulement ce
+          nombre et le jour de la demande : rien qui permette de relier deux demandes au même appareil.
         </p>
       </Section>
 
