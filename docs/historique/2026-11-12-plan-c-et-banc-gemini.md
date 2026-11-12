@@ -28,7 +28,8 @@ qu'on ne sait pas si les gens reviennent ; freemium ou affiliation ensuite, selo
 
 - Ancien quota : 5 par heure et par appareil, 20 par heure et par IP, soit jusqu'à 480 recherches
   par jour pour une seule adresse (~12 $).
-- Nouveau : 3 par appareil et par jour, 12 par IP, 20 par jour au total (`consommer_quota_jour`,
+- Nouveau : 3 par appareil et par jour, 6 par IP, 30 par jour au total (12 et 20 au départ ;
+  l'audit du même jour a montré que deux connexions vidaient le plafond de 20) (`consommer_quota_jour`,
   `scripts/sql/2026-11-12-quota-jour.sql`). Le global n'est décompté qu'après les deux autres.
 - Mesure du retour (`scripts/sql/2026-11-12-mesure-retour.sql`) : l'appareil envoie son ancienneté
   (`x-vibetrip-anciennete`), la base ne garde que le jour et ce nombre. Choisi plutôt que de garder

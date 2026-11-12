@@ -7,8 +7,8 @@ Les nouvelles décisions datées vont là-bas ; ce fichier ne garde que ce qui r
 ## État actuel (au 12/11/2026)
 
 - Web en production (https://moodtrip-schuft.vercel.app) depuis le 28/08/2026, sur Next 16 / React 19.
-- **Plan C** (gratuit, perte plafonnée) : 3 recherches par appareil et par jour, 12 par IP, 20 par
-  jour pour toute l'application (au pire ~0,50 $/jour). Mesure du retour sans identifiant (vue
+- **Plan C** (gratuit, perte plafonnée) : 3 recherches par appareil et par jour, 6 par IP, 30 par
+  jour pour toute l'application (au pire ~0,75 $/jour), refusées si la base ne répond pas. Mesure du retour sans identifiant (vue
   `retour_par_semaine`). Décision et chiffres : `docs/historique/2026-11-12-plan-c-et-banc-gemini.md`.
 - Modèle : Claude Haiku 4.5, ~2,5 centimes par recherche (mesuré). Gemini gratuit écarté (20
   requêtes par jour) ; son code reste sur la branche `bench-gemini`.
@@ -54,7 +54,7 @@ Next.js, React, Tailwind, Mapbox (`react-map-gl`), vaul, Zod, SDK Anthropic, Sup
 - **Ne jamais lancer `npm run build` pendant que `next dev` tourne** : le build écrase `.next`.
   Correctif : `rm -rf .next`, relancer.
 - `VIBETRIP_MOCK=1` dans `.env.local` : itérer sur l'UI sans consommer de crédit API.
-- Banc d'essai : une IP distincte par scénario, mais le plafond global (20/jour) s'applique ; en
+- Banc d'essai : une IP distincte par scénario, mais le plafond global (30/jour) s'applique ; en
   local, monter `VIBETRIP_PLAFOND_GLOBAL` dans `.env.local`. Le coût de chaque appel est écrit dans
   le journal du serveur (`[usage]`).
 - Les téléphones de test doivent voir la **production**, pas `next dev`.

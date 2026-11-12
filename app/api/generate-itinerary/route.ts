@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
   }
   // Le plafond global n'est décompté qu'après les deux autres : une demande refusée par appareil
   // ne doit pas consommer la journée de tout le monde.
-  const global = await checkRateLimit("global", PLAFOND_GLOBAL);
+  const global = await checkRateLimit("global", PLAFOND_GLOBAL, { fermeSansBase: true });
   if (!global.allowed) {
     return errorResponse(
       "RATE_LIMITED",

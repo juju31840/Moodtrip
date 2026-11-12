@@ -81,3 +81,23 @@ describe("mesure du retour", () => {
     expect(lireAnciennete(null)).toBeNull();
   });
 });
+
+describe("plafond global sans base", () => {
+  it("refuse sur Vercel quand la base ne répond pas, laisse passer en local", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://exemple.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("panne", { status: 503 })));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { checkRateLimit } = await vi.importActual<typeof import("@/lib/rate-limit")>("@/lib/rate-limit");
+
+    vi.stubEnv("VERCEL", "1");
+    expect((await checkRateLimit("global", 30, { fermeSansBase: true })).allowed).toBe(false);
+    expect((await checkRateLimit("ip:1", 6)).allowed).toBe(true);
+
+    vi.stubEnv("VERCEL", "");
+    expect((await checkRateLimit("global-local", 30, { fermeSansBase: true })).allowed).toBe(true);
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+});

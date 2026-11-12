@@ -6,8 +6,8 @@ import { rpcServeur } from "./supabase-serveur";
  *
  * **Par jour et plafonné depuis le 12/11/2026 (plan C)** : l'application est gratuite tant qu'on
  * ne sait pas si les gens reviennent, et la perte doit être connue d'avance. Une recherche coûte
- * environ 2,5 centimes (mesuré le 11/11) ; 20 recherches par jour pour toute l'application, c'est
- * au pire 0,50 $ par jour. L'ancien quota (5 par heure et par appareil, 20 par heure et par IP)
+ * environ 2,5 centimes (mesuré le 11/11) ; 30 recherches par jour pour toute l'application (20 jusqu'à l'audit
+ * du 12/11), c'est au pire 0,75 $ par jour. L'ancien quota (5 par heure et par appareil, 20 par heure et par IP)
  * laissait une seule adresse faire 480 recherches par jour.
  *
  * **Persisté en base depuis le 27/08/2026, et ce n'est pas un raffinement.** Le compteur vivait
@@ -32,13 +32,14 @@ interface Bucket {
 /** Recherches par appareil et par jour. Surchargeable pour tester en local. */
 export const QUOTA_APPAREIL = Number(process.env.VIBETRIP_QUOTA_JOUR ?? 3);
 /**
- * Plafond par adresse IP, quel que soit le nombre d'appareils derrière. Quatre fois le quota
- * d'un appareil : assez pour un foyer ou un groupe d'amis, pas assez pour vider le crédit en
- * renouvelant son identifiant d'appareil à chaque appel.
+ * Plafond par adresse IP, quel que soit le nombre d'appareils derrière : deux appareils, un
+ * couple ou une colocation. Il était de quatre fois le quota, et l'audit du 12/11/2026 a montré
+ * que deux connexions (wifi puis 4G) vidaient alors le plafond global pour tout le monde ; à deux
+ * fois, il en faut cinq.
  */
-export const QUOTA_ADRESSE = QUOTA_APPAREIL * 4;
-/** Recherches par jour pour toute l'application : la dépense maximale. */
-export const PLAFOND_GLOBAL = Number(process.env.VIBETRIP_PLAFOND_GLOBAL ?? 20);
+export const QUOTA_ADRESSE = QUOTA_APPAREIL * 2;
+/** Recherches par jour pour toute l'application : la dépense maximale (~0,75 $ au pire). */
+export const PLAFOND_GLOBAL = Number(process.env.VIBETRIP_PLAFOND_GLOBAL ?? 30);
 
 const FENETRE_MS = 24 * 60 * 60 * 1000;
 
@@ -49,7 +50,18 @@ export interface RateLimitResult {
   remaining: number;
 }
 
-export async function checkRateLimit(key: string, max = QUOTA_APPAREIL): Promise<RateLimitResult> {
+/**
+ * `fermeSansBase` : refuser quand la base ne répond pas, au lieu de retomber sur la mémoire. Pour
+ * le plafond global seulement, et seulement sur Vercel : c'est lui qui borne la dépense, et le repli
+ * mémoire ne limite rien en serverless. L'indisponibilité ne coûte presque rien de plus, puisque
+ * les lieux viennent de la même base. En développement local, sans clé secrète, le repli reste.
+ */
+export async function checkRateLimit(
+  key: string,
+  max = QUOTA_APPAREIL,
+  { fermeSansBase = false }: { fermeSansBase?: boolean } = {}
+): Promise<RateLimitResult> {
+  const fermer = fermeSansBase && process.env.VERCEL === "1";
   try {
     const response = await rpcServeur("consommer_quota_jour", { p_cle: key, p_max: max });
     if (response?.ok) {
@@ -58,11 +70,11 @@ export async function checkRateLimit(key: string, max = QUOTA_APPAREIL): Promise
     }
     // Le repli mémoire ne limite rien en serverless : il doit se voir dans les journaux Vercel
     // (refus de droits après l'étape 3 sans SUPABASE_SECRET_KEY, base injoignable…).
-    if (response) console.error(`quota : consommer_quota a répondu ${response.status}, repli mémoire`);
+    if (response) console.error(`quota : consommer_quota_jour a répondu ${response.status}, ${fermer ? "refus" : "repli mémoire"}`);
   } catch {
-    console.error("quota : base injoignable, repli mémoire");
+    console.error(`quota : base injoignable, ${fermer ? "refus" : "repli mémoire"}`);
   }
-  return checkInMemory(key, max);
+  return fermer ? { allowed: false, remaining: 0 } : checkInMemory(key, max);
 }
 
 /** Repli hors ligne, et seul mode disponible en développement sans identifiants Supabase. */

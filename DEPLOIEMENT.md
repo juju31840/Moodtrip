@@ -43,8 +43,8 @@ npx vercel env add GOOGLE_PLACES_API_KEY production
 # Valeur : une chaîne aléatoire, par exemple `openssl rand -hex 32`.
 npx vercel env add CRON_SECRET production
 
-# Quota par appareil et par jour (3 par défaut, l'IP a 4 fois plus) et plafond global
-# par jour (20 par défaut, soit au pire ~0,50 $ par jour). Facultatifs : les défauts sont
+# Quota par appareil et par jour (3 par défaut, l'IP a 2 fois plus) et plafond global
+# par jour (30 par défaut, soit au pire ~0,75 $ par jour). Facultatifs : les défauts sont
 # ceux du plan C du 12/11/2026. Nécessite scripts/sql/2026-11-12-quota-jour.sql en base.
 npx vercel env add VIBETRIP_QUOTA_JOUR production
 npx vercel env add VIBETRIP_PLAFOND_GLOBAL production
