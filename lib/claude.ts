@@ -55,6 +55,20 @@ async function requestItinerary(
     ? `${buildSystemPrompt(angle)} Ta réponse précédente n'était pas un JSON valide conforme au schéma attendu. Corrige-la et renvoie uniquement le JSON demandé, sans aucun texte autour.`
     : buildSystemPrompt(angle);
 
+  // Une sortie hors schéma ne rend pas `parsed_output: null` : `parse` **lève** une erreur. Le
+  // nouvel essai de `generateOne` ne se déclenchait donc jamais, et la proposition était perdue
+  // (2 sur 19 au banc du 11/11/2026 : un lieu cité hors de son créneau). Les erreurs de l'API
+  // elle-même, elles, remontent telles quelles.
+  try {
+    return await parseItinerary(request, systemPrompt, candidates);
+  } catch (error) {
+    if (error instanceof Anthropic.APIError) throw error;
+    console.warn(`[claude] sortie hors schéma : ${(error as Error).message.slice(0, 200)}`);
+    return { parsed_output: null };
+  }
+}
+
+function parseItinerary(request: GenerateItineraryRequest, systemPrompt: string, candidates: PlaceCandidate[]) {
   return client.messages.parse({
     model: MODEL,
     max_tokens: MAX_TOKENS,

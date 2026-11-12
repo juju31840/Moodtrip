@@ -54,7 +54,8 @@ Next.js, React, Tailwind, Mapbox (`react-map-gl`), vaul, Zod, SDK Anthropic, Sup
 - `VIBETRIP_MOCK=1` dans `.env.local` : itérer sur l'UI sans consommer de crédit API
   (`lib/mock-itinerary.ts`, lu par `lib/claude.ts` qui teste `=== "1"`). Vide = vrais appels.
 - Le banc `scripts/eval-itineraries.mjs` utilise une IP distincte par scénario pour ne pas
-  déclencher le rate limit (5/h) : à garder en tête si le quota change.
+  déclencher le quota par IP ; le plafond global (20/jour) s'applique quand même : en local,
+  monter `VIBETRIP_PLAFOND_GLOBAL` dans `.env.local` avant de lancer le banc.
 - Les téléphones de test doivent voir la **production**, pas `next dev` (recompile chaque écran).
 - La géolocalisation exige HTTPS (ou localhost) : impossible en HTTP sur le réseau local.
 
@@ -115,3 +116,13 @@ lieux (étape 2) », « Socle de lieux — Supabase », « Ce que la vérificati
 « En production depuis le 28/08/2026 », « Routine mensuelle du socle », « Onglet Profil »,
 « Retour du test et passage à l'App Store », « Préparation App Store », « Soirées : ce que la
 curation avait cassé », « Points ouverts », « Reste à faire ».
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

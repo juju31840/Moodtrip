@@ -2,7 +2,13 @@ import "server-only";
 import { rpcServeur } from "./supabase-serveur";
 
 /**
- * Quota de génération, par IP et par heure.
+ * Quota de génération, par jour : par appareil, par adresse IP, et un plafond global.
+ *
+ * **Par jour et plafonné depuis le 12/11/2026 (plan C)** : l'application est gratuite tant qu'on
+ * ne sait pas si les gens reviennent, et la perte doit être connue d'avance. Une recherche coûte
+ * environ 2,5 centimes (mesuré le 11/11) ; 20 recherches par jour pour toute l'application, c'est
+ * au pire 0,50 $ par jour. L'ancien quota (5 par heure et par appareil, 20 par heure et par IP)
+ * laissait une seule adresse faire 480 recherches par jour.
  *
  * **Persisté en base depuis le 27/08/2026, et ce n'est pas un raffinement.** Le compteur vivait
  * en mémoire du processus : en serverless, chaque instance froide repart avec un compteur neuf,
@@ -23,15 +29,18 @@ interface Bucket {
   lastRefillAt: number;
 }
 
+/** Recherches par appareil et par jour. Surchargeable pour tester en local. */
+export const QUOTA_APPAREIL = Number(process.env.VIBETRIP_QUOTA_JOUR ?? 3);
 /**
- * Quota par heure et par IP. Réglable via `VIBETRIP_RATE_LIMIT` dans `.env.local` : la valeur
- * par défaut protège le crédit API en production, mais elle est beaucoup trop basse pour tester
- * l'app depuis un téléphone — toutes les requêtes du réseau local partagent la même clé
- * « unknown » (aucun en-tête `x-forwarded-for` sans proxy devant), donc cinq essais suffisent à
- * bloquer la session pour une heure entière.
+ * Plafond par adresse IP, quel que soit le nombre d'appareils derrière. Quatre fois le quota
+ * d'un appareil : assez pour un foyer ou un groupe d'amis, pas assez pour vider le crédit en
+ * renouvelant son identifiant d'appareil à chaque appel.
  */
-const MAX_TOKENS = Number(process.env.VIBETRIP_RATE_LIMIT ?? 5);
-const REFILL_WINDOW_MS = 60 * 60 * 1000; // 1 heure pour reconstituer le quota complet
+export const QUOTA_ADRESSE = QUOTA_APPAREIL * 4;
+/** Recherches par jour pour toute l'application : la dépense maximale. */
+export const PLAFOND_GLOBAL = Number(process.env.VIBETRIP_PLAFOND_GLOBAL ?? 20);
+
+const FENETRE_MS = 24 * 60 * 60 * 1000;
 
 const buckets = new Map<string, Bucket>();
 
@@ -40,16 +49,9 @@ export interface RateLimitResult {
   remaining: number;
 }
 
-/**
- * Plafond par adresse IP, quel que soit le nombre d'appareils derrière. Quatre fois le quota
- * courant : assez pour un foyer ou un groupe d'amis, pas assez pour vider un crédit en renouvelant
- * son identifiant d'appareil à chaque appel.
- */
-export const MAX_PAR_ADRESSE = MAX_TOKENS * 4;
-
-export async function checkRateLimit(key: string, max = MAX_TOKENS): Promise<RateLimitResult> {
+export async function checkRateLimit(key: string, max = QUOTA_APPAREIL): Promise<RateLimitResult> {
   try {
-    const response = await rpcServeur("consommer_quota", { p_cle: key, p_max: max });
+    const response = await rpcServeur("consommer_quota_jour", { p_cle: key, p_max: max });
     if (response?.ok) {
       const [ligne] = (await response.json()) as { autorise: boolean; restant: number }[];
       if (ligne) return { allowed: ligne.autorise, remaining: ligne.restant };
@@ -64,7 +66,7 @@ export async function checkRateLimit(key: string, max = MAX_TOKENS): Promise<Rat
 }
 
 /** Repli hors ligne, et seul mode disponible en développement sans identifiants Supabase. */
-function checkInMemory(key: string, max = MAX_TOKENS): RateLimitResult {
+function checkInMemory(key: string, max: number): RateLimitResult {
   const now = Date.now();
   const existing = buckets.get(key);
 
@@ -74,7 +76,7 @@ function checkInMemory(key: string, max = MAX_TOKENS): RateLimitResult {
   }
 
   const elapsed = now - existing.lastRefillAt;
-  if (elapsed >= REFILL_WINDOW_MS) {
+  if (elapsed >= FENETRE_MS) {
     existing.tokens = max;
     existing.lastRefillAt = now;
   }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { generateItineraryRequestSchema } from "@/lib/itinerary-schema";
 import { generateProposals, ItineraryParseError } from "@/lib/claude";
-import { checkRateLimit, MAX_PAR_ADRESSE } from "@/lib/rate-limit";
+import { checkRateLimit, PLAFOND_GLOBAL, QUOTA_ADRESSE, QUOTA_APPAREIL } from "@/lib/rate-limit";
 import { filterPlausibleSteps } from "@/lib/geo";
 import { geocodeCity } from "@/lib/geocode";
 import { PROPOSAL_ANGLE_LABELS } from "@/lib/prompt";
@@ -81,20 +81,29 @@ export async function POST(request: NextRequest) {
 
   // Quota décompté seulement après validation : le but est de limiter les appels payants à
   // Claude, pas les requêtes malformées. Le compter avant laisserait un bug côté client
-  // épuiser le quota d'un utilisateur pour une heure sans qu'aucune génération ait eu lieu.
+  // épuiser le quota d'un utilisateur pour la journée sans qu'aucune génération ait eu lieu.
   // Deux compteurs : un par appareil au quota courant, un par adresse quatre fois plus large.
   // Le premier laisse vivre un groupe d'amis derrière une même box ; le second empêche qu'on
   // contourne indéfiniment en renouvelant son identifiant.
   const { appareil, adresse } = quotaKeys(request);
   const [parAppareil, parAdresse] = await Promise.all([
-    checkRateLimit(appareil),
-    checkRateLimit(adresse, MAX_PAR_ADRESSE),
+    checkRateLimit(appareil, QUOTA_APPAREIL),
+    checkRateLimit(adresse, QUOTA_ADRESSE),
   ]);
-  const rateLimit = parAppareil.allowed ? parAdresse : parAppareil;
-  if (!rateLimit.allowed) {
+  if (!parAppareil.allowed || !parAdresse.allowed) {
     return errorResponse(
       "RATE_LIMITED",
-      "Tu as atteint la limite de générations pour cette heure. Réessaie plus tard.",
+      `Tu as utilisé tes ${QUOTA_APPAREIL} recherches du jour. Reviens demain.`,
+      429
+    );
+  }
+  // Le plafond global n'est décompté qu'après les deux autres : une demande refusée par appareil
+  // ne doit pas consommer la journée de tout le monde.
+  const global = await checkRateLimit("global", PLAFOND_GLOBAL);
+  if (!global.allowed) {
+    return errorResponse(
+      "RATE_LIMITED",
+      "Moodtrip a fait le plein de recherches pour aujourd'hui. Reviens demain.",
       429
     );
   }
