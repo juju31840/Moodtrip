@@ -2,7 +2,7 @@
 
 Applique `docs/conception/seo-programmatique-plan.md` §2-4 : copy réelle pour les 5 villes pilotes
 (Paris, Lyon, Bordeaux, Bruxelles, Montréal), modes Tonight/Weekend, 3 niveaux de budget. Ton aligné
-sur `docs/commercialisation/landing-page-copy.md` (direct, sans superlatif).
+sur `docs/historique/landing-page-copy-avant-riso.md` (direct, sans superlatif).
 
 > **Important — ce qui n'est PAS dans ce document** : les listes d'étapes précises (noms de lieux
 > réels, adresses) ne sont **pas inventées ici**. Le plan SEO (§5) est explicite : un itinéraire

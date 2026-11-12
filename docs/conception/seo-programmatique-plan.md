@@ -20,7 +20,7 @@ le candidat le plus autonome à lancer une fois le MVP interactif stabilisé.
 ## 2. Corpus de villes — vague pilote avant scale
 
 Ne pas générer des dizaines de villes d'un coup sans savoir ce qui convertit. Cohérent avec la
-cible "jeunes actifs urbains francophones 25-40 ans" de `positioning.md`, la vague pilote doit
+cible "jeunes actifs urbains francophones 25-40 ans" de `docs/historique/positioning-avant-riso.md`, la vague pilote doit
 couvrir la France mais aussi tester la portée francophone hors France (Belgique, Suisse, Québec) :
 
 **5 villes pilotes suggérées** : Paris, Lyon, Bordeaux, Bruxelles, Montréal.

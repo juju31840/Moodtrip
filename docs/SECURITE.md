@@ -315,8 +315,6 @@ Audit complet par un agent au contexte neuf (46 points), constats graves contre-
   - votes (`noter_lieu`, `noter_visite`) : 20 par heure et par adresse IP (`vt_vote_autorise`) ; `noter_propositions` réservé au serveur, tableau borné à 60.
   - cron : fonctions `file_verification_google` et `enregistrer_verdict_google` réservées au serveur ; plus de jeton d'administration de l'API de gestion ni de SQL concaténé.
   - `points_repli` : écriture et `TRUNCATE` retirés à la clé publique (`TRUNCATE` ne passe pas par la RLS) ; politiques de lecture en double supprimées.
-- **Reste à traiter** :
-  - `spatial_ref_sys` (PostGIS) : la clé publique peut encore écrire et vider la table. Les droits viennent de `supabase_admin` : seul le support Supabase peut les retirer (le `revoke` est ignoré sans erreur).
-  - retirer `SUPABASE_ACCESS_TOKEN` des variables Vercel (plus utilisé par le cron ; les scripts locaux gardent le leur dans le trousseau).
-  - Next.js 16 et React 19 : prêts sur la branche `maj-next-16` (build et essais locaux réussis), à valider sur la prévisualisation Vercel avant fusion.
-  - plafond de dépense Anthropic et restriction de la clé Google Places, dans les consoles.
+- **Reste à traiter** (au 12/11/2026) :
+  - `spatial_ref_sys` (PostGIS) : la clé publique peut encore écrire et vider la table. Seul le support Supabase peut retirer ces droits : demande envoyée le 11/11, réponse attendue.
+- **Traité le 11-12/11/2026** : `SUPABASE_ACCESS_TOKEN` retiré de Vercel ; Next 16 / React 19 en production ; clé Google Places restreinte à Places API (New) ; crédit Anthropic prépayé sans recharge automatique (le solde est le plafond) ; quota par jour et plafond global de 20 recherches (plan C).
