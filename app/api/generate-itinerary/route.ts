@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { generateItineraryRequestSchema } from "@/lib/itinerary-schema";
 import { generateProposals, ItineraryParseError } from "@/lib/claude";
 import { checkRateLimit, PLAFOND_GLOBAL, QUOTA_ADRESSE, QUOTA_APPAREIL } from "@/lib/rate-limit";
+import { noterRecherche } from "@/lib/mesure-retour";
 import { filterPlausibleSteps } from "@/lib/geo";
 import { geocodeCity } from "@/lib/geocode";
 import { PROPOSAL_ANGLE_LABELS } from "@/lib/prompt";
@@ -107,6 +108,9 @@ export async function POST(request: NextRequest) {
       429
     );
   }
+
+  // Sans attendre : une statistique ne doit pas retarder la génération.
+  void noterRecherche(request.headers.get("x-vibetrip-anciennete"));
 
   // Les deux erreurs ci-dessus sont les seules à pouvoir porter un statut HTTP : dès que le flux
   // commence, la réponse est un 200 et tout le reste passe par un événement `error`.

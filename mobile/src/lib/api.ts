@@ -11,6 +11,7 @@ import type { GenerateItineraryRequest, GenerationEvent } from "@/types/itinerar
 export const API_BASE = process.env.EXPO_PUBLIC_API_BASE ?? "https://moodtrip-schuft.vercel.app";
 
 const CLIENT_KEY = "vibetrip.client.v1";
+const PREMIERE_KEY = "vibetrip.premiere.v1";
 
 /**
  * Identifiant d'appareil tiré au sort, envoyé en `x-vibetrip-client` : le quota compte par
@@ -23,6 +24,20 @@ function clientId(): string {
   const id = `ios-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   Storage.setItemSync(CLIENT_KEY, id);
   return id;
+}
+
+/**
+ * Ancienneté de l'appareil, pour mesurer si les gens reviennent (plan C, 12/11/2026) : le nombre
+ * de jours depuis sa première recherche, ou « nouveau » pour celle-ci. Le téléphone garde la date ;
+ * le serveur ne reçoit que ce nombre, jamais rien qui permette de le reconnaître.
+ */
+function anciennete(): string {
+  const premiere = Storage.getItemSync(PREMIERE_KEY);
+  if (!premiere) {
+    Storage.setItemSync(PREMIERE_KEY, new Date().toISOString().slice(0, 10));
+    return "nouveau";
+  }
+  return String(Math.max(0, Math.floor((Date.now() - Date.parse(premiere)) / 86_400_000)));
 }
 
 export const OFFLINE_MESSAGE = "Pas de connexion. Vérifie ton réseau, puis relance.";
@@ -43,7 +58,11 @@ export async function generate(
   try {
     response = await fetch(`${API_BASE}/api/generate-itinerary`, {
       method: "POST",
-      headers: { "content-type": "application/json", "x-vibetrip-client": clientId() },
+      headers: {
+        "content-type": "application/json",
+        "x-vibetrip-client": clientId(),
+        "x-vibetrip-anciennete": anciennete(),
+      },
       body: JSON.stringify(request),
       signal,
     });

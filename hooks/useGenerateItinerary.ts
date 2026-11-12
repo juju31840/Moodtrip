@@ -47,6 +47,25 @@ function clientId(): string {
   }
 }
 
+/**
+ * Ancienneté de l'appareil, pour mesurer si les gens reviennent (plan C, 12/11/2026) : le nombre
+ * de jours depuis sa première recherche, ou « nouveau » pour celle-ci. C'est l'appareil qui garde
+ * la date ; le serveur ne reçoit que ce nombre, jamais rien qui permette de le reconnaître.
+ */
+function anciennete(): string {
+  const CLE = "vibetrip.premiere.v1";
+  try {
+    const premiere = window.localStorage.getItem(CLE);
+    if (!premiere) {
+      window.localStorage.setItem(CLE, new Date().toISOString().slice(0, 10));
+      return "nouveau";
+    }
+    return String(Math.max(0, Math.floor((Date.now() - Date.parse(premiere)) / 86_400_000)));
+  } catch {
+    return "";
+  }
+}
+
 export function useGenerateItinerary() {
   const [state, setState] = useState<GenerationState>({ status: "idle" });
 
@@ -71,7 +90,7 @@ export function useGenerateItinerary() {
     try {
       const response = await fetch("/api/generate-itinerary", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-vibetrip-client": clientId() },
+        headers: { "Content-Type": "application/json", "x-vibetrip-client": clientId(), "x-vibetrip-anciennete": anciennete() },
         body: JSON.stringify(request),
         signal: controller.signal,
       });

@@ -69,3 +69,15 @@ describe("repli mémoire sans base", () => {
     vi.unstubAllEnvs();
   });
 });
+
+describe("mesure du retour", () => {
+  it("n'accepte que « nouveau » ou un nombre de jours", async () => {
+    const { lireAnciennete } = await import("@/lib/mesure-retour");
+    expect(lireAnciennete("nouveau")).toEqual({ anciennete: 0, premiere: true });
+    expect(lireAnciennete("12")).toEqual({ anciennete: 12, premiere: false });
+    expect(lireAnciennete("99999")).toBeNull();
+    expect(lireAnciennete("-3")).toBeNull();
+    expect(lireAnciennete("1; drop table")).toBeNull();
+    expect(lireAnciennete(null)).toBeNull();
+  });
+});
